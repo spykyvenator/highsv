@@ -24,7 +24,7 @@ st	{
 		state = AVAL; 
 	else 
 		puts("error: only one st allowed"); 
-	i = 0; 
+  numNz = 0;
 	if (lastVal) {
 		if (Highs_changeObjectiveOffset(model, lastVal)) puts("setting offset failed");
 		lastVal = 0;
@@ -51,7 +51,6 @@ st	{
         } else if (!lastVal) {
             lastVal = sign * atof(yytext); 
             sign = 1;
-	    numNz++;
         } else {
             puts("don't put two floats behind each other"); 
         }
@@ -68,6 +67,21 @@ st	{
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+
+void
+printModel(const void* mod)
+{
+  const HighsInt numCol = Highs_getPresolvedNumCol(mod), numRow = Highs_getPresolvedNumRow(mod);
+  double offset;
+
+  const double inf = Highs_getInfinity(mod);
+
+  Highs_getObjectiveOffset(mod, &offset);
+  printf("offset: %lf\n numCol: %d, numRow: %d\n", 
+    offset,
+    numCol, numRow
+    );
+}
 
 /*
 	return the column index of a variable name.
@@ -92,7 +106,11 @@ findIndex(void *mod, const char *text)
 */
 static void
 setBounds (void *mod, const double val, char sign) {
-	printf("setting bounds with numNz = %d ", numNz);
+	printf("setting bounds with numNz = %d\n", numNz);
+  for (uint8_t i = 0; i < numNz; i++){
+    printf("%o: %d, %lf \n", i, rowIndex[i], rowVal[i]);
+
+  }
 	/*
 	if (i == 1) {// set col_upper/lower instead of the row_lower/upper
 		const int index = findIndex(mod, lastVarName);
@@ -117,6 +135,7 @@ setBounds (void *mod, const double val, char sign) {
 		return;
 	} else {
 	*/
+    puts("adding row\n");
 		switch (sign) {
 			case 1:// >=
 				//Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
@@ -150,8 +169,8 @@ readVar (void *mod, char *text, const char state)
 	if (state == COST) {
 		Highs_changeColCost(mod, index, lastVal);
 	} else if (state == AVAL) {
-		rowIndex[i] = index;
-		rowVal[i] = lastVal;
+		rowIndex[numNz] = index;
+		rowVal[numNz++] = lastVal;
 	}
 	lastVal = 0;
 	strcpy(lastVarName, text);
@@ -179,10 +198,11 @@ parseString(const char *s, GOutputStream* ostream)
 	preModel(model);
 	YY_BUFFER_STATE buffer = yy_scan_string(s);
 	yylex();
+  printModel(model);
 	Highs_presolve(model);
 	Highs_run(model);
 	//printSolToFile(res, &mod, ostream);
 	yy_delete_buffer(buffer);
-        cleanModel(model);
+  cleanModel(model);
 	return 0;
 }
