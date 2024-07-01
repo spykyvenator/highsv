@@ -17,11 +17,16 @@ org.gtk.exampleapp.gschema.valid: org.gtk.exampleapp.gschema.xml
 src/gresource.c: ./.gresource.xml
 	$(GCR) ./.gresource.xml --target=$@ --generate-source
 
+./src/parse/parse.c:$(LEX)
+	flex -o $@ $< 
+
 $(OBJ): $(SRC)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
 highsv: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -fv $(OBJ)
+	rm -fv $(OBJ) ./src/parse/parse.c
+
+.PHONY all options clean highsv
