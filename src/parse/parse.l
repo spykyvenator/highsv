@@ -2,9 +2,9 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %{
 typedef struct {
-    int num_col, num_row, num_nz, sense;// num_nz is the number of nonzeros in a_value ( its lenght )
+    int num_col, num_row, num_nz, sense;// num_nz is the number of nonzeros in a_value ( its length ) all are being set
 
-    double col_cost[10], col_lower[10], col_upper[10], row_lower[10], row_upper[10], a_value[10], offset;
+    double col_cost[10], col_lower[10], col_upper[10], row_lower[10], row_upper[10], a_value[10], offset;// all are set
 
     // a_start_ has num_col_1 entries, and the last entry is the number
     // of nonzeros in A, allowing the number of nonzeros in the last
@@ -15,10 +15,10 @@ typedef struct {
     // a_start[0] = 0
 
 
-    int a_start[10], a_index[10];
+    int a_start[10], a_index[10], a_format;// TODO
 
-    int nIndex[2];
-    char *varNames[10];
+    int nIndex[2];// set
+    char *varNames[10];// set
 } model_t;
 
 	extern int yylex(void);
@@ -90,6 +90,7 @@ printModel(model_t *mod)
 	}
 	for (int i = 0; i < mod->num_nz; i++) {
 		printf("a_value[%d] == %lf\t", i, mod->a_value[i]);
+		printf("a_index[%d] == %d\t", i, mod->a_index[i]);
 		puts("\n");
 	}
 	
@@ -131,21 +132,24 @@ setBounds(double val, char sign) {
 		int index = findIndex(lastVarName);
 		printf("settinc columns to %lf index: %d name: %s\n", val, index, lastVarName);
 		switch (sign) {
-			case 1:
-				mod.col_lower[index] = val; 
+			case 1:// >=
+				mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
 				mod.col_upper[index] = 1.0e30;
 				break;
-			case 0:
-				mod.col_lower[index] = val; 
-				mod.col_upper[index] = val;
+			case 0:// =
+				mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
+				mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
 				break;
-			case -1:
+			case -1:// <= 
 				mod.col_lower[index] = -1.0e30; 
-				mod.col_upper[index] = val;
+				mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
 				break;
 		}
 
 		i = 0;
+		if (mod.num_nz > 0){
+		    mod.num_nz--;
+		}
 		return;
 	}
 	if (i > mod.num_col) 
@@ -180,6 +184,7 @@ readVar(char *text, char cost)
 	if (cost) {
 		mod.col_cost[index] = lastVal;
 	} else {
+		mod.a_index[mod.num_nz] = mod.num_row;
 		mod.a_value[mod.num_nz++] = lastVal;
 	}
 	lastVal = 0;
@@ -197,6 +202,7 @@ yylex(int *lineNb, char **vars) {
 
 int
 main () {
+	mod.a_format = 2;
 	yylex();
 	printModel(&mod);
 }

@@ -33,4 +33,4 @@ highsv: $(OBJ)
 clean:
 	rm -fv $(OBJ) ./src/parse/parse.c
 
-.PHONY: all options clean highsv test
+.PHONY: all options clean highsv
