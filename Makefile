@@ -1,6 +1,10 @@
 .POSIX:
 include config.mk
 
+test.out: ./src/parse/parse.l
+	flex -o ./src/parse/parse.c $<
+	gcc ./src/parse/parse.c -o test.out -lfl
+
 all: options $(XOBJ) highsv
 
 options: 
@@ -29,4 +33,4 @@ highsv: $(OBJ)
 clean:
 	rm -fv $(OBJ) ./src/parse/parse.c
 
-.PHONY all options clean highsv
+.PHONY: all options clean highsv test
