@@ -88,6 +88,10 @@ printModel(model_t *mod)
 		printf("row_upper[%d] == %lf\t", i, mod->row_upper[i]);
 		puts("\n");
 	}
+	for (int i = 0; i < mod->num_nz; i++) {
+		printf("a_value[%d] == %lf\t", i, mod->a_value[i]);
+		puts("\n");
+	}
 	
 }
 
@@ -170,10 +174,13 @@ readVar(char *text, char cost)
 	puts("readvar:");
 	puts(text);
 	int index = findIndex(text);
+	if (lastVal == 0) {// this should be ok
+	    lastVal = 1;
+	}
 	if (cost) {
 		mod.col_cost[index] = lastVal;
 	} else {
-		mod.a_value[index] = lastVal;
+		mod.a_value[mod.num_nz++] = lastVal;
 	}
 	lastVal = 0;
 	strcpy(lastVarName, text);
