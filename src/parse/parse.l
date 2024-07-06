@@ -1,32 +1,14 @@
 FLOAT [0-9]*[\.,]?[0-9]*
 
 %{
-typedef struct {
-    int num_col, num_row, num_nz, sense;// num_nz is the number of nonzeros in a_value ( its length ) all are being set
 
-    double col_cost[10], col_lower[10], col_upper[10], row_lower[10], row_upper[10], a_value[10], offset;// all are set
-
-    // a_start_ has num_col_1 entries, and the last entry is the number
-    // of nonzeros in A, allowing the number of nonzeros in the last
-    // column to be defined
-
-    // a_index are the indices in our rows of values in a_value
-    // The position in a_index/a_value of the index/value of the first nonzero in each vector is stored in a_start
-    // a_start[0] = 0
-
-
-    int a_start[10], a_index[10], a_format;// TODO
-
-    int nIndex[2];// set
-    char *varNames[10];// set
-} model_t;
-
+	#include "../model.h" 
 	extern int yylex(void);
 	static void readVar(char *text, char cost);
 	static void setBounds(double val, char sign);
 
-	int i = 0;
-	double lastVal, sign = 1;
+	int i = 0, a_value_index[10];
+	double lastVal, sign = 1, a_value_cache[10][10];
 	char cost = 1;
 	model_t mod;
 	char lastVarName[10];
@@ -64,14 +46,13 @@ st	{
 
 #include <stdlib.h>
 #include <string.h>
-#include "../model.h" 
 
 #define MIN(a,b) (a < b ? a : b)
 
 void
 printModel(model_t *mod) 
 {
-	printf("offset == %lf\tnum_col == %d\tnum_row == %d\tsense == %d\n", mod->offset, mod->num_col, mod->num_row, mod->sense);
+	printf("offset == %lf\tnum_col == %d\tnum_row == %d\tnum_nz == %d\tsense == %d\n", mod->offset, mod->num_col, mod->num_row, mod->num_nz, mod->sense);
 
 	for (int i = 0; i < mod->nIndex[0]; i++){
 		printf("varNames[%d] == %s\n", i, mod->varNames[i]);
@@ -81,6 +62,7 @@ printModel(model_t *mod)
 		printf("col_cost[%d] == %lf\t", i, mod->col_cost[i]);
 		printf("col_lower[%d] == %lf\t", i, mod->col_lower[i]);
 		printf("col_upper[%d] == %lf\t", i, mod->col_upper[i]);
+		printf("a_start[%d] == %d", i, mod->a_start[i]);
 		puts("\n");
 	}
 	for (int i = 0; i < mod->num_row; i++) {
@@ -133,16 +115,20 @@ setBounds(double val, char sign) {
 		printf("settinc columns to %lf index: %d name: %s\n", val, index, lastVarName);
 		switch (sign) {
 			case 1:// >=
-				mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
-				mod.col_upper[index] = 1.0e30;
+				//mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
+				//mod.col_upper[index] = 1.0e30;
+				mod.col_lower[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 			case 0:// =
-				mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
-				mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
+				//mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
+				//mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
+				mod.col_upper[index] = val/a_value_cache[index][--a_value_index[index]];
+				mod.col_lower[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 			case -1:// <= 
-				mod.col_lower[index] = -1.0e30; 
-				mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
+				//mod.col_lower[index] = -1.0e30; 
+				//mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
+				mod.col_upper[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 		}
 
@@ -169,6 +155,8 @@ setBounds(double val, char sign) {
 			mod.row_upper[mod.num_row++] = val;
 			break;
 	}
+	int index = findIndex(lastVarName);
+	mod.a_start[index]++;
 }
 
 
@@ -183,12 +171,40 @@ readVar(char *text, char cost)
 	}
 	if (cost) {
 		mod.col_cost[index] = lastVal;
-	} else {
-		mod.a_index[mod.num_nz] = mod.num_row;
-		mod.a_value[mod.num_nz++] = lastVal;
+	} else  {
+		//mod.a_index[mod.num_nz] = mod.num_row;
+		//mod.a_index[mod.num_nz] = mod.num_row;
+		//mod.a_value[mod.num_nz++] = lastVal;
+		a_value_cache[index][a_value_index[index]++] = lastVal;
+		mod.num_nz++;
 	}
 	lastVal = 0;
 	strcpy(lastVarName, text);
+}
+
+static void
+completeModel (model_t *mod) 
+{
+	mod->a_start[0] = 0;
+	for (int i = 1; i < mod->num_col; i++) {
+		mod->a_start[i]+= mod->a_start[i-1];
+	}
+	int n = 0;
+	for (int i = 0; i < mod->num_col; i++) {
+		for (int j = 0; j < a_value_index[i]; j++) {
+			mod->a_index[n] = j;
+			mod->a_value[n++] = a_value_cache[i][j];
+		}
+	}
+}
+
+static void
+preModel (model_t *mod) 
+{
+	for (int i = 0; i < 10; i++) {
+		mod->col_upper[i] = 1.0e30;
+		mod->col_lower[i] = -1.0e30;
+	}
 }
 
 /*
@@ -203,6 +219,10 @@ yylex(int *lineNb, char **vars) {
 int
 main () {
 	mod.a_format = 2;
+	preModel(&mod);
 	yylex();
+	completeModel(&mod);
 	printModel(&mod);
+	sol* res = solveModel(&mod);
+	printSol(res, &mod);
 }

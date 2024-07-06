@@ -1,6 +1,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <stddef.h>
+
 
   // a_start_ has num_col_1 entries, and the last entry is the number
   // of nonzeros in A, allowing the number of nonzeros in the last
@@ -8,28 +10,32 @@
   // model.lp_.a_matrix_.start_ = {0, 2, 5};
   // model.lp_.a_matrix_.index_ = {1, 2, 0, 1, 2};
   // model.lp_.a_matrix_.value_ = {1.0, 3.0, 1.0, 2.0, 2.0};
-/*
-struct ll;
+typedef struct ll ll;
 
-typedef struct {
+typedef struct ll {
     size_t size;
     char *val;
     ll *next;
 } ll;
-*/
 
-/* 
+    // a_start_ has num_col_1 entries, and the last entry is the number
+    // of nonzeros in A, allowing the number of nonzeros in the last
+    // column to be defined
+    // it is thus the index of each column start in A
+
+    // a_index are the indices in our rows of values in a_value
+    // The position in a_index/a_value of the index/value of the first nonzero in each vector is stored in a_start
+    // a_start[0] = 0
 typedef struct {
-    int num_col, num_row, num_nz, sense;
+    int num_col, num_row, num_nz, sense;// num_nz is the number of nonzeros in a_value ( its length ) all are being set
 
-    double col_cost[10], col_lower[10], col_upper[10], *row_lower, *row_upper, offset, a_value[10];
+    double col_cost[10], col_lower[10], col_upper[10], row_lower[10], row_upper[10], a_value[10], offset;// all are set
 
-    int *a_start, *a_index;
+    int a_start[10], a_index[10], a_format;// TODO
 
-    int nIndex[2];
-    char *varNames[10];
+    int nIndex[2];// set
+    char *varNames[10];// set
 } model_t;
-*/
 
 typedef struct {
         double *col_value, *col_dual, *row_value, *row_dual, objective_value;

@@ -1,9 +1,11 @@
 .POSIX:
 include config.mk
 
-test.out: ./src/parse/parse.l
-	flex -o ./src/parse/parse.c $<
-	gcc ./src/parse/parse.c -o test.out -lfl
+./src/parse/parse.c:src/parse/parse.l
+	flex -o $@ $< 
+
+test.out:src/parse/parse.c src/lp.c
+	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c -o test.out -lfl -lhighs
 
 all: options $(XOBJ) highsv
 
@@ -20,9 +22,6 @@ org.gtk.exampleapp.gschema.valid: org.gtk.exampleapp.gschema.xml
 
 src/gresource.c: ./.gresource.xml
 	$(GCR) ./.gresource.xml --target=$@ --generate-source
-
-./src/parse/parse.c:$(LEX)
-	flex -o $@ $< 
 
 $(OBJ): $(SRC)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
