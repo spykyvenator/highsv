@@ -8,37 +8,40 @@ print_hello (GtkWidget *widget,
 }
 
 static void
+quit_cb (GtkWindow *window)
+{
+  gtk_window_close (window);
+}
+
+static void
 activate (GtkApplication* app, gpointer user_data) 
 {
-    GtkWidget *window;
-    GtkWidget *button, *grid;
+    GtkBuilder *builder = gtk_builder_new();
+    gtk_builder_add_from_file(builder, "builder.ui", NULL);
+    GObject *window = gtk_builder_get_object(builder, "window");
+    gtk_window_set_application(GTK_WINDOW(window), app);
 
-    window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW (window), "highsv");
-    //gtk_window_set_default_size(GTK_WINDOW (window), 600, 600);
+    GObject *button = gtk_builder_get_object(builder, "solve");
+    g_signal_connect (button, "clicked", G_CALLBACK(print_hello), NULL);
+    
+    button = gtk_builder_get_object(builder, "quit");
+    g_signal_connect (button, "clicked", G_CALLBACK(quit_cb), NULL);
 
-    grid = gtk_grid_new ();
-    gtk_window_set_child(GTK_WINDOW (window), grid);
-
-    button = gtk_button_new_with_label("Quit");
-    g_signal_connect(button, "clicked", G_CALLBACK (gtk_window_destroy), NULL);
-    gtk_grid_attach(GTK_GRID (grid), button, 0, 0, 1, 1);
-
-    button = gtk_button_new_with_label("Solve");
-    g_signal_connect(button, "clicked", G_CALLBACK (print_hello), NULL);
-    gtk_grid_attach(GTK_GRID (grid), button, 1, 0, 1, 1);
-
-    gtk_window_present(GTK_WINDOW (window));
+    gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
+    g_object_unref(builder);
 }
 
 int
 main (int argc, char *argv[])
 {
+#ifdef GTK_SRCDIR
+    g_chdir(GTK_SRCDIR);
+#endif
+
     GtkApplication *app;
-    int status;
     app = gtk_application_new("org.gtk.highsv", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
-    status = g_application_run(G_APPLICATION (app), argc, argv);
+    int status = g_application_run(G_APPLICATION (app), argc, argv);
     g_object_unref(app);
 
     return status;
