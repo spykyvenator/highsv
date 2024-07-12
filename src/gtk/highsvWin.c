@@ -68,7 +68,8 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   highsv_app_window_open(fopen->win, file);
-  free(fopen);
+  // TODO set as active, add closing func, reset button pos
+  g_free(fopen);
 } 
 
 static void
