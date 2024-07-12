@@ -11,27 +11,77 @@ struct _HighsvAppWindow
 };
 
 static void
-rangeAnalysis()
+rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 {
-    g_print("analysing range\n");
+    char* content;
+    GtkWidget *tab;
+    GtkWidget *view;
+    GtkTextBuffer *buffer;
+    GtkTextIter startI, endI;
+    
+    tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+    gtk_text_buffer_get_start_iter(buffer, &startI);
+    gtk_text_buffer_get_end_iter(buffer, &endI);
+
+    content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
+    printf("content: %s\n", content);
 }
 
 static void
-solveModel()
+solveModel(GtkEntry *entry, HighsvAppWindow *win)
 {
-    g_print("solving model\n");
+    char* content;
+    GtkWidget *tab;
+    GtkWidget *view;
+    GtkTextBuffer *buffer;
+    GtkTextIter startI, endI;
+    
+    tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+    gtk_text_buffer_get_start_iter(buffer, &startI);
+    gtk_text_buffer_get_end_iter(buffer, &endI);
+
+    content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
+
+    printf("content: %s\n", content);
 }
 
-static void
-openNew()
-{
+typedef struct {
   GtkFileDialog *fd;
-  fd = gtk_file_dialog_new();
-  gtk_file_dialog_open(fd, NULL, NULL, NULL, NULL);
+  HighsvAppWindow *win;
+} FileOpenData;
+
+static void
+handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
+{
+  gboolean success = FALSE;
+  FileOpenData *fopen = (FileOpenData *)data;
+
+  GFile *file = gtk_file_dialog_open_finish(fopen->fd, res, NULL);
+
+  if (!file)
+      return;
+
+  highsv_app_window_open(fopen->win, file);
+  free(fopen);
+} 
+
+static void
+openNew(GtkEntry *entry, HighsvAppWindow *win)
+{
+  FileOpenData *res = g_malloc(sizeof(FileOpenData));
+  res->fd = gtk_file_dialog_new();
+  res->win = win;
+  gtk_file_dialog_open(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
 }
 
 
-G_DEFINE_TYPE (HighsvAppWindow, highsv_app_window, GTK_TYPE_APPLICATION_WINDOW)
+G_DEFINE_TYPE(HighsvAppWindow, highsv_app_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void
 highsv_app_window_init (HighsvAppWindow *win)
