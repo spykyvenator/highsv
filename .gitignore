@@ -1,2 +1,7 @@
 *.o
 highsv
+*.out
+*resources.c
+*lex*
+*.test
+examples/*

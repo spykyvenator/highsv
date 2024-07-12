@@ -1,13 +1,14 @@
 .POSIX:
 include config.mk
 
+all: options highsv
+
 ./src/parse/parse.c:src/parse/parse.l
 	flex -o $@ $< 
 
-test.out:src/parse/parse.c src/lp.c
+test.out:./src/parse/parse.c src/lp.c
 	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c -o test.out -lfl -lhighs
 
-all: options $(XOBJ) highsv
 
 options: 
 	@echo highsv build options:
@@ -15,21 +16,19 @@ options:
 	@echo "LDFLAGS = $(LDFLAGS)"
 	@echo "CC = $(CC)"
 	@echo "$(XOBJ2)"
+	@echo "$(OBJ)"
 
 
-org.gtk.exampleapp.gschema.valid: org.gtk.exampleapp.gschema.xml
-	$(GLIB_COMPILE_SCHEMAS) --strict --dry-run --schema-file=$< && mkdir -p $(@D) && touch $@
-
-src/gresource.c: ./.gresource.xml
-	$(GCR) ./.gresource.xml --target=$@ --generate-source
+./resources.c: ./src/gtk/highsv.gresource.xml ./src/gtk/window.ui
+	$(GLIB_COMPILE_RESOURCES) ./src/gtk/highsv.gresource.xml --target=$@ --sourcedir=. --generate-source
 
 $(OBJ): $(SRC)
-	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -c -o $@ $(LDFLAGS) $<
 
 highsv: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -fv $(OBJ) ./src/parse/parse.c
+	rm -fv $(BUILT_SRC) $(OBJ) ./src/parse/parse.c highsv
 
 .PHONY: all options clean highsv
