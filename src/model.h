@@ -29,12 +29,12 @@ typedef struct ll {
 typedef struct {
     int num_col, num_row, num_nz, sense;// num_nz is the number of nonzeros in a_value ( its length ) all are being set
 
-    double col_cost[10], col_lower[10], col_upper[10], row_lower[10], row_upper[10], a_value[10], offset;// all are set
+    double col_cost[200], col_lower[200], col_upper[200], row_lower[200], row_upper[200], a_value[200], offset;// all are set
 
-    int a_start[10], a_index[10], a_format;// TODO
+    int a_start[200], a_index[200], a_format;// TODO
 
     int nIndex[2];// set
-    char *varNames[10];// set
+    char *varNames[100];// set
 } model_t;
 
 typedef struct {

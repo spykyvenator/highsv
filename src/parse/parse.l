@@ -7,8 +7,8 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(char *text, char cost);
 	static void setBounds(double val, char sign);
 
-	int i = 0, a_value_index[10];
-	double lastVal, sign = 1, a_value_cache[10][10];
+	int i = 0, a_value_index[100];
+	double lastVal, sign = 1, a_value_cache[50][100];
 	char cost = 1;
 	model_t mod;
 	char lastVarName[10];
@@ -30,7 +30,7 @@ st	{
 	    } 
 	}
 
-">"\ *{FLOAT}|">= "{FLOAT} { setBounds( atof(&(yytext[2])), 1); }
+">"\ *{FLOAT}|">= "{FLOAT} { setBounds( atof(&(yytext[2])), 1); }// TODO: allow negative values, ignore spaces
 "<"\ *{FLOAT}|"<= "{FLOAT} { setBounds( atof(&(yytext[2])), -1); }
 "="\ *{FLOAT} { setBounds( atof(&(yytext[2])), 0); }
 
@@ -78,12 +78,15 @@ printModel(model_t *mod)
 	
 }
 
+/*
 size_t
 strlen(const char *s) {
 	size_t i = 0;
 	while (s[i++] != '\0');
 	return i;
 }
+*/
+
 
 int
 findIndex(char *text)
@@ -201,7 +204,7 @@ completeModel (model_t *mod)
 static void
 preModel (model_t *mod) 
 {
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 200; i++) {
 		mod->col_upper[i] = 1.0e30;
 		mod->col_lower[i] = -1.0e30;
 	}

@@ -68,7 +68,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   highsv_app_window_open(fopen->win, file);
-  // TODO set as active, add closing func, reset button pos
+  // TODO add closing func, reset button pos
   g_free(fopen);
 } 
 
@@ -95,10 +95,10 @@ highsv_app_window_class_init (HighsvAppWindowClass *class)
 {
   gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (class),
                                                "/org/highsvapp/window.ui");
-  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), HighsvAppWindow, stack);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), solveModel);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), rangeAnalysis);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), openNew);
+  gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class), HighsvAppWindow, stack);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), solveModel);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), rangeAnalysis);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
 }
 
 HighsvAppWindow *
@@ -108,8 +108,7 @@ highsv_app_window_new (HighsvApp *app)
 }
 
 void
-highsv_app_window_open (HighsvAppWindow *win,
-                         GFile            *file)
+highsv_app_window_open (HighsvAppWindow *win, GFile *file)
 {
   char *basename;
   GtkWidget *scrolled, *view;
@@ -122,10 +121,11 @@ highsv_app_window_open (HighsvAppWindow *win,
   gtk_widget_set_hexpand (scrolled, TRUE);
   gtk_widget_set_vexpand (scrolled, TRUE);
   view = gtk_text_view_new ();
-  gtk_text_view_set_editable (GTK_TEXT_VIEW (view), TRUE);
-  gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), TRUE);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), view);
-  gtk_stack_add_titled (GTK_STACK (win->stack), scrolled, basename, basename);
+  gtk_text_view_set_editable (GTK_TEXT_VIEW(view), TRUE);
+  gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(view), TRUE);
+  gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
+  gtk_stack_add_titled(GTK_STACK(win->stack), scrolled, basename, basename);
+  gtk_stack_set_visible_child(GTK_STACK(win->stack), scrolled);
 
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
     {

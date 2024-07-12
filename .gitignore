@@ -5,3 +5,4 @@ highsv
 *lex*
 *.test
 examples/*
+src/parse/parse.c
