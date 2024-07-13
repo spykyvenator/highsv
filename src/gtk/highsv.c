@@ -25,10 +25,7 @@ highsv_app_activate (GApplication *app)
 }
 
 static void
-highsv_app_open (GApplication  *app,
-                  GFile        **files,
-                  int            n_files,
-                  const char    *hint)
+highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint)
 {
   GList *windows;
   HighsvAppWindow *win;
@@ -43,7 +40,13 @@ highsv_app_open (GApplication  *app,
   for (i = 0; i < n_files; i++)
     highsv_app_window_open (win, files[i]);
 
-  gtk_window_present (GTK_WINDOW (win));
+  if (n_files == 0) {
+    GFileIOStream *tmpio = NULL;
+    GFile *tmp = g_file_new_tmp(NULL, &tmpio, NULL);
+    highsv_app_window_open(win, tmp);
+  }
+
+  gtk_window_present(GTK_WINDOW (win));
 }
 
 static void
@@ -56,8 +59,5 @@ highsv_app_class_init (HighsvAppClass *class)
 HighsvApp *
 highsv_app_new (void)
 {
-  return g_object_new (HIGHSV_APP_TYPE,
-                       "application-id", "org.gtk.highsvapp",
-                       "flags", G_APPLICATION_HANDLES_OPEN,
-                       NULL);
+  return g_object_new (HIGHSV_APP_TYPE, "application-id", "org.gtk.highsvapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
 }

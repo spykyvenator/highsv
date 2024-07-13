@@ -29,6 +29,12 @@
 	    <signal name="clicked" handler="openNew"/>
 	  </object>
 	</child>
+	<child>
+	  <object class="GtkButton" id="CloseButton">
+	    <property name="label">-</property>
+	    <signal name="clicked" handler="closeActive"/>
+	  </object>
+	</child>
       </object>
     </child>
     <child>
