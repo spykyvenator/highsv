@@ -42,6 +42,7 @@ typedef struct {
         int *col_basis_status, *row_basis_status,
             run_status, model_status;
 } sol;
+
 sol* solveModel(model_t *m);
 void printSol(sol *solution, model_t *mod);
 

@@ -4,12 +4,13 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 	#include "../model.h" 
 	extern int yylex(void);
-	static void readVar(char *text, char cost);
+	static void readVar(char *text, const char state);
 	static void setBounds(double val, char sign);
 
 	int i = 0, a_value_index[100];
 	double lastVal, sign = 1, a_value_cache[50][100];
-	char cost = 1;
+	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
+        char state = COST;
 	model_t mod;
 	char lastVarName[10];
 %}
@@ -19,8 +20,8 @@ FLOAT [0-9]*[\.,]?[0-9]*
 max|MAX	{ mod.num_col = i; printf("set modnumCol %d, %d\n", i, mod.num_col); i = 0; if (!mod.sense) mod.sense = -1; else puts("multiple min/max declarations"); }
 min|MIN	{ mod.num_col = i; printf("set modnumCol %d, %d\n", i, mod.num_col); i = 0; if (!mod.sense) mod.sense = 1; else puts("multiple min/max declarations"); }
 st	{ 
-	if (cost) 
-		cost = 0; 
+	if (state == COST) 
+		state = AVAL; 
 	else 
 		puts("error: only one st allowed"); 
 	i = 0; 
@@ -30,16 +31,35 @@ st	{
 	    } 
 	}
 
-">"\ *{FLOAT}|">= "{FLOAT} { setBounds( atof(&(yytext[2])), 1); }// TODO: allow negative values, ignore spaces
-"<"\ *{FLOAT}|"<= "{FLOAT} { setBounds( atof(&(yytext[2])), -1); }
-"="\ *{FLOAT} { setBounds( atof(&(yytext[2])), 0); }
+">"|">=" { state = BOUNDG; }// TODO: allow negative values, ignore spaces
+"<"|"<=" { state = BOUNDL; }
+"="|"==" { state = BOUNDE; }
 
-{FLOAT} { if (!lastVal) lastVal = sign * atof(yytext); else puts("don't put two floats behind each other"); }
+{FLOAT} { 
+        if (state == BOUNDG) {
+            setBounds(sign * atof(yytext), 1); 
+            state = AVAL; 
+            sign = 1;
+        } else if (state == BOUNDL) {
+            setBounds(sign * atof(yytext), -1);
+            state = AVAL;
+            sign = 1;
+        } else if (state == BOUNDE) {
+            setBounds(sign * atof(yytext), 0);
+            state = AVAL;
+            sign = 1;
+        } else if (!lastVal) {
+            lastVal = sign * atof(yytext); 
+            sign = 1;
+        } else {
+            puts("don't put two floats behind each other"); 
+        }
+        }
 
 \+ {sign = 1;}
 \- {sign = -1;}
 
-[a-zA-Z][0-9a-zA-Z]* { i++; readVar(yytext, cost); }
+[a-zA-Z][0-9a-zA-Z]* { i++; readVar(yytext, state); }
 
 
 %%
@@ -115,7 +135,7 @@ setBounds(double val, char sign) {
 	printf("setting bounds with i = %d ", i);
 	if (i == 1) {// set col_upper/lower instead of the row_lower/upper
 		int index = findIndex(lastVarName);
-		printf("settinc columns to %lf index: %d name: %s\n", val, index, lastVarName);
+		printf("setting columns to %lf index: %d name: %s\n", val, index, lastVarName);
 		switch (sign) {
 			case 1:// >=
 				//mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
@@ -164,7 +184,7 @@ setBounds(double val, char sign) {
 
 
 static void
-readVar(char *text, char cost) 
+readVar(char *text, const char state) 
 {
 	puts("readvar:");
 	puts(text);
@@ -172,9 +192,9 @@ readVar(char *text, char cost)
 	if (lastVal == 0) {// this should be ok
 	    lastVal = 1;
 	}
-	if (cost) {
+	if (state == COST) {
 		mod.col_cost[index] = lastVal;
-	} else  {
+	} else if (state == AVAL) {
 		//mod.a_index[mod.num_nz] = mod.num_row;
 		//mod.a_index[mod.num_nz] = mod.num_row;
 		//mod.a_value[mod.num_nz++] = lastVal;
@@ -220,7 +240,7 @@ yylex(int *lineNb, char **vars) {
 */
 
 int
-main () {
+parseStdin() {
 	mod.a_format = 2;
 	preModel(&mod);
 	yylex();
@@ -228,4 +248,20 @@ main () {
 	printModel(&mod);
 	sol* res = solveModel(&mod);
 	printSol(res, &mod);
+}
+
+int
+parseString(const char *s)
+{
+        puts(s);
+	mod.a_format = 2;
+	preModel(&mod);
+	YY_BUFFER_STATE buffer = yy_scan_string(s);
+	yylex();
+	completeModel(&mod);
+	printModel(&mod);
+	sol* res = solveModel(&mod);
+	printSol(res, &mod);
+	yy_delete_buffer(buffer);
+	return 0;
 }

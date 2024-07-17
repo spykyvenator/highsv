@@ -8,6 +8,10 @@ all: options highsv
 
 test.out:./src/parse/parse.c src/lp.c
 	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c -o test.out -lfl -lhighs
+test3.out:./src/parse/parse.c src/lp.c ./test/stdIn.c
+	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c ./test/stdIn.c -o test3.out -lfl -lhighs
+test4.out:./src/parse/parse.c src/lp.c ./test/stdIn.c
+	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c ./test/stringIn2.c -o test4.out -lfl -lhighs
 
 
 options: 

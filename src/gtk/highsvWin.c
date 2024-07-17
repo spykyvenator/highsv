@@ -2,6 +2,8 @@
 
 #include "highsv.h"
 #include "highsvWin.h"
+#include "../parse/parse.h"
+#include "../sol.h"
 
 struct _HighsvAppWindow
 {
@@ -33,7 +35,7 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 static void
 solveModel(GtkEntry *entry, HighsvAppWindow *win)
 {
-    char* content;
+    const char* content;
     GtkWidget *tab;
     GtkWidget *view;
     GtkTextBuffer *buffer;
@@ -48,7 +50,8 @@ solveModel(GtkEntry *entry, HighsvAppWindow *win)
 
     content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
 
-    printf("content: %s\n", content);
+    parseString(content);
+    //printf("content: %s\n", content);
 }
 
 static void
@@ -56,6 +59,22 @@ closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
     GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
     gtk_stack_remove(GTK_STACK(win->stack), tab);
+    /* TODO: select another window upon closing
+    GtkSelectionModel *s = gtk_stack_get_pages(GTK_STACK(win->stack));
+    GtkBitset *selected, *mask;
+    selected = gtk_bitset_new_range(1, 1);
+    mask = gtk_bitset_new_range(3, 1);
+    gtk_selection_model_set_selection(s, selected, mask);
+    g_free(selected);
+    g_free(mask);
+    g_free(s);
+    const char *name = gtk_stack_get_visible_child_name(GTK_STACK(win->stack));
+    if (name)
+      puts(name);
+    else
+      puts("NULL");
+    gtk_stack_set_visible_child(GTK_STACK(win->stack), scrolled);
+    */
 }
 
 typedef struct {
