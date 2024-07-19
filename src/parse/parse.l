@@ -31,7 +31,7 @@ st	{
 	    } 
 	}
 
-">"|">=" { state = BOUNDG; }// TODO: allow negative values, ignore spaces
+">"|">=" { state = BOUNDG; }// TODO: allow negative values
 "<"|"<=" { state = BOUNDL; }
 "="|"==" { state = BOUNDE; }
 
@@ -229,15 +229,6 @@ preModel (model_t *mod)
 		mod->col_lower[i] = -1.0e30;
 	}
 }
-
-/*
-static int
-yylex(int *lineNb, char **vars) {
-	int res = yylex();
-	*lineNb = _lineNb;
-	return yylex();
-}
-*/
 
 int
 parseStdin() {

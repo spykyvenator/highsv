@@ -4,11 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-sol*
-solveModel(model_t *m)
+static inline sol*
+allocSol(model_t *m)
 {
-    void * highs = Highs_create();
-    Highs_setBoolOptionValue(highs, "output_flag", 1);
     sol *res = (sol*) malloc(sizeof(sol));
 
     res->col_value = (double*) malloc(sizeof(double) * m->num_col);
@@ -19,23 +17,24 @@ solveModel(model_t *m)
     res->col_basis_status = (int*) malloc(sizeof(int) * m->num_col);
     res->row_basis_status = (int*) malloc(sizeof(int) * m->num_row);
 
+    return res;
+}
+
+sol*
+solveModel(model_t *m)
+{
+    sol *res = allocSol(m);
     int format = kHighsMatrixFormatColwise;
+
     res->run_status = Highs_lpCall(m->num_col, m->num_row, m->num_nz, 
            format,  m->sense, m->offset, m->col_cost, m->col_lower, m->col_upper, m->row_lower, m->row_upper,
            m->a_start, m->a_index, m->a_value,
            res->col_value, res->col_dual, res->row_value, res->row_dual,
            res->col_basis_status, res->row_basis_status,
            &(res->model_status));
-    /*
-    res->run_status = Highs_passLp(highs, m->num_col, m->num_row, m->num_nz, 
-           format,  m->sense, m->offset, m->col_cost, m->col_lower, m->col_upper, m->row_lower, m->row_upper,
-           m->a_start, m->a_index, m->a_value);
-    Highs_getSolution(highs, res->col_value, res->col_dual, res->row_value, res->row_dual);
-    Highs_getBasis(highs, res->col_basis_status, res->row_basis_status);
-    */
-
     res->objective_value = m->offset;
     for (int i = 0; i < m->num_col; i++) res->objective_value += res->col_value[i]*m->col_cost[i];
+
     return res;
 }
 
@@ -73,5 +72,4 @@ printSol(sol *solution, model_t *mod) {
             printf("%d\t\t%lf\t\t%lf\n", i, solution->row_value[i], solution->row_dual[i]);
         }
     }
-
 }

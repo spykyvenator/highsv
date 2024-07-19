@@ -35,7 +35,7 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 static void
 solveModel(GtkEntry *entry, HighsvAppWindow *win)
 {
-    const char* content;
+    char* content;
     GtkWidget *tab;
     GtkWidget *view;
     GtkTextBuffer *buffer;
@@ -117,7 +117,7 @@ highsv_app_window_init (HighsvAppWindow *win)
 }
 
 static void
-highsv_app_window_class_init (HighsvAppWindowClass *class)
+highsv_app_window_class_init(HighsvAppWindowClass *class)
 {
   gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (class),
                                                "/org/highsvapp/window.ui");
@@ -129,9 +129,11 @@ highsv_app_window_class_init (HighsvAppWindowClass *class)
 }
 
 HighsvAppWindow *
-highsv_app_window_new (HighsvApp *app)
+highsv_app_window_new(HighsvApp *app)
 {
-  return g_object_new (HIGHSV_APP_WINDOW_TYPE, "application", app, NULL);
+  HighsvAppWindow *win = g_object_new(HIGHSV_APP_WINDOW_TYPE, "application", app, NULL);
+  gtk_stack_set_hhomogeneous(GTK_STACK(win->stack), FALSE);
+  return win;
 }
 
 void
