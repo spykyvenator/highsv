@@ -43,7 +43,7 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     parseString(content);
 
-    GFileIOStream* stream = NULL;
+    GFileIOStream* stream;
     GFile *new = g_file_new_tmp("result", &stream, NULL);
     GOutputStream* ostream = g_io_stream_get_output_stream((GIOStream*) stream);
     gsize bw;
@@ -54,4 +54,3 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     highsv_app_window_open(win, new);
     //printf("content: %s\n", content);
 }
-

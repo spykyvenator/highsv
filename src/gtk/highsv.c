@@ -59,5 +59,5 @@ highsv_app_class_init (HighsvAppClass *class)
 HighsvApp *
 highsv_app_new (void)
 {
-  return g_object_new (HIGHSV_APP_TYPE, "application-id", "org.gtk.highsvapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
+  return g_object_new(HIGHSV_APP_TYPE, "application-id", "org.gtk.highsvapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
 }

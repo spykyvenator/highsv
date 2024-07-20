@@ -18,8 +18,8 @@ highsv_app_window_init (HighsvAppWindow *win)
 static void
 highsv_app_window_class_init(HighsvAppWindowClass *class)
 {
-  gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (class),
-                                               "/org/highsvapp/window.ui");
+  gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (class), "/org/highsvapp/window.ui");
+
   gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class), HighsvAppWindow, stack);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), solveEntry);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), rangeAnalysis);
@@ -48,9 +48,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   scrolled = gtk_scrolled_window_new ();
   gtk_widget_set_hexpand (scrolled, TRUE);
   gtk_widget_set_vexpand (scrolled, TRUE);
-  view = gtk_text_view_new ();
-  gtk_text_view_set_editable (GTK_TEXT_VIEW(view), TRUE);
-  gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(view), TRUE);
+  view = gtk_text_view_new();
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
+  gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_stack_add_titled(GTK_STACK(win->stack), scrolled, basename, basename);
 
@@ -60,10 +60,10 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
     {
       GtkTextBuffer *buffer;
 
-      buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-      gtk_text_buffer_set_text (buffer, contents, length);
-      g_free (contents);
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+      gtk_text_buffer_set_text(buffer, contents, length);
+      g_free(contents);
     }
 
-  g_free (basename);
+  g_free(basename);
 }

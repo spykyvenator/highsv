@@ -26,6 +26,14 @@ closeActive(GtkEntry *entry , HighsvAppWindow *win)
     */
 }
 
+void
+saveActive(GtkEntry *entry, HighsvAppWindow *win)
+{
+    GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    GtkWidget* view = gtk_widget_get_first_child(tab);
+    
+}
+
 typedef struct {
   GtkFileDialog *fd;
   HighsvAppWindow *win;
