@@ -4,7 +4,7 @@ CFLAGS = -g $(shell $(PKGCONFIG) --cflags gtk4) $(shell $(PKGCONFIG) --cflags hi
 LIBS = $(shell $(PKGCONFIG) --libs gtk4) $(shell $(PKGCONFIG) --libs highs) -lfl
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
-SRC = highsv.c ./highsvWin.c ./main.c ../lp.c ../parse/parse.c
+SRC = highsv.c ./highsvWin.c ./main.c ../lp.c ../parse/parse.c ./highsvFile.c ./highsvSol.c
 BUILT_SRC = resources.c
 
 OBJS = $(BUILT_SRC:.c=.o) $(SRC:.c=.o)

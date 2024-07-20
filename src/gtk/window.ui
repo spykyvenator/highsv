@@ -26,7 +26,7 @@
 	<child>
 	  <object class="GtkButton" id="SolveButton">
 	    <property name="label">Solve</property>
-	    <signal name="clicked" handler="solveModel"/>
+	    <signal name="clicked" handler="solveEntry"/>
 	  </object>
 	</child>
 	<child>
