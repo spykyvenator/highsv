@@ -43,14 +43,33 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     parseString(content);
 
-    GFileIOStream* stream;
-    GFile *new = g_file_new_tmp("result", &stream, NULL);
-    GOutputStream* ostream = g_io_stream_get_output_stream((GIOStream*) stream);
+    GError *error = NULL;
+    GFileIOStream* stream = NULL;
     gsize bw;
-    g_output_stream_write_all(ostream, "testing\0", 8, &bw, NULL, NULL);
-    g_output_stream_close(ostream, NULL, NULL);
-    g_io_stream_close((GIOStream*)stream, NULL, NULL);
+
+    GFile *new = g_file_new_tmp("result-XXXXXX", &stream, &error);
+    if (!new) {
+        g_printerr("Error creating temp file: %s\n", error->message);
+        g_clear_error(&error);
+        return;
+    }
+
+    GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
+    if (!g_output_stream_write_all(ostream, "testing", 7, &bw, NULL, &error)) {
+        g_printerr("Error writing to file: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_output_stream_close(ostream, NULL, &error)){
+        g_printerr("Error closing out-stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+    if (!g_io_stream_close((GIOStream*)stream, NULL, NULL)) {
+        g_printerr("Error closing stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
 
     highsv_app_window_open(win, new);
+    
     //printf("content: %s\n", content);
 }
