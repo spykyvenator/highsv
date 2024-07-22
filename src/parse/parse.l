@@ -66,8 +66,9 @@ st	{
 
 #include <stdlib.h>
 #include <string.h>
+#include <gtk/gtk.h>
 
-#define MIN(a,b) (a < b ? a : b)
+//#define MIN(a,b) (a < b ? a : b)
 
 void
 printModel(model_t *mod) 
@@ -238,11 +239,11 @@ parseStdin() {
 	completeModel(&mod);
 	printModel(&mod);
 	sol* res = solveModel(&mod);
-	printSol(res, &mod);
+	//printSol(res, &mod);
 }
 
 int
-parseString(const char *s)
+parseString(const char *s, GOutputStream* ostream)
 {
         puts(s);
 	mod.a_format = 2;
@@ -252,7 +253,7 @@ parseString(const char *s)
 	completeModel(&mod);
 	printModel(&mod);
 	sol* res = solveModel(&mod);
-	printSol(res, &mod);
+	printSolToFile(res, &mod, ostream);
 	yy_delete_buffer(buffer);
 	return 0;
 }

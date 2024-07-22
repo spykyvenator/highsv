@@ -1,5 +1,6 @@
 #include "highsv.h"
 #include "highsvWin.h"
+#include "highsvFile.h"
 #include "../parse/parse.h"
 #include "../sol.h"
 
@@ -26,11 +27,12 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
-    char* content;
+    char* content, *resBuffer;
     GtkWidget *tab;
     GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
+    size_t resLen;
     
     tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
@@ -41,7 +43,6 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
 
-    parseString(content);
 
     GError *error = NULL;
     GFileIOStream* stream = NULL;
@@ -55,10 +56,8 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     }
 
     GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
-    if (!g_output_stream_write_all(ostream, "testing", 7, &bw, NULL, &error)) {
-        g_printerr("Error writing to file: %s\n", error->message);
-        g_clear_error(&error);
-    }
+
+    parseString(content, ostream);
 
     if (!g_output_stream_close(ostream, NULL, &error)){
         g_printerr("Error closing out-stream: %s\n", error->message);

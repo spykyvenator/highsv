@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include <stddef.h>
+#include <gtk/gtk.h>
 
 
   // a_start_ has num_col_1 entries, and the last entry is the number
@@ -45,5 +46,6 @@ typedef struct {
 
 sol* solveModel(model_t *m);
 void printSol(sol *solution, model_t *mod);
+void printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream);
 
 #endif

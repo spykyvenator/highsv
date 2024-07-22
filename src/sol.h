@@ -1,5 +1,6 @@
 #ifndef SOL_H
 #define SOL_H
-char* parseString(char *s);
+#include <gtk/gtk.h>
+char* parseString(char *s, GOutputStream *ostream);
 int parseStdin();
 #endif

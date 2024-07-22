@@ -63,3 +63,35 @@ openNew(GtkEntry *entry, HighsvAppWindow *win)
   res->win = win;
   gtk_file_dialog_open(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
 }
+
+void
+openWithText(HighsvAppWindow *win, const char *text, const size_t len)
+{
+    GError *error = NULL;
+    GFileIOStream* stream = NULL;
+    gsize bw;
+
+    GFile *new = g_file_new_tmp("result-XXXXXX", &stream, &error);
+    if (!new) {
+        g_printerr("Error creating temp file: %s\n", error->message);
+        g_clear_error(&error);
+        return;
+    }
+
+    GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
+    if (!g_output_stream_write_all(ostream, text, len, &bw, NULL, &error)) {
+        g_printerr("Error writing to file: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_output_stream_close(ostream, NULL, &error)){
+        g_printerr("Error closing out-stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+    if (!g_io_stream_close((GIOStream*)stream, NULL, NULL)) {
+        g_printerr("Error closing stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    highsv_app_window_open(win, new);
+}
