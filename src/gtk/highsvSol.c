@@ -69,6 +69,7 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     }
 
     highsv_app_window_open(win, new);
-    
-    //printf("content: %s\n", content);
+
+    printf("content: %s\n", content);
+    g_free(content);
 }

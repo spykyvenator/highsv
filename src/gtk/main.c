@@ -14,5 +14,7 @@ main (int argc, char *argv[])
     argv[1] = malloc(sizeof(char)*14);
     argv[1] = "/tmp/test.ltx";
   }
-  return g_application_run(G_APPLICATION (highsv_app_new ()), argc, argv);
+  int res = g_application_run(G_APPLICATION(highsv_app_new ()), argc, argv);
+  // remove tmp files
+  return res;
 }

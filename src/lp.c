@@ -85,38 +85,43 @@ printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream) {
     int n = 0;
     GError *error = NULL;
     gsize bw;
-    char *colLine = "%s\t\t%lf\t\t%lf\n", 
-         *rowLine = "%d\t\t%lf\t\t%lf\n";
+    char colLine[] = "%s\t\t%lf\t\t\t%lf\n", 
+         rowLine[] = "%d\t\t%lf\t\t\t%lf\n",
+         rowStart[] = "\nRow\t\tSlack Or Surplus\tDual Price\n",
+         StatusNOK[] = "run was not ok, please check your model";
 
     if (solution->run_status != kHighsStatusOk) {
-        puts("run was not ok, please check your model");
+        if (!g_output_stream_write_all(ostream, StatusNOK, strlen(StatusNOK),  &bw, NULL, &error)) {// instead, put red marker with problem onscreen
+            g_printerr("Error writing to file: %s\n", error->message);
+            g_clear_error(&error);
+        }
         return;
     }
 
     if (solution->model_status == kHighsModelStatusOptimal) {
-        puts("Global optimal solution found.");
-        /*snprintf(*res, *resLen, "Objective value:\t\t%lf\nTotal Variables:\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
+        if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
+                "Global optimal solution found.\n\nObjective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
                 solution->objective_value,
-                mod->num_col, mod->num_row);
-                */
-        for (int i = 0; i < mod->num_col; i++) {// cols are varnames and their values reduced cost is col's dual
-
-            //g_output_stream_printf(stream, gsize* bytes_written, NULL (cancel), error, format, args);
-            if (!g_output_stream_write_all(ostream, "test", 5, &bw, NULL, &error)) {
+                mod->num_col, mod->num_row)) {
+            g_printerr("Error writing to file: %s\n", error->message);
+            g_clear_error(&error);
+        }
+        for (int i = 0; i < mod->num_col; i++) {// cols are varnames and their values reduced cost is col's dual -> wrong?
+            if (!g_output_stream_printf(ostream, &bw, NULL, &error, colLine, mod->varNames[i], solution->col_value[i], solution->col_dual[i])) {
                 g_printerr("Error writing to file: %s\n", error->message);
                 g_clear_error(&error);
             }
-
-            //snprintf(*res, *resLen, colLine, mod->varNames[i], solution->col_value[i], solution->col_dual[i]);
         }
 
-        puts("\nRow\t\tSlack Or Surplus\tDual Price");
-        for (int i = 0; i < mod->num_row; i++) {// row is objective dual is shadow price
-            if (!g_output_stream_write_all(ostream, "test", 5, &bw, NULL, &error)) {
+        if (!g_output_stream_write_all(ostream, rowStart, strlen(rowStart),  &bw, NULL, &error)) {
+            g_printerr("Error writing to file: %s\n", error->message);
+            g_clear_error(&error);
+        }
+        for (int i = 0; i < mod->num_row; i++) {// row is objective dual is shadow price -> wrong
+            if (!g_output_stream_printf(ostream, &bw, NULL, &error, rowLine, i, solution->row_value[i], solution->row_dual[i])) {
                 g_printerr("Error writing to file: %s\n", error->message);
                 g_clear_error(&error);
             }
-            //snprintf(*res, *resLen, *rowLine, i, solution->row_value[i], solution->row_dual[i]);
         }
     } else {
         puts("No global optimal solution found!");

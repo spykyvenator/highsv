@@ -32,10 +32,10 @@ typedef struct {
 
     double col_cost[200], col_lower[200], col_upper[200], row_lower[200], row_upper[200], a_value[200], offset;// all are set
 
-    int a_start[200], a_index[200], a_format;// TODO
+    int a_start[200], a_index[200], a_format;
 
-    int nIndex[2];// set
-    char *varNames[100];// set
+    int nIndex[2];
+    char *varNames[100];
 } model_t;
 
 typedef struct {

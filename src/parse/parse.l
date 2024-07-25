@@ -223,11 +223,60 @@ completeModel (model_t *mod)
 }
 
 static void
+cleanModel (model_t *mod)
+{
+
+        for (int i = 0; i < mod->nIndex[0]; i++) {
+                free(mod->varNames[i]);
+                mod->varNames[i] = NULL;
+        }
+
+	for (int i = 0; i < 200; i++) {
+                mod->col_cost[i] = 0;
+                mod->row_lower[i] = 0;
+                mod->row_upper[i] = 0;
+                mod->a_value[i] = 0;
+                mod->a_start[i] = 0;
+                mod->a_index[i] = 0;
+	}
+
+        mod->nIndex[0] = 0;
+        mod->num_col = 0;
+        mod->num_row = 0;
+        mod->num_nz = 0;
+        mod->sense = 0;
+        mod->offset = 0;
+        state = COST;
+        lastVal = 0;
+        i = 0;
+        sign = 1;
+        for (int i = 0; i < 10; i++) {
+            lastVarName[i] = '\0';
+        }
+
+        for (int i = 0; i < 50; i++) {
+            for (int j = 0; j < 100; j++) {
+                a_value_cache[i][j] = 0;
+            }
+        }
+        for (int i = 0; i < 100; i++) {
+            a_value_index[i] = 0;
+        }
+}
+
+static void
 preModel (model_t *mod) 
 {
+
 	for (int i = 0; i < 200; i++) {
 		mod->col_upper[i] = 1.0e30;
 		mod->col_lower[i] = -1.0e30;
+
+                mod->row_lower[i] = 0;
+                mod->row_upper[i] = 0;
+                mod->a_value[i] = 0;
+                mod->a_start[i] = 0;
+                mod->a_index[i] = 0;
 	}
 }
 
@@ -235,6 +284,7 @@ int
 parseStdin() {
 	mod.a_format = 2;
 	preModel(&mod);
+        cleanModel(&mod);
 	yylex();
 	completeModel(&mod);
 	printModel(&mod);
@@ -255,5 +305,6 @@ parseString(const char *s, GOutputStream* ostream)
 	sol* res = solveModel(&mod);
 	printSolToFile(res, &mod, ostream);
 	yy_delete_buffer(buffer);
+        cleanModel(&mod);
 	return 0;
 }
