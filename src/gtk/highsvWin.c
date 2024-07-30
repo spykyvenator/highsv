@@ -25,6 +25,7 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), rangeAnalysis);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveActive);
 }
 
 HighsvAppWindow *
@@ -46,8 +47,8 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   basename = g_file_get_basename (file);
 
   scrolled = gtk_scrolled_window_new ();
-  gtk_widget_set_hexpand (scrolled, TRUE);
-  gtk_widget_set_vexpand (scrolled, TRUE);
+  gtk_widget_set_hexpand(scrolled, TRUE);
+  gtk_widget_set_vexpand(scrolled, TRUE);
   view = gtk_text_view_new();
   gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);

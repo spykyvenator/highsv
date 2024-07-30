@@ -29,6 +29,12 @@
 	    <signal name="clicked" handler="solveEntry"/>
 	  </object>
 	</child>
+	<child>
+	  <object class="GtkButton" id="SaveButton">
+	    <property name="label">Save</property>
+	    <signal name="clicked" handler="saveActive"/>
+	  </object>
+	</child>
 	<!--	<child>
 	  <object class="GtkButton" id="RangeButton">
 	    <property name="label">Range</property>
