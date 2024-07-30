@@ -60,14 +60,21 @@ static void
 saveFile(GFile *file, const char *content)
 {
   GError *error = NULL;
+  GFileIOStream *stream;
   gsize bw;
-  GFileIOStream *stream = g_file_create_readwrite(file, G_FILE_CREATE_REPLACE_DESTINATION, NULL, &error);
-  GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
+
+  if (g_file_query_exists(file, NULL))
+    stream = g_file_open_readwrite(file, NULL, &error);
+  else
+    stream = g_file_create_readwrite(file, G_FILE_CREATE_NONE, NULL, &error);
+
+  GOutputStream *ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));// what??
         
-  if (!g_output_stream_write_all(ostream, content, strlen(content),  &bw, NULL, &error)) {
+  if (!g_output_stream_write_all(ostream, content, strlen(content), &bw, NULL, &error)) {
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
+  g_output_stream_close(ostream);
 }
 
 static void
@@ -86,6 +93,7 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 
   if (!file)
       return;
+
   tab = gtk_stack_get_visible_child(GTK_STACK(fsave->win->stack));
   view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -96,8 +104,9 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
   content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
 
   saveFile(file, content);
-  // TODO reset button pos -> in stack button possible?
-  g_free(fopen);
+
+  g_free(fsave);
+  g_free(content);
 } 
 
 void
