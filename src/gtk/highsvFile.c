@@ -37,7 +37,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
   gboolean success = FALSE;
   FileData *fopen = (FileData *)data;
 
-  GFile *file = gtk_file_dialog_open_finish(fopen->fd, res, NULL);
+  GFile *file = gtk_file_dialog_save_finish(fopen->fd, res, NULL);
 
   if (!file)
       return;
@@ -53,7 +53,7 @@ openNew(GtkEntry *entry, HighsvAppWindow *win)
   FileData *res = g_malloc(sizeof(FileData));
   res->fd = gtk_file_dialog_new();
   res->win = win;
-  gtk_file_dialog_open(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
+  gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
 }
 
 static void
@@ -74,7 +74,16 @@ saveFile(GFile *file, const char *content)
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
-  g_output_stream_close(ostream);
+
+  if (!g_output_stream_close(ostream, NULL, &error)) {
+      g_printerr("Error closing ostream: %s\n", error->message);
+      g_clear_error(&error);
+  }
+
+  if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
+      g_printerr("Error closing stream: %s\n", error->message);
+      g_clear_error(&error);
+  }
 }
 
 static void

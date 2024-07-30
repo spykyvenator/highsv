@@ -71,6 +71,15 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     highsv_app_window_open(win, new);
 
     printf("content: %s\n", content);
-    g_output_stream_close(ostream);
+    if (!g_output_stream_close(ostream, NULL, &error)) {
+        g_printerr("Error closing ostream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
+        g_printerr("Error closing stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
     g_free(content);
 }
