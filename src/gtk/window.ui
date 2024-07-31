@@ -31,7 +31,7 @@
 	</child>
 	<child>
 	  <object class="GtkButton" id="SaveButton">
-	    <property name="label">Save</property>
+	    <property name="label">save As</property>
 	    <signal name="clicked" handler="saveActive"/>
 	  </object>
 	</child>
