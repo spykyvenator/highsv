@@ -39,7 +39,7 @@ highsv_app_startup(GApplication *app)
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.quit", quit_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.open", open_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.close", close_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.save", close_accels); 
+  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.save", save_accels); 
 }
 
 static void
