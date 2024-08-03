@@ -3,27 +3,39 @@
 #include "highsv.h"
 #include "highsvWin.h"
 
+GtkWidget* 
+get_previous_stack_child(GtkStack *stack, GtkWidget *current_child) {
+    GtkSelectionModel *pages = gtk_stack_get_pages(GTK_STACK(stack));
+
+    if (pages == NULL || current_child == NULL) {
+        return NULL; // No pages or no visible child in the stack
+    }
+
+    GListModel *list_model = G_LIST_MODEL(pages);
+    guint n_pages = g_list_model_get_n_items(list_model);
+
+    for (guint i = 0; i < n_pages; i++) {
+        GtkStackPage *page = GTK_STACK_PAGE(g_list_model_get_item(list_model, i));
+        if (gtk_stack_page_get_child(page) == current_child) {
+            gint prev_index = (i - 1 + n_pages) % n_pages;
+            GtkStackPage *prev_page = GTK_STACK_PAGE(g_list_model_get_item(list_model, prev_index));
+            return gtk_stack_page_get_child(prev_page);
+        }
+    }
+
+    return NULL; // Should not reach here if current_child is in the stack
+}
+
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
     GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    GtkWidget* new = get_previous_stack_child(GTK_STACK(win->stack), tab);
+    if (!new || !tab) {
+        return;
+    }
     gtk_stack_remove(GTK_STACK(win->stack), tab);
-    /* TODO: select another window upon closing
-    GtkSelectionModel *s = gtk_stack_get_pages(GTK_STACK(win->stack));
-    GtkBitset *selected, *mask;
-    selected = gtk_bitset_new_range(1, 1);
-    mask = gtk_bitset_new_range(3, 1);
-    gtk_selection_model_set_selection(s, selected, mask);
-    g_free(selected);
-    g_free(mask);
-    g_free(s);
-    const char *name = gtk_stack_get_visible_child_name(GTK_STACK(win->stack));
-    if (name)
-      puts(name);
-    else
-      puts("NULL");
-    gtk_stack_set_visible_child(GTK_STACK(win->stack), scrolled);
-    */
+    gtk_stack_set_visible_child(GTK_STACK(win->stack), GTK_WIDGET(new));
 }
 
 typedef struct {
@@ -37,7 +49,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
   gboolean success = FALSE;
   FileData *fopen = (FileData *)data;
 
-  GFile *file = gtk_file_dialog_save_finish(fopen->fd, res, NULL);
+  GFile *file = gtk_file_dialog_open_finish(fopen->fd, res, NULL);
 
   if (!file)
       return;
@@ -53,7 +65,7 @@ openNew(GtkEntry *entry, HighsvAppWindow *win)
   FileData *res = g_malloc(sizeof(FileData));
   res->fd = gtk_file_dialog_new();
   res->win = win;
-  gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
+  gtk_file_dialog_open(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
 }
 
 static void

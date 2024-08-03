@@ -14,12 +14,12 @@
                 <signal name="clicked" handler="openNew"/>
               </object>
             </child>
-	<child>
-	  <object class="GtkButton" id="CloseButton">
-	    <property name="label">-</property>
-	    <signal name="clicked" handler="closeActive"/>
-	  </object>
-	</child>
+            <child>
+              <object class="GtkButton" id="CloseButton">
+                <property name="label">-</property>
+                <signal name="clicked" handler="closeActive"/>
+              </object>
+            </child>
             <property name="stack">stack</property>
           </object>
         </child>
@@ -35,13 +35,6 @@
 	    <signal name="clicked" handler="saveActive"/>
 	  </object>
 	</child>
-	<!--	<child>
-	  <object class="GtkButton" id="RangeButton">
-	    <property name="label">Range</property>
-	    <signal name="clicked" handler="rangeAnalysis"/>
-	  </object>
-	</child>
-	-->
       </object>
     </child>
     <child>

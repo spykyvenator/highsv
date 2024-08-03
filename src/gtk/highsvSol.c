@@ -27,14 +27,15 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
-    char* content, *resBuffer;
+    char* content, *resBuffer, *newName;
     GtkWidget *tab;
     GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
-    size_t resLen;
+    size_t resLen, nameLen;
     
     tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    const char *name = gtk_stack_get_visible_child_name(GTK_STACK(win->stack));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
@@ -48,7 +49,10 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     GFileIOStream* stream = NULL;
     gsize bw;
 
-    GFile *new = g_file_new_tmp("result-XXXXXX", &stream, &error);
+    nameLen = strlen(name)+8;
+    newName = malloc(sizeof(char)*nameLen);
+    snprintf(newName, nameLen, "%s-XXXXXX", name);
+    GFile *new = g_file_new_tmp(newName, &stream, &error);
     if (!new) {
         g_printerr("Error creating temp file: %s\n", error->message);
         g_clear_error(&error);
