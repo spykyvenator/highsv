@@ -10,7 +10,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	int i = 0, a_value_index[100];
 	double lastVal, sign = 1, a_value_cache[50][100];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
-        char state = COST;
+  char state = COST;
 	model_t mod;
 	char lastVarName[10];
 %}
@@ -56,8 +56,8 @@ st	{
         }
         }
 
-\+ {sign = 1;}
-\- {sign = -1;}
+\+ { sign = 1; }
+\- { sign = -1; }
 
 [a-zA-Z][0-9a-zA-Z]* { i++; readVar(yytext, state); }
 
@@ -99,16 +99,6 @@ printModel(model_t *mod)
 	
 }
 
-/*
-size_t
-strlen(const char *s) {
-	size_t i = 0;
-	while (s[i++] != '\0');
-	return i;
-}
-*/
-
-
 int
 findIndex(char *text)
 {
@@ -127,31 +117,22 @@ findIndex(char *text)
 	return mod.nIndex[0]++;
 }
 
-
-/*
- TODO: check if new col limit is bigger/smaller than current before setting
-*/
 static void
 setBounds(double val, char sign) {
 	printf("setting bounds with i = %d ", i);
 	if (i == 1) {// set col_upper/lower instead of the row_lower/upper
 		int index = findIndex(lastVarName);
 		printf("setting columns to %lf index: %d name: %s\n", val, index, lastVarName);
-		switch (sign) {
+   //TODO: check if new col limit is bigger/smaller than current before setting
+		switch (sign) {// this works correctly
 			case 1:// >=
-				//mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
-				//mod.col_upper[index] = 1.0e30;
 				mod.col_lower[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 			case 0:// =
-				//mod.col_lower[index] = val/mod.a_value[mod.num_nz-1]; 
-				//mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
 				mod.col_upper[index] = val/a_value_cache[index][--a_value_index[index]];
 				mod.col_lower[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 			case -1:// <= 
-				//mod.col_lower[index] = -1.0e30; 
-				//mod.col_upper[index] = val/mod.a_value[mod.num_nz-1];
 				mod.col_upper[index] = val/a_value_cache[index][--a_value_index[index]];
 				break;
 		}
@@ -165,7 +146,7 @@ setBounds(double val, char sign) {
 	if (i > mod.num_col) 
 		mod.num_col = i; 
 	i = 0; 
-	switch (sign) {
+	switch (sign) {// its here that our negatives fail 
 		case 1:
 			mod.row_lower[mod.num_row] = val; 
 			mod.row_upper[mod.num_row++] = 1.0e30;
@@ -191,14 +172,11 @@ readVar(char *text, const char state)
 	puts(text);
 	int index = findIndex(text);
 	if (lastVal == 0) {// this should be ok
-	    lastVal = 1;
+	    lastVal = sign;
 	}
 	if (state == COST) {
 		mod.col_cost[index] = lastVal;
 	} else if (state == AVAL) {
-		//mod.a_index[mod.num_nz] = mod.num_row;
-		//mod.a_index[mod.num_nz] = mod.num_row;
-		//mod.a_value[mod.num_nz++] = lastVal;
 		a_value_cache[index][a_value_index[index]++] = lastVal;
 		mod.num_nz++;
 	}

@@ -98,7 +98,7 @@ printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream) {
         return;
     }
 
-    if (solution->model_status == kHighsModelStatusOptimal) {
+    if (solution->model_status == kHighsModelStatusOptimal || solution->model_status == kHighsModelStatusUnbounded) {
         if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
                 "Global optimal solution found.\n\nObjective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
                 solution->objective_value,
