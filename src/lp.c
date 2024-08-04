@@ -88,7 +88,10 @@ printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream) {
     char colLine[] = "%s\t\t%lf\t\t\t%lf\n", 
          rowLine[] = "%d\t\t%lf\t\t\t%lf\n",
          rowStart[] = "\nRow\t\tSlack Or Surplus\tDual Price\n",
-         StatusNOK[] = "run was not ok, please check your model";
+         StatusNOK[] = "run was not ok, please check your model",
+         ModSOptimal[] = "Global optimal solution found\n\n",
+         ModSUnbounded[] = "Global optimal solution found\n\n",
+          *ModS;
 
     if (solution->run_status != kHighsStatusOk) {
         if (!g_output_stream_write_all(ostream, StatusNOK, strlen(StatusNOK),  &bw, NULL, &error)) {// instead, put red marker with problem onscreen
@@ -98,9 +101,18 @@ printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream) {
         return;
     }
 
+  if (solution->model_status == kHighsModelStatusOptimal)
+      ModS = ModSOptimal;
+  else if (solution->model_status == kHighsModelStatusUnbounded)
+      ModS = ModSUnbounded;
+  if (!g_output_stream_write_all(ostream, ModS, strlen(ModS),  &bw, NULL, &error)) {// instead, put red marker with problem onscreen
+      g_printerr("Error writing to file: %s\n", error->message);
+      g_clear_error(&error);
+  }
+
     if (solution->model_status == kHighsModelStatusOptimal || solution->model_status == kHighsModelStatusUnbounded) {
         if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-                "Global optimal solution found.\n\nObjective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
+                "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
                 solution->objective_value,
                 mod->num_col, mod->num_row)) {
             g_printerr("Error writing to file: %s\n", error->message);
@@ -123,24 +135,7 @@ printSolToFile(sol *solution, model_t *mod, GOutputStream* ostream) {
                 g_clear_error(&error);
             }
         }
-    } else {
-        puts("No global optimal solution found!");
-        //printf("Objective value:\t\t%lf\nTotal Variables:\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
-                //solution->objective_value,
-                //mod->num_col, mod->num_row);
-        for (int i = 0; i < mod->num_col; i++) {// cols are varnames and their values reduced cost is col's dual
-            if (!g_output_stream_write_all(ostream, "test", 5, &bw, NULL, &error)) {
-                g_printerr("Error writing to file: %s\n", error->message);
-                g_clear_error(&error);
-            }
-            printf("%s\t\t%lf\t\t%lf\n", mod->varNames[i], solution->col_value[i], solution->col_dual[i]);
-        }
-
-        puts("\nRow\t\tSlack Or Surplus\tDual Price");
-        for (int i = 0; i < mod->num_row; i++) {// row is objective dual is shadow price
-            printf("%d\t\t%lf\t\t%lf\n", i, solution->row_value[i], solution->row_dual[i]);
-        }
-    }
+    } 
 }
 
 
