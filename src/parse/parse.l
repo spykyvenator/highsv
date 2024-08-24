@@ -99,22 +99,18 @@ printModel(model_t *mod)
 	
 }
 
+/*
+ This should be ok
+*/
 int
-findIndex(char *text)
+findIndex(const char *text)
 {
-	size_t cmp = strlen(text);
-	int res;
-
-	for (int i = 0; i < mod.nIndex[0]; i++){
-		size_t j = strlen(mod.varNames[i]);
-		res = strncmp(text, mod.varNames[i], MIN(cmp, j));
-		if (res == 0) {
-			return i;
-		}
+	HighsInt index;
+	if (getColByName(model, text, &index) == KHighsStatusError) {// returns Error when col does not exist
+		index = Highs_getNumCol(model);
+		Highs_passColName(model, ++index, text);
 	}
-	mod.varNames[mod.nIndex[0]] = malloc(cmp);
-	strcpy(mod.varNames[mod.nIndex[0]], text);
-	return mod.nIndex[0]++;
+	return index;
 }
 
 static void
