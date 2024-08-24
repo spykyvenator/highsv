@@ -10,9 +10,9 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	int i = 0, a_value_index[100];
 	double lastVal, sign = 1, a_value_cache[50][100];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
-  char state = COST;
-	model_t mod;
+	char state = COST;
 	char lastVarName[10];
+	void *model;
 %}
 
 %%
@@ -240,11 +240,13 @@ cleanModel (model_t *mod)
         for (int i = 0; i < 100; i++) {
             a_value_index[i] = 0;
         }
+	Highsv_destroy(model);
 }
 
 static void
 preModel (model_t *mod) 
 {
+	model = Highs_create();
 
 	for (int i = 0; i < 200; i++) {
 		mod->col_upper[i] = 1.0e30;
