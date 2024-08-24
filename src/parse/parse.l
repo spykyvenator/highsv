@@ -7,8 +7,8 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(char *text, const char state);
 	static void setBounds(double val, char sign);
 
-	int i = 0, a_value_index[100];
-	double lastVal, sign = 1, a_value_cache[50][100];
+	int i = 0, rowIndex[200];
+	double lastVal, sign = 1, rowVal[200];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
 	char lastVarName[10];
@@ -149,7 +149,7 @@ setBounds(double val, char sign) {
 	switch (sign) {// its here that our negatives fail 
 		case 1:
 			mod.row_lower[mod.num_row] = val; 
-			mod.row_upper[mod.num_row++] = 1.0e30;
+			mod.row_upper[mod.num_row++] = 1.0e30;// Highs_getInfinity();
 			break;
 		case 0:
 			mod.row_lower[mod.num_row] = val; 
