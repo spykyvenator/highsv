@@ -7,7 +7,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(void *mod, char *text, const char state);
 	static void setBounds(void *mod, const double val, char sign);
 
-	int i = 0, rowIndex[200], rowN=0, numNz = 0;
+	int i = 0, rowIndex[200], rowN = 0, colN = 0, numNz = 0;
 	double lastVal, sign = 1, rowVal[200];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
@@ -78,7 +78,9 @@ findIndex(void *mod, const char *text)
 	HighsInt index;
 	if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
 		index = Highs_getNumCol(mod);
-		Highs_passColName(mod, ++index, text);
+		Highs_addCol(mod, 0, -Highs_getInfinity(mod), Highs_getInfinity(mod), 0, &index, NULL);
+		Highs_passColName(mod, index, text);
+
 	}
 	return index;
 }
@@ -135,11 +137,11 @@ readVar (void *mod, char *text, const char state)
 	puts("readvar:");
 	puts(text);
 	int index = findIndex(mod, text);
-	if (lastVal == 0) {// this should be ok
+	if (lastVal == 0) // this should be ok
 	    lastVal = sign;
-	}
+	
 	if (state == COST) {
-		Highs_changeColCost(mod, i, lastVal);
+		Highs_changeColCost(mod, index, lastVal);
 	} else if (state == AVAL) {
 		rowIndex[i] = index;
 		rowVal[i] = lastVal;
