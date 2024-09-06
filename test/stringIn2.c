@@ -1,7 +1,8 @@
-#include "../src/sol.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../src/sol.h"
 
 int
 main(int argc, char *argv[])
@@ -18,6 +19,6 @@ main(int argc, char *argv[])
         if (!buffer || !fread (buffer, 1, length, f)) return 1;
         fclose (f);
         }
-    parseString(buffer);
+    parseString(buffer, NULL);
     return 0;
 }

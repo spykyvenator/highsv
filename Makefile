@@ -8,10 +8,10 @@ all: options highsv
 
 test.out:./src/parse/parse.c src/lp.c
 	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c -o test.out -lfl -lhighs
-test3.out:./src/parse/parse.c src/lp.c ./test/stdIn.c
-	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c ./test/stdIn.c -o test3.out -lfl -lhighs
-test4.out:./src/parse/parse.c src/lp.c ./test/stdIn.c
-	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c ./test/stringIn2.c -o test4.out -lfl -lhighs
+testStdIn.out:./src/parse/parse.c ./test/stdIn.c
+	gcc -g -I /usr/include/highs ./src/lp.c ./src/parse/parse.c ./test/stdIn.c -o $@ -lfl -lhighs
+testFile.out:./src/parse/parse.c ./test/stringIn2.c
+	gcc -g -I/usr/include/gtk-4.0 -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/harfbuzz -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/cairo -I/usr/include/libpng16 -I/usr/include/freetype2 -I/usr/include/pixman-1 -I/usr/include/graphene-1.0 -I/usr/lib64/graphene-1.0/include -mfpmath=sse -msse -msse2 -I/usr/lib64/libffi/include -pthread -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/libmount -I/usr/include/blkid -I /usr/include/highs ./src/parse/parse.c ./test/stringIn2.c -o $@ -lfl -lhighs
 
 
 options: 

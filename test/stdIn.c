@@ -1,5 +1,3 @@
-#include "../src/sol.h"
-
 int
 main(void)
 {
