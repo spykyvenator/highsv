@@ -17,8 +17,8 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %%
 
-^max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
-^min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
+max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
+min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
 st	{ 
 	if (state == COST) 
 		state = AVAL; 
@@ -51,6 +51,7 @@ st	{
         } else if (!lastVal) {
             lastVal = sign * atof(yytext); 
             sign = 1;
+	    numNz++;
         } else {
             puts("don't put two floats behind each other"); 
         }
@@ -91,7 +92,8 @@ findIndex(void *mod, const char *text)
 */
 static void
 setBounds (void *mod, const double val, char sign) {
-	printf("setting bounds with i = %d ", i);
+	printf("setting bounds with numNz = %d ", numNz);
+	/*
 	if (i == 1) {// set col_upper/lower instead of the row_lower/upper
 		const int index = findIndex(mod, lastVarName);
 		printf("setting columns to %lf index: %d name: %s\n", val, index, lastVarName);
@@ -114,18 +116,23 @@ setBounds (void *mod, const double val, char sign) {
 		}
 		return;
 	} else {
+	*/
 		switch (sign) {
 			case 1:// >=
-				Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
+				//Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
+				Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
 				break;
 			case 0:// =
-				Highs_changeRowBounds(mod, rowN, val, val);
+				//Highs_changeRowBounds(mod, rowN, val, val);
+				Highs_addRow(mod, val, val, numNz, rowIndex, rowVal);
 				break;
 			case -1:// <=
-				Highs_changeRowBounds(mod, rowN, -Highs_getInfinity(mod), val);
+				//Highs_changeRowBounds(mod, rowN, -Highs_getInfinity(mod), val);
+				Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
 				break;
 		}
-	}
+	//}
+	numNz = 0;
 }
 
 /*
@@ -172,6 +179,8 @@ parseString(const char *s, GOutputStream* ostream)
 	preModel(model);
 	YY_BUFFER_STATE buffer = yy_scan_string(s);
 	yylex();
+	Highs_presolve(model);
+	Highs_run(model);
 	//printSolToFile(res, &mod, ostream);
 	yy_delete_buffer(buffer);
         cleanModel(model);
