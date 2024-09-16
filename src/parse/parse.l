@@ -7,7 +7,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(void *mod, char *text, const char state);
 	static void setBounds(void *mod, const double val, char sign);
 
-	int i = 0, rowIndex[200], rowN = 0, colN = 0, numNz = 0;
+	int rowIndex[200], numNz = 0, numCol = 0, numRow = 0;
 	double lastVal, sign = 1, rowVal[200];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
@@ -59,8 +59,7 @@ st	{
 \+ { sign = 1; }
 \- { sign = -1; }
 
-[a-zA-Z][0-9a-zA-Z]* { i++; readVar(model, yytext, state); }
-
+[a-zA-Z][0-9a-zA-Z]* { readVar(model, yytext, state); }
 
 %%
 
@@ -83,6 +82,25 @@ printModel(const void* mod)
     );
 }
 
+void
+printSol(const void *mod)
+{
+  double *col_value, *row_value, *col_dual, *row_dual;
+  col_value = malloc(sizeof(double)*numCol);
+  col_dual = malloc(sizeof(double)*numRow);
+
+  row_value = malloc(sizeof(double)*numRow);
+  row_dual = malloc(sizeof(double)*numCol);
+
+  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
+
+  puts("values:");
+  for (uint8_t i = 0; i < numCol; i++){
+    printf("i: %d col: %lf\n",
+      i, col_value[i]);
+  }
+}
+
 /*
 	return the column index of a variable name.
 	add it if it is not present
@@ -93,9 +111,9 @@ findIndex(void *mod, const char *text)
 	HighsInt index;
 	if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
 		index = Highs_getNumCol(mod);
-		Highs_addCol(mod, 0, -Highs_getInfinity(mod), Highs_getInfinity(mod), 0, &index, NULL);
+		Highs_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
 		Highs_passColName(mod, index, text);
-
+    numCol++;
 	}
 	return index;
 }
@@ -111,47 +129,23 @@ setBounds (void *mod, const double val, char sign) {
     printf("%o: %d, %lf \n", i, rowIndex[i], rowVal[i]);
 
   }
-	/*
-	if (i == 1) {// set col_upper/lower instead of the row_lower/upper
-		const int index = findIndex(mod, lastVarName);
-		printf("setting columns to %lf index: %d name: %s\n", val, index, lastVarName);
-   //TODO: check if new col limit is bigger/smaller than current before setting
-		switch (sign) {// this works correctly
-			case 1:// >=
-				 Highs_changeColBounds(mod, index, val, Highs_getInfinity(mod));
-				break;
-			case 0:// =
-				 Highs_changeColBounds(mod, index, val, val);
-				break;
-			case -1:// <= 
-				 Highs_changeColBounds(mod, index, -Highs_getInfinity(mod), val);
-				break;
-		}
-
-		i = 0;
-		if (numNz > 0){
-		    numNz--;
-		}
-		return;
-	} else {
-	*/
-    puts("adding row\n");
-		switch (sign) {
-			case 1:// >=
-				//Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
-				Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
-				break;
-			case 0:// =
-				//Highs_changeRowBounds(mod, rowN, val, val);
-				Highs_addRow(mod, val, val, numNz, rowIndex, rowVal);
-				break;
-			case -1:// <=
-				//Highs_changeRowBounds(mod, rowN, -Highs_getInfinity(mod), val);
-				Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
-				break;
-		}
-	//}
+  puts("adding row\n");
+  switch (sign) {
+    case 1:// >=
+      //Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
+      Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
+      break;
+    case 0:// =
+      //Highs_changeRowBounds(mod, rowN, val, val);
+      Highs_addRow(mod, val, val, numNz, rowIndex, rowVal);
+      break;
+    case -1:// <=
+      //Highs_changeRowBounds(mod, rowN, -Highs_getInfinity(mod), val);
+      Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
+      break;
+  }
 	numNz = 0;
+  numRow++;
 }
 
 /*
@@ -201,6 +195,7 @@ parseString(const char *s, GOutputStream* ostream)
   printModel(model);
 	Highs_presolve(model);
 	Highs_run(model);
+  printSol(model);
 	//printSolToFile(res, &mod, ostream);
 	yy_delete_buffer(buffer);
   cleanModel(model);
