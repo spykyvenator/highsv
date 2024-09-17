@@ -86,13 +86,7 @@ void
 printSol(const void *mod)
 {
   char text[kHighsMaximumStringLength];
-  double *col_value, *row_value, *col_dual, *row_dual;
-  col_value = malloc(sizeof(double)*numCol);
-  col_dual = malloc(sizeof(double)*numRow);
-
-  row_value = malloc(sizeof(double)*numRow);
-  row_dual = malloc(sizeof(double)*numCol);
-
+  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// I tought I had to malloc this??
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
   puts("values:");
@@ -101,11 +95,6 @@ printSol(const void *mod)
     printf("i: %d, %s col: %lf\n",
       i, text, col_value[i]);
   }
-
-  free(col_value);
-  free(col_dual);
-  free(row_value);
-  free(row_dual);
 }
 
 void
@@ -113,13 +102,8 @@ printSolToFile(const void *mod, GOutputStream* ostream) {
   gsize bw;
   GError *error = NULL;
   char text[kHighsMaximumStringLength];
-  double *col_value, *row_value, *col_dual, *row_dual;
+  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
   const double objectiveVal = Highs_getObjectiveValue(mod);
-  col_value = malloc(sizeof(double)*numCol);
-  col_dual = malloc(sizeof(double)*numRow);
-
-  row_value = malloc(sizeof(double)*numRow);
-  row_dual = malloc(sizeof(double)*numCol);
 
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
@@ -130,11 +114,6 @@ printSolToFile(const void *mod, GOutputStream* ostream) {
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
-
-  free(col_value);
-  free(col_dual);
-  free(row_value);
-  free(row_dual);
 }
 
 /*
