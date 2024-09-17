@@ -85,6 +85,7 @@ printModel(const void* mod)
 void
 printSol(const void *mod)
 {
+  char text[kHighsMaximumStringLength];
   double *col_value, *row_value, *col_dual, *row_dual;
   col_value = malloc(sizeof(double)*numCol);
   col_dual = malloc(sizeof(double)*numRow);
@@ -96,9 +97,44 @@ printSol(const void *mod)
 
   puts("values:");
   for (uint8_t i = 0; i < numCol; i++){
-    printf("i: %d col: %lf\n",
-      i, col_value[i]);
+    Highs_getColName(mod, i, text);
+    printf("i: %d, %s col: %lf\n",
+      i, text, col_value[i]);
   }
+
+  free(col_value);
+  free(col_dual);
+  free(row_value);
+  free(row_dual);
+}
+
+void
+printSolToFile(const void *mod, GOutputStream* ostream) {
+  gsize bw;
+  GError *error = NULL;
+  char text[kHighsMaximumStringLength];
+  double *col_value, *row_value, *col_dual, *row_dual;
+  const double objectiveVal = Highs_getObjectiveValue(mod);
+  col_value = malloc(sizeof(double)*numCol);
+  col_dual = malloc(sizeof(double)*numRow);
+
+  row_value = malloc(sizeof(double)*numRow);
+  row_dual = malloc(sizeof(double)*numCol);
+
+  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
+
+  if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
+          "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
+          objectiveVal,
+          numCol, numRow)) {
+      g_printerr("Error writing to file: %s\n", error->message);
+      g_clear_error(&error);
+  }
+
+  free(col_value);
+  free(col_dual);
+  free(row_value);
+  free(row_dual);
 }
 
 /*
@@ -196,7 +232,7 @@ parseString(const char *s, GOutputStream* ostream)
 	Highs_presolve(model);
 	Highs_run(model);
   printSol(model);
-	//printSolToFile(res, &mod, ostream);
+	printSolToFile(model, ostream);
 	yy_delete_buffer(buffer);
   cleanModel(model);
 	return 0;
