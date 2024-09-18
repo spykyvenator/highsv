@@ -102,10 +102,10 @@ printSolToFile(const void *mod, GOutputStream* ostream) {
   gsize bw;
   GError *error = NULL;
   char text[kHighsMaximumStringLength];
-  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
+  //double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
   const double objectiveVal = Highs_getObjectiveValue(mod);
 
-  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
+  //Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
   if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
           "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
