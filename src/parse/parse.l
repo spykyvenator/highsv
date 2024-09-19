@@ -66,6 +66,8 @@ st	{
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include "../print.h"
+#include "../printOstream.h"
 
 void
 printModel(const void* mod)
@@ -80,40 +82,6 @@ printModel(const void* mod)
     offset,
     numCol, numRow
     );
-}
-
-void
-printSol(const void *mod)
-{
-  char text[kHighsMaximumStringLength];
-  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// I tought I had to malloc this??
-  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
-
-  puts("values:");
-  for (uint8_t i = 0; i < numCol; i++){
-    Highs_getColName(mod, i, text);
-    printf("i: %d, %s col: %lf\n",
-      i, text, col_value[i]);
-  }
-}
-
-void
-printSolToFile(const void *mod, GOutputStream* ostream) {
-  gsize bw;
-  GError *error = NULL;
-  char text[kHighsMaximumStringLength];
-  //double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
-  const double objectiveVal = Highs_getObjectiveValue(mod);
-
-  //Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-          "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
-          objectiveVal,
-          numCol, numRow)) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
 }
 
 /*
