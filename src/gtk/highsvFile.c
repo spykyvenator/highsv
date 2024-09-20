@@ -62,9 +62,15 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
 void
 openNew(GtkEntry *entry, HighsvAppWindow *win)
 {
+  GListStore *list = g_list_store_new(GTK_TYPE_FILE_FILTER);
+  GtkFileFilter *filter = gtk_file_filter_new();
+  gtk_file_filter_add_mime_type(filter, "text/plain");
+  gtk_file_filter_set_name(filter, "text");
+  g_list_store_append(list, filter);
   FileData *res = g_malloc(sizeof(FileData));
   res->fd = gtk_file_dialog_new();
   res->win = win;
+  gtk_file_dialog_set_filters(res->fd, G_LIST_MODEL(list));
   gtk_file_dialog_open(res->fd, GTK_WINDOW(res->win), NULL, (handleOpen), res);
 }
 

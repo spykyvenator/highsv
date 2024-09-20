@@ -13,9 +13,9 @@ options:
 	@echo "$(XOBJ2)"
 	@echo "$(OBJ)"
 
-highsv:
+highsv: 
 	cd src/gtk && $(MAKE)
 	cp src/gtk/highsv ./
 
 
-.PHONY: all options clean 
+.PHONY: all options clean highsv
