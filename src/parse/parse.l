@@ -156,17 +156,17 @@ readVar (void *mod, char *text, const char state)
 static void
 cleanModel (void *mod)
 {
-	Highs_destroy(mod);
+  Highs_destroy(mod);
   numCol = 0;
   numRow = 0;
   state = COST;
   lastVal = 0;
   sign = 1,
   numNz = 0;
-	for (int i = 0; i < 200; i++){
-		rowIndex[i] = 0;
-		rowVal[i] = 0;
-	}
+  for (int i = 0; i < 200; i++){
+    rowIndex[i] = 0;
+    rowVal[i] = 0;
+  }
 }
 
 static void
@@ -179,15 +179,15 @@ int
 parseString(const char *s, GOutputStream* ostream)
 {
   puts(s);
-	preModel(model);
-	YY_BUFFER_STATE buffer = yy_scan_string(s);
-	yylex();
+  preModel(model);
+  YY_BUFFER_STATE buffer = yy_scan_string(s);
+  yylex();
   printModel(model);
-	Highs_presolve(model);
-	Highs_run(model);
+  Highs_presolve(model);
+  Highs_run(model);
   printSol(model);
-	printSolToFile(model, ostream);
-	yy_delete_buffer(buffer);
+  printSolToFile(model, ostream);
+  yy_delete_buffer(buffer);
   cleanModel(model);
-	return 0;
+  return 0;
 }
