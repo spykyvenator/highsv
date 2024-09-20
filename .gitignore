@@ -1,5 +1,6 @@
 *.o
 highsv
+*.d
 *.out
 *resources.c
 *lex*

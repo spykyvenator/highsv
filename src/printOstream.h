@@ -54,8 +54,11 @@ void
 printOptimal(const void *mod, GOutputStream* ostream){
   gsize bw;
   GError *error = NULL;
-
+  char text[kHighsMaximumStringLength];
+  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
   const double objectiveVal = Highs_getObjectiveValue(mod);
+
+  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
   if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
           "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\n\nVariable\tValue\t\t\tReduced Cost\n",
@@ -64,15 +67,23 @@ printOptimal(const void *mod, GOutputStream* ostream){
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
+
+  for (uint8_t i = 0; i < numCol; i++){
+    if (Highs_getColName(mod, i, text) == kHighsStatusError)
+      break;
+    if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
+            "%s\t%lf\n",
+            text, col_value[i])) {
+        g_printerr("Error writing to file: %s\n", error->message);
+        g_clear_error(&error);
+    }
+  }
 }
 
 void
 printSolToFile(const void *mod, GOutputStream* ostream) {
-  char text[kHighsMaximumStringLength];
-  //double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
   HighsInt status = Highs_getModelStatus(mod);
 
-  //Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
   if (status == kHighsModelStatusNotset
     || status == kHighsModelStatusLoadError

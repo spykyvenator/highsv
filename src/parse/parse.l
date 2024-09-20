@@ -59,7 +59,7 @@ st	{
 \+ { sign = 1; }
 \- { sign = -1; }
 
-[a-zA-Z][0-9a-zA-Z]* { readVar(model, yytext, state); }
+[a-zA-Z][0-9a-zA-Z]* { /*puts(yylex);*/ readVar(model, yytext, state); }
 
 %%
 
@@ -157,21 +157,28 @@ static void
 cleanModel (void *mod)
 {
 	Highs_destroy(mod);
-}
-
-static void
-preModel (void *mod) 
-{
-	model = Highs_create();
+  numCol = 0;
+  numRow = 0;
+  state = COST;
+  lastVal = 0;
+  sign = 1,
+  numNz = 0;
 	for (int i = 0; i < 200; i++){
 		rowIndex[i] = 0;
 		rowVal[i] = 0;
 	}
 }
 
+static void
+preModel (void *mod) 
+{
+	model = Highs_create();
+}
+
 int
 parseString(const char *s, GOutputStream* ostream)
 {
+  puts(s);
 	preModel(model);
 	YY_BUFFER_STATE buffer = yy_scan_string(s);
 	yylex();
