@@ -5,7 +5,6 @@
 #include "highsvFile.h"
 #include "highsvSol.h"
 #include "../parse/parse.h"
-#include "../sol.h"
 
 G_DEFINE_TYPE(HighsvAppWindow, highsv_app_window, GTK_TYPE_APPLICATION_WINDOW)
 

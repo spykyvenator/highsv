@@ -5,16 +5,14 @@
 int
 main (int argc, char *argv[])
 {
-  /*
-   * this is stupid
-   * is there even a second place in this array?
-   */
+  int res;
   if (argc == 1) {
-    argc = 2;
-    argv[1] = malloc(sizeof(char)*14);
-    argv[1] = "/tmp/test.ltx";
+    char *argv_new[2];
+    argv_new[0] = argv[0];
+    argv_new[1] = "/tmp/test.ltx";
+    res = g_application_run(G_APPLICATION(highsv_app_new ()), 2, argv_new);
+  } else {
+    res = g_application_run(G_APPLICATION(highsv_app_new ()), argc, argv);
   }
-  int res = g_application_run(G_APPLICATION(highsv_app_new ()), argc, argv);
-  // remove tmp files
   return res;
 }
