@@ -17,6 +17,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %%
 
+!.*\n 	{ printf("skipping comment %s", yytext); }
 max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
 min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
 st	{ 
@@ -59,7 +60,7 @@ st	{
 \+ { sign = 1; }
 \- { sign = -1; }
 
-[a-zA-Z][0-9a-zA-Z]* { /*puts(yylex);*/ readVar(model, yytext, state); }
+[a-zA-Z][0-9a-zA-Z]* { readVar(model, yytext, state); }
 
 %%
 
