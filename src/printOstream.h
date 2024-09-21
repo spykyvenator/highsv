@@ -1,5 +1,5 @@
-//#ifdef PRINTO_H
-//#define PRINTO_H
+#ifndef PRINTO_H
+#define PRINTO_H
 extern int numRow, numCol;
 
 void
@@ -27,36 +27,11 @@ printInfeasible(const void *mod, GOutputStream* ostream){
 }
 
 void
-printUnbounded(const void *mod, GOutputStream* ostream){
-  gsize bw;
-  GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Your model is unbounded\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-}
-
-void
-printError(const void *mod, GOutputStream* ostream){
-  gsize bw;
-  GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Something went wrong\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-}
-
-void
-printOptimal(const void *mod, GOutputStream* ostream){
-  gsize bw;
-  GError *error = NULL;
-  char text[kHighsMaximumStringLength];
-  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// weird bug on free => would segfault => stream_printf async?
+printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
+{
   const double objectiveVal = Highs_getObjectiveValue(mod);
+  char text[kHighsMaximumStringLength];
+  double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];
 
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
@@ -69,8 +44,12 @@ printOptimal(const void *mod, GOutputStream* ostream){
   }
 
   for (uint8_t i = 0; i < numCol; i++){
-    if (Highs_getColName(mod, i, text) == kHighsStatusError)
+    if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
+
+    if (col_value[i] == 0.0 && signbit(col_value[i]))// remove negative 0's
+        col_value[i] += 0.0;
+
     if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
             "%s\t%lf\n",
             text, col_value[i])) {
@@ -78,6 +57,45 @@ printOptimal(const void *mod, GOutputStream* ostream){
         g_clear_error(&error);
     }
   }
+}
+
+void
+printUnbounded(const void *mod, GOutputStream *ostream){
+  gsize bw;
+  GError *error = NULL;
+
+  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
+        "Your model is unbounded\n")) {
+      g_printerr("Error writing to file: %s\n", error->message);
+      g_clear_error(&error);
+  }
+
+  printValues(mod, ostream, bw, error);
+
+}
+
+void
+printError(const void *mod, GOutputStream *ostream){
+  gsize bw;
+  GError *error = NULL;
+
+  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
+        "Something went wrong\n")) {
+      g_printerr("Error writing to file: %s\n", error->message);
+      g_clear_error(&error);
+  }
+}
+
+void
+printOptimal(const void *mod, GOutputStream *ostream){
+  gsize bw;
+  GError *error = NULL;
+  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
+        "Global optimal solution found:\n")) {
+      g_printerr("Error writing to file: %s\n", error->message);
+      g_clear_error(&error);
+  }
+  printValues(mod, ostream, bw, error);
 }
 
 void
@@ -108,4 +126,4 @@ printSolToFile(const void *mod, GOutputStream* ostream) {
     printUnbounded(mod, ostream);
 }
 
-//#endif
+#endif

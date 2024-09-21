@@ -17,7 +17,11 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %%
 
-!.*\n 	{ printf("skipping comment %s", yytext); }
+!.*\n 	{ 
+	  #ifdef DEBUG 
+	    printf("skipping comment %s", yytext); 
+	  #endif
+	}
 max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
 min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
 st	{ 
@@ -86,20 +90,20 @@ printModel(const void* mod)
 }
 
 /*
-	return the column index of a variable name.
-	add it if it is not present
+  return the column index of a variable name.
+  add it if it is not present
 */
 int
 findIndex(void *mod, const char *text)
 {
-	HighsInt index;
-	if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
-		index = Highs_getNumCol(mod);
-		Highs_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
-		Highs_passColName(mod, index, text);
+  HighsInt index;
+  if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
+    index = Highs_getNumCol(mod);
+    Highs_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
+    Highs_passColName(mod, index, text);
     numCol++;
-	}
-	return index;
+  }
+  return index;
 }
 
 /*
@@ -143,9 +147,9 @@ readVar (void *mod, char *text, const char state)
 	int index = findIndex(mod, text);
 	if (lastVal == 0) // this should be ok
 	    lastVal = sign;
-	
 	if (state == COST) {
-		Highs_changeColCost(mod, index, lastVal);
+		rowVal[index] += lastVal;
+		Highs_changeColCost(mod, index, rowVal[index]);
 	} else if (state == AVAL) {
 		rowIndex[numNz] = index;
 		rowVal[numNz++] = lastVal;

@@ -15,7 +15,6 @@ options:
 
 highsv: 
 	cd src/gtk && $(MAKE)
-	cp src/gtk/highsv ./
-
+	cp --update=older src/gtk/highsv ./
 
 .PHONY: all options clean highsv
