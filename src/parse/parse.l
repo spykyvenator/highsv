@@ -17,11 +17,11 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %%
 
-!.*\n 	{ 
-	  #ifdef DEBUG 
-	    printf("skipping comment %s", yytext); 
-	  #endif
-	}
+!.*\n { 
+	#ifdef DEBUG
+	printf("skipping comment: %s", yytext); 
+	#endif
+      }
 max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
 min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
 st	{ 
@@ -36,29 +36,27 @@ st	{
 	    } 
 	}
 
-">"|">=" { state = BOUNDG; }// TODO: allow negative values
-"<"|"<=" { state = BOUNDL; }
-"="|"==" { state = BOUNDE; }
+">"|">=" { state = BOUNDG; /* sign = 1; */ }// TODO: allow negative values
+"<"|"<=" { state = BOUNDL; /* sign = 1; */ }
+"="|"==" { state = BOUNDE; /* sign = 1; */ }
 
 {FLOAT} { 
         if (state == BOUNDG) {
             setBounds(model, sign * atof(yytext), 1); 
             state = AVAL; 
-            sign = 1;
         } else if (state == BOUNDL) {
             setBounds(model, sign * atof(yytext), -1);
             state = AVAL;
-            sign = 1;
         } else if (state == BOUNDE) {
+	    printf("found double: %s to %lf, sign %lf\n", yytext, atof(yytext), sign);
             setBounds(model, sign * atof(yytext), 0);
             state = AVAL;
-            sign = 1;
         } else if (!lastVal) {
             lastVal = sign * atof(yytext); 
-            sign = 1;
         } else {
             puts("don't put two floats behind each other"); 
         }
+	sign = 1;
         }
 
 \+ { sign = 1; }
@@ -111,10 +109,10 @@ findIndex(void *mod, const char *text)
 	depending on the amount of variables in the current text row
 */
 static void
-setBounds (void *mod, const double val, char sign) {
-	printf("setting bounds with numNz = %d\n", numNz);
+setBounds (void *mod, const double val, const char sign) {
+  printf("setting bounds with numNz = %d to %lf, sign %hhd\n", numNz, val, sign);
   for (uint8_t i = 0; i < numNz; i++){
-    printf("%o: %d, %lf \n", i, rowIndex[i], rowVal[i]);
+    printf("setting bounds value: %o: index: %d, val: %lf \n", i, rowIndex[i], rowVal[i]);
 
   }
   puts("adding row\n");
@@ -145,8 +143,10 @@ readVar (void *mod, char *text, const char state)
 	puts("readvar:");
 	puts(text);
 	int index = findIndex(mod, text);
-	if (lastVal == 0) // this should be ok
+	if (lastVal == 0){ // this should be ok but need to reset sign !
 	    lastVal = sign;
+	    sign = 1;
+	}
 	if (state == COST) {
 		rowVal[index] += lastVal;
 		Highs_changeColCost(mod, index, rowVal[index]);
