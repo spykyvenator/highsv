@@ -9,7 +9,7 @@ main (int argc, char *argv[])
   if (argc == 1) {
     char *argv_new[2];
     argv_new[0] = argv[0];
-    argv_new[1] = "/tmp/test.ltx";
+    argv_new[1] = "/tmp/test.txt";
     res = g_application_run(G_APPLICATION(highsv_app_new ()), 2, argv_new);
   } else {
     res = g_application_run(G_APPLICATION(highsv_app_new ()), argc, argv);

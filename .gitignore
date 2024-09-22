@@ -1,5 +1,6 @@
 *.o
 highsv
+lps
 *.d
 *.out
 *resources.c

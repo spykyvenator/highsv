@@ -110,6 +110,7 @@ findIndex(void *mod, const char *text)
 */
 static void
 setBounds (void *mod, const double val, const char sign) {
+  char rowName[kHighsMaximumStringLength];
   printf("setting bounds with numNz = %d to %lf, sign %hhd\n", numNz, val, sign);
   for (uint8_t i = 0; i < numNz; i++){
     printf("setting bounds value: %o: index: %d, val: %lf \n", i, rowIndex[i], rowVal[i]);
@@ -130,7 +131,9 @@ setBounds (void *mod, const double val, const char sign) {
       Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
       break;
   }
-	numNz = 0;
+  snprintf(rowName, 512, "%d", numRow);
+  Highs_passRowName(mod, numRow, rowName);
+  numNz = 0;
   numRow++;
 }
 
