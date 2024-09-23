@@ -8,18 +8,6 @@
       <object class="GtkHeaderBar" id="header">
         <child type="title">
           <object class="GtkStackSwitcher" id="tabs">
-            <child>
-              <object class="GtkButton" id="OpenButton">
-                <property name="label">+</property>
-                <signal name="clicked" handler="openNew"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="CloseButton">
-                <property name="label">-</property>
-                <signal name="clicked" handler="closeActive"/>
-              </object>
-            </child>
             <property name="stack">stack</property>
           </object>
         </child>
@@ -29,6 +17,18 @@
 	    <signal name="clicked" handler="solveEntry"/>
 	  </object>
 	</child>
+  <child>
+    <object class="GtkButton" id="OpenButton">
+      <property name="label">Open</property>
+      <signal name="clicked" handler="openNew"/>
+    </object>
+  </child>
+  <child>
+    <object class="GtkButton" id="CloseButton">
+      <property name="label">Close</property>
+      <signal name="clicked" handler="closeActive"/>
+    </object>
+  </child>
 	<child>
 	  <object class="GtkButton" id="SaveButton">
 	    <property name="label">save As</property>

@@ -69,7 +69,8 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
     if (!col_value[i]){
       reducedCost = 0.0;
     } else {
-      if (Highs_getReducedColumn(mod, i, col_reduced, &num_nz, col_index) == kHighsStatusError)
+      HighsInt colNz;
+      if (Highs_getReducedColumn(mod, i, col_reduced, &colNz, col_index) == kHighsStatusError)
         break;
       reducedCost = col_reduced[0];
     }
@@ -88,6 +89,9 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
       g_clear_error(&error);
   }
 
+  /*
+   * slack/surplus = abs(diff of row)
+   */
   for (uint8_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
