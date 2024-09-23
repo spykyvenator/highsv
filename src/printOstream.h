@@ -33,15 +33,16 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
   char text[kHighsMaximumStringLength];
   const char RowText[] = "\n\nRow\t\t Slack or Surplus\tDual Price\n";
   double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow],
-        col_reduced[numRow];
+        col_reduced[numRow], reducedCost;
   HighsInt col_index[numRow];
+  const HighsInt num_nz = Highs_getNumNz(mod);
 
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
 
   if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
           "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\nTotal nonzeros:\t\t\t%d\n\nVariable\tValue\t\tReduced Cost\n",
           objectiveVal,
-          numCol, numRow, Highs_getNumNz(mod))) {
+          numCol, numRow, num_nz)) {
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
@@ -49,11 +50,10 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
   for (uint8_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
-    HighsInt num_nz, reducedIndex;
-    if (Highs_getReducedColumn(mod, i, col_reduced, &num_nz, col_index) == kHighsStatusError)
-      break;
+    HighsInt  reducedIndex;
 
     printf("num_nz: %d\n", num_nz);
+    /*
     for (reducedIndex = 0; reducedIndex < num_nz; reducedIndex++){
       printf("col_reduced: %lf, col_index: %d\n", col_reduced[reducedIndex], col_index[reducedIndex]);
       if (col_index[reducedIndex] == i){
@@ -61,13 +61,22 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
       }
     }
     printf("reducedIndex: %d\n", reducedIndex);
+    */
 
     if (col_value[i] == 0.0 && signbit(col_value[i]))// remove negative 0's
         col_value[i] += 0.0;
 
+    if (!col_value[i]){
+      reducedCost = 0.0;
+    } else {
+      if (Highs_getReducedColumn(mod, i, col_reduced, &num_nz, col_index) == kHighsStatusError)
+        break;
+      reducedCost = col_reduced[0];
+    }
+    
     if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
             "%s\t\t%lf\t\t\t%lf\n",
-            text, col_value[i], col_reduced[reducedIndex])) {
+            text, col_value[i], reducedCost)) {
         g_printerr("Error writing to file: %s\n", error->message);
         g_clear_error(&error);
     }
