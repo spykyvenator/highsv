@@ -131,7 +131,7 @@ setBounds (void *mod, const double val, const char sign) {
       Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
       break;
   }
-  snprintf(rowName, 512, "%d", numRow);
+  snprintf(rowName, 512, "%d", numRow + 1);
   Highs_passRowName(mod, numRow, rowName);
   numNz = 0;
   numRow++;
