@@ -1,6 +1,10 @@
 #ifndef PRINTO_H
 #define PRINTO_H
+#include <highs/interfaces/highs_c_api.h>
 extern int numRow, numCol;
+
+//#define MIN(a,b) (a < b ? a : b)
+//#define ABS(a) (a < 0 ? -a : a)
 
 void
 printEmpty(const void *mod, GOutputStream* ostream){
@@ -96,9 +100,22 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
 
+    HighsInt numRow, start;
+    int rowNumNz, matrix_index[num_nz];
+    double lower, upper, matrix_value[num_nz];
+    if (Highs_getRowsByRange(mod, i, i, &numRow, &lower, &upper, 
+          &rowNumNz, &start, 
+          matrix_index, matrix_value) == kHighsStatusError)
+      break;
+    const double rowBound = MIN(ABS(lower), ABS(upper));
+    double rowVal = 0;
+    for (int j = 0; j < rowNumNz; j++)
+      rowVal += col_value[j];
+
+
     if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
             "%s\t\t%lf\t\t\t%lf\n",
-            text, 0.0, 0.0)) {
+            text, ABS(rowVal-rowBound), 0.0)) {
         g_printerr("Error writing to file: %s\n", error->message);
         g_clear_error(&error);
     }
