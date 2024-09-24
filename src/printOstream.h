@@ -1,38 +1,47 @@
 #ifndef PRINTO_H
 #define PRINTO_H
 #include <highs/interfaces/highs_c_api.h>
+#include <stdarg.h>
+
 extern int numRow, numCol;
 
 //#define MIN(a,b) (a < b ? a : b)
 //#define ABS(a) (a < 0 ? -a : a)
 
 void
-printEmpty(const void *mod, GOutputStream* ostream){
+pToF(GOutputStream *ostream, const char *str, ...)
+{
   gsize bw;
   GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Your model appears empty\n")) {
+  va_list ap;
+  va_start(ap, str);
+  if (!g_output_stream_vprintf(ostream, &bw, NULL, &error,
+        str, ap)) {
       g_printerr("Error writing to file: %s\n", error->message);
       g_clear_error(&error);
   }
+  va_end(ap);
+
+}
+
+void
+printEmpty(const void *mod, GOutputStream* ostream){
+  pToF(ostream,"Your model appears empty\n");
 }
 
 void
 printInfeasible(const void *mod, GOutputStream* ostream){
-  gsize bw;
-  GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Your model is infeasible\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
+  pToF(ostream, "Your model is infeasible\n");
 }
 
+/*
+ * TODO: clean this function up and split it into multiple funcs
+ */
 void
-printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
+printValues(const void *mod, GOutputStream *ostream)
 {
+  gsize bw;
+  GError *error = NULL;
   const double objectiveVal = Highs_getObjectiveValue(mod);
   char text[kHighsMaximumStringLength];
   const char RowText[] = "\n\nRow\t\t Slack or Surplus\tDual Price\n";
@@ -44,13 +53,8 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
   Highs_getObjectiveOffset(mod, &offset);
 
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-          "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\nTotal nonzeros:\t\t\t%d\n\nVariable\tValue\t\tReduced Cost\n",
-          objectiveVal,
-          numCol, numRow, num_nz)) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
+  pToF(ostream, "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\nTotal nonzeros:\t\t\t%d\n\nVariable\tValue\t\tReduced Cost\n", 
+      objectiveVal, numCol, numRow, num_nz);
 
   for (uint8_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
@@ -58,16 +62,6 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
     HighsInt  reducedIndex;
 
     printf("num_nz: %d\n", num_nz);
-    /*
-    for (reducedIndex = 0; reducedIndex < num_nz; reducedIndex++){
-      printf("col_reduced: %lf, col_index: %d\n", col_reduced[reducedIndex], col_index[reducedIndex]);
-      if (col_index[reducedIndex] == i){
-        break;
-      }
-    }
-    printf("reducedIndex: %d\n", reducedIndex);
-    */
-
     if (col_value[i] == 0.0 && signbit(col_value[i]))// remove negative 0's
         col_value[i] += 0.0;
 
@@ -80,26 +74,11 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
       reducedCost = col_reduced[0];
     }
     
-    if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-            "%s\t\t%lf\t\t\t%lf\n",
-            text, col_value[i], reducedCost)) {
-        g_printerr("Error writing to file: %s\n", error->message);
-        g_clear_error(&error);
-    }
+    pToF(ostream, "%s\t\t%lf\t\t\t%lf\n",text, col_value[i], reducedCost);
   }
 
-  if (!g_output_stream_write_all(ostream, RowText, 
-        sizeof(RowText) - 1, &bw, NULL, &error)) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-          "%s\t\t%lf\t\t\t%lf\n",
-          "0", objectiveVal - offset, 0.0)) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
+  pToF(ostream, RowText);
+  pToF(ostream, "%s\t\t%lf\t\t\t%lf\n", "0", objectiveVal - offset, 0.0);
 
   /*
    * slack/surplus = abs(diff of row)
@@ -123,58 +102,30 @@ printValues(const void *mod, GOutputStream *ostream, gsize bw, GError *error)
     printf("row slack: %lf- %lf\n", rowVal, rowBound);
 
 
-    if (!g_output_stream_printf(ostream, &bw, NULL, &error, 
-            "%s\t\t%lf\t\t\t%lf\n",
-            text, ABS(rowVal-rowBound), 0.0)) {
-        g_printerr("Error writing to file: %s\n", error->message);
-        g_clear_error(&error);
-    }
+    pToF(ostream, "%s\t\t%lf\t\t\t%lf\n", text,  ABS(rowVal-rowBound), 0.0);
   }
 }
 
 void
 printUnbounded(const void *mod, GOutputStream *ostream){
-  gsize bw;
-  GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Your model is unbounded\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-
-  printValues(mod, ostream, bw, error);
-
+  pToF(ostream, "Your model is unbounded\n");
+  printValues(mod, ostream);
 }
 
 void
 printError(const void *mod, GOutputStream *ostream){
-  gsize bw;
-  GError *error = NULL;
-
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Something went wrong\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
+  pToF(ostream, "Something went wrong\n");
 }
 
 void
 printOptimal(const void *mod, GOutputStream *ostream){
-  gsize bw;
-  GError *error = NULL;
-  if (!g_output_stream_printf(ostream, &bw, NULL, &error,
-        "Global optimal solution found:\n")) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-  printValues(mod, ostream, bw, error);
+  pToF(ostream, "Global optimal solution found:\n");
+  printValues(mod, ostream);
 }
 
 void
 printSolToFile(const void *mod, GOutputStream* ostream) {
   HighsInt status = Highs_getModelStatus(mod);
-
 
   if (status == kHighsModelStatusNotset
     || status == kHighsModelStatusLoadError
@@ -189,14 +140,13 @@ printSolToFile(const void *mod, GOutputStream* ostream) {
     || status == kHighsModelStatusInterrupt)
     printError(mod, ostream);
   else if (status == kHighsModelStatusModelEmpty)
-      printEmpty(mod, ostream);
+    printEmpty(mod, ostream);
   else if (status == kHighsModelStatusOptimal)
-      printOptimal(mod, ostream);
+    printOptimal(mod, ostream);
   else if (status == kHighsModelStatusInfeasible 
       || status == kHighsModelStatusUnboundedOrInfeasible)
     printInfeasible(mod, ostream);
   else if (status == kHighsModelStatusUnbounded)
     printUnbounded(mod, ostream);
 }
-
 #endif
