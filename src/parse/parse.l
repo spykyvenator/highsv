@@ -8,7 +8,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void setBounds(void *mod, const double val, char sign);
 
 	int rowIndex[200], numNz = 0, numCol = 0, numRow = 0;
-	double lastVal, sign = 1, rowVal[200];
+	double lastVal, sign = 1, rowVal[20];
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
 	char lastVarName[10];
