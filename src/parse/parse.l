@@ -191,6 +191,7 @@ parseString(const char *s, GOutputStream* ostream)
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
   printModel(model);
+  //pRange(model, ostream);
   Highs_presolve(model);
   Highs_run(model);
   printSol(model);

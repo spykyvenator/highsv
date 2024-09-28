@@ -24,7 +24,36 @@ pToF(GOutputStream *ostr, const char *str, ...)
 }
 
 static void
-printEmpty(const void *mod, GOutputStream* ostr){
+pReduced(const void *mod, GOutputStream *ostr)
+{
+    double row_vect[numRow], col_vect[numCol], costs[numCol], l[numCol], u[numCol], m_val[numCol];
+    HighsInt r_numNz, r_index[numRow], c_numNz, c_index[numCol], m_start, m_ind[numCol], numCol;
+
+    pToF(ostr, "\n\nreducedrow:%d\n", numRow);
+    for (int i = 0; i < numRow; i++){
+        Highs_getReducedRow(mod, i, row_vect, &r_numNz, r_index);
+        for (int j = 0; j < r_numNz; j++)
+            pToF(ostr, "r_vect: %lf, r_index: %d\n", row_vect[j], r_index[j]);
+    }
+
+    /*
+    pToF(ostr, "\n\nreducedcol:\n");
+    for (int i = 0; i < numCol; i++){
+        Highs_getReducedColumn(mod, i, col_vect, &c_numNz, c_index);
+        for (int j = 0; j < c_numNz; j++)
+            pToF(ostr, "c_vect: %lf, c_index: %d\n", col_vect[j], c_index[j]);
+    }  */
+
+    pToF(ostr, "\n\ncolR: %d\n", numCol);
+    for (int i = 0; i < numCol; i++){
+        Highs_getColsByRange(mod, i, i, &numCol, costs, l, u, &c_numNz, &m_start, m_ind, m_val);
+        for (uint8_t j = 0; j < c_numNz; j++)
+            pToF(ostr, "col: %d, cost: %lf m_vect: %lf, m_index: %d\n", i, costs[j], m_val[j], m_ind[j]);
+    }
+}
+
+static void
+pEmpty(const void *mod, GOutputStream* ostr){
   pToF(ostr,"Your model appears empty\n");
 }
 
@@ -37,20 +66,21 @@ static double
 getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const double *r_value)
 {
   int rowNumNz, matrix_index[num_nz];
-  HighsInt numRow, start;
+  HighsInt nRow, start;
   double lower, upper, matrix_value[num_nz];
-  Highs_getRowsByRange(mod, row, row, &numRow, &lower, &upper, 
+  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
         &rowNumNz, &start, 
         matrix_index, matrix_value);
   const double rowBound = MIN(ABS(lower), ABS(upper));
 #ifdef DEBUG
-  printf("row slack: %lf- %lf\n", rowVal, rowBound);
+  printf("row slack: %lf- %lf\n", r_value[row], rowBound);
 #endif
   return ABS(r_value[row]-rowBound);
 
 }
 
-pRange(const void *mod, GOutputStream *ostr)
+void
+pRange(void *mod, GOutputStream *ostr)
 {
   double ccUpperVal, ccUpperObj, 
          ccLowerVal, ccLowerObj,
@@ -72,6 +102,7 @@ pRange(const void *mod, GOutputStream *ostr)
       &cBndLowerVal, &cBndLowerObj, &cBndLowerInVar, &cBndLowerOutVar,
       &rBndUpperVal, &rBndUpperObj, &rBndUpperInVar, &rBndUpperOutVar,
       &rBndLowerVal, &rBndLowerObj, &rBndLowerInVar, &rBndLowerOutVar);
+  pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal, ccUpperObj, ccLowerVal, ccLowerObj, cBndUpperValue, cBndUpperObj, cBndLowerVal, cBndLowerObj, rBndUpperVal, rBndUpperObj, rBndLowerVal, rBndLowerObj);
 }
 
 /*
@@ -141,10 +172,11 @@ static void
 pOpt(const void *mod, GOutputStream *ostr){
   pToF(ostr, "Global optimal solution found:\n");
   pVal(mod, ostr);
+  pReduced(mod, ostr);
 }
 
 static void
-printSolToFile(const void *mod, GOutputStream* ostr) {
+printSolToFile(void *mod, GOutputStream* ostr) {
   HighsInt status = Highs_getModelStatus(mod);
   pToF(ostr, "HiGHS Version: %d.%d.%d\n",
     Highs_versionMajor(), Highs_versionMinor(), Highs_versionPatch());
@@ -162,7 +194,7 @@ printSolToFile(const void *mod, GOutputStream* ostr) {
     || status == kHighsModelStatusInterrupt)
     pErr(mod, ostr);
   else if (status == kHighsModelStatusModelEmpty)
-    printEmpty(mod, ostr);
+    pEmpty(mod, ostr);
   else if (status == kHighsModelStatusOptimal)
     pOpt(mod, ostr);
   else if (status == kHighsModelStatusInfeasible 
