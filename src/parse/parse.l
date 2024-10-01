@@ -7,8 +7,9 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(void *mod, char *text, const char state);
 	static void setBounds(void *mod, const double val, char sign);
 
-	int rowIndex[200], numNz = 0, numCol = 0, numRow = 0;
-	double lastVal, sign = 1, rowVal[20];
+	int *rowIndex = NULL, numNz = 0, numCol = 0, numRow = 0;
+  size_t rowLen = 4, rowN = 0;
+	double lastVal, sign = 1, *rowVal = NULL;
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
 	char lastVarName[10];
@@ -150,6 +151,21 @@ readVar (void *mod, char *text, const char state)
 	    lastVal = sign;
 	    sign = 1;
 	}
+
+  if (index > rowLen){
+    rowLen*=2;
+    double *tmpVal = (double*) malloc(sizeof(double)*rowLen);
+    int *tmpIndex = (int*) malloc(sizeof(int)*rowLen);
+    memcpy(tmpVal, rowVal, rowN);
+    memcpy(tmpIndex, rowIndex, rowN);
+    // normally only called when this has a value, but extra check
+    if (rowVal)
+      free(rowVal);
+    if (rowIndex)
+      free(rowIndex);
+    rowVal = tmpVal;
+    rowIndex = tmpIndex;
+  }
 	if (state == COST) {
 		rowVal[index] += lastVal;
 		Highs_changeColCost(mod, index, rowVal[index]);
@@ -171,16 +187,30 @@ cleanModel (void *mod)
   lastVal = 0;
   sign = 1,
   numNz = 0;
+  /*
   for (int i = 0; i < 200; i++){
     rowIndex[i] = 0;
     rowVal[i] = 0;
   }
+  */
+  if (rowVal){
+    free(rowVal);
+    rowVal = NULL;
+  }
+  if (rowIndex){
+    free(rowIndex);
+    rowIndex = NULL;
+  }
+  rowN = 0;
+  rowLen = 4;
 }
 
 static void
 preModel (void *mod) 
 {
 	model = Highs_create();
+  rowVal = (double*) malloc(sizeof(double)*rowLen);
+  rowIndex = (int*) malloc(sizeof(int)*rowLen);
 }
 
 int

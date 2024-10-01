@@ -50,7 +50,8 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
 
 }
 
-pRange(const void *mod, GOutputStream *ostr)
+void
+pRange(void *mod, GOutputStream *ostr)
 {
   double ccUpperVal, ccUpperObj, 
          ccLowerVal, ccLowerObj,
