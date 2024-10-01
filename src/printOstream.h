@@ -24,14 +24,28 @@ pToF(GOutputStream *ostr, const char *str, ...)
 }
 
 static void
-printEmpty(const void *mod, GOutputStream* ostr){
+printEmpty(const void *mod, GOutputStream* ostr)
+{
   pToF(ostr,"Your model appears empty\n");
 }
 
 static void
-printInfeasible(const void *mod, GOutputStream* ostr){
+printInfeasible(const void *mod, GOutputStream* ostr)
+{
   pToF(ostr, "Your model is infeasible\n");
 }
+
+/*
+static double
+getReduced(const void *mod, const HighsInt col)
+{
+  double BCVal[numRow], cost[numCol], m_val[numRow];
+  HighsInt BCIndex[numRow], cNz;
+  int m_start, m_index[numCol];
+  Highs_getBasisInverseRow(mod, col, &cNz, BCIndex);
+  Highs_getColsByRange(mod, col, col, NULL, cost, NULL, NULL, &cNz, &m_start, m_index, m_val);
+}
+*/
 
 static double
 getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const double *r_value)
