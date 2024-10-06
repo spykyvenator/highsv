@@ -23,34 +23,29 @@ pToF(GOutputStream *ostr, const char *str, ...)
   va_end(ap);
 }
 
+/*
 static void
 pReduced(const void *mod, GOutputStream *ostr)
 {
-    double row_vect[numRow], col_vect[numCol], costs[numCol], l[numCol], u[numCol], m_val[numCol];
-    HighsInt r_numNz, r_index[numRow], c_numNz, c_index[numCol], m_start, m_ind[numCol], numCol;
+    HighsInt nCol = Highs_getNumCol(mod), nRow = Highs_getNumRow(mod);
+    double row_vect[nRow], col_vect[nCol], costs[nCol], l[nCol], u[nCol], m_val[nCol];
+    HighsInt r_numNz, r_index[nRow], c_numNz, c_index[nCol], m_start, m_ind[nCol], gotNCol;
 
-    pToF(ostr, "\n\nreducedrow:%d\n", numRow);
-    for (int i = 0; i < numRow; i++){
+    pToF(ostr, "\n\nreducedrow:%d\n", nRow);
+    for (int i = 0; i < nRow; i++){
         Highs_getReducedRow(mod, i, row_vect, &r_numNz, r_index);
         for (int j = 0; j < r_numNz; j++)
             pToF(ostr, "r_vect: %lf, r_index: %d\n", row_vect[j], r_index[j]);
     }
 
-    /*
-    pToF(ostr, "\n\nreducedcol:\n");
-    for (int i = 0; i < numCol; i++){
-        Highs_getReducedColumn(mod, i, col_vect, &c_numNz, c_index);
-        for (int j = 0; j < c_numNz; j++)
-            pToF(ostr, "c_vect: %lf, c_index: %d\n", col_vect[j], c_index[j]);
-    }  */
-
-    pToF(ostr, "\n\ncolR: %d\n", numCol);
-    for (int i = 0; i < numCol; i++){
-        Highs_getColsByRange(mod, i, i, &numCol, costs, l, u, &c_numNz, &m_start, m_ind, m_val);
+    pToF(ostr, "\n\ncolR: %d\n", nCol);
+    for (int i = 0; i < nCol; i++){
+        Highs_getColsByRange(mod, i, i, &gotNCol, costs, l, u, &c_numNz, &m_start, m_ind, m_val);
         for (uint8_t j = 0; j < c_numNz; j++)
             pToF(ostr, "col: %d, cost: %lf m_vect: %lf, m_index: %d\n", i, costs[j], m_val[j], m_ind[j]);
     }
 }
+*/
 
 static void
 pEmpty(const void *mod, GOutputStream* ostr){
@@ -185,7 +180,7 @@ static void
 pOpt(const void *mod, GOutputStream *ostr){
   pToF(ostr, "Global optimal solution found:\n");
   pVal(mod, ostr);
-  pReduced(mod, ostr);
+  //pReduced(mod, ostr);
 }
 
 static void
