@@ -23,7 +23,6 @@ pToF(GOutputStream *ostr, const char *str, ...)
   va_end(ap);
 }
 
-/*
 static void
 pReduced(const void *mod, GOutputStream *ostr)
 {
@@ -45,7 +44,6 @@ pReduced(const void *mod, GOutputStream *ostr)
             pToF(ostr, "col: %d, cost: %lf m_vect: %lf, m_index: %d\n", i, costs[j], m_val[j], m_ind[j]);
     }
 }
-*/
 
 static void
 pEmpty(const void *mod, GOutputStream* ostr){
@@ -180,7 +178,7 @@ static void
 pOpt(const void *mod, GOutputStream *ostr){
   pToF(ostr, "Global optimal solution found:\n");
   pVal(mod, ostr);
-  //pReduced(mod, ostr);
+  pReduced(mod, ostr);
 }
 
 static void
