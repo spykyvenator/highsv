@@ -110,7 +110,8 @@ findIndex(void *mod, const char *text)
 	depending on the amount of variables in the current text row
 */
 static void
-setBounds (void *mod, const double val, const char sign) {
+setBounds (void *mod, const double val, const char sign) 
+{
   char rowName[kHighsMaximumStringLength];
   printf("setting bounds with numNz = %d to %lf, sign %hhd\n", numNz, val, sign);
   for (uint8_t i = 0; i < numNz; i++){
@@ -144,7 +145,7 @@ readVar (void *mod, char *text, const char state)
 	puts("readvar:");
 	puts(text);
 	int index = findIndex(mod, text);
-	if (lastVal == 0){ // this should be ok but need to reset sign !
+	if (lastVal == 0){
 	    lastVal = sign;
 	    sign = 1;
 	}
