@@ -17,4 +17,7 @@ lps:
 	cd src/gtk && $(MAKE)
 	cp --update=older src/gtk/highsv ./lps
 
+clean:
+	cd src/gtk && $(MAKE) clean
+
 .PHONY: all options clean lps

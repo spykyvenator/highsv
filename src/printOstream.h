@@ -6,7 +6,7 @@
 #include <highs/interfaces/highs_c_api.h>
 #include <stdarg.h>
 
-extern int numRow, numCol;
+extern size_t numRow, numCol;
 
 static void
 pToF(GOutputStream *ostr, const char *str, ...)

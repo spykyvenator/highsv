@@ -7,8 +7,8 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	static void readVar(void *mod, char *text, const char state);
 	static void setBounds(void *mod, const double val, char sign);
 
-	int *rowIndex = NULL, numNz = 0, numCol = 0, numRow = 0;
-  size_t rowLen = 4, rowN = 0;
+	int *rowIndex = NULL, numNz = 0;
+  size_t rowLen = 2, numRow = 0, numCol = 0;
 	double lastVal, sign = 1, *rowVal = NULL;
 	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
@@ -120,19 +120,16 @@ setBounds (void *mod, const double val, const char sign) {
   puts("adding row\n");
   switch (sign) {
     case 1:// >=
-      //Highs_changeRowBounds(mod, rowN, val, Highs_getInfinity(mod));
       Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
       break;
     case 0:// =
-      //Highs_changeRowBounds(mod, rowN, val, val);
       Highs_addRow(mod, val, val, numNz, rowIndex, rowVal);
       break;
     case -1:// <=
-      //Highs_changeRowBounds(mod, rowN, -Highs_getInfinity(mod), val);
       Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
       break;
   }
-  snprintf(rowName, 512, "%d", numRow + 1);
+  snprintf(rowName, 512, "%ld", numRow + 1);
   Highs_passRowName(mod, numRow, rowName);
   numNz = 0;
   numRow++;
@@ -152,17 +149,14 @@ readVar (void *mod, char *text, const char state)
 	    sign = 1;
 	}
 
-  if (index > rowLen){
+  if (index >= rowLen){
     rowLen*=2;
     double *tmpVal = (double*) malloc(sizeof(double)*rowLen);
     int *tmpIndex = (int*) malloc(sizeof(int)*rowLen);
-    memcpy(tmpVal, rowVal, rowN);
-    memcpy(tmpIndex, rowIndex, rowN);
-    // normally only called when this has a value, but extra check
-    if (rowVal)
-      free(rowVal);
-    if (rowIndex)
-      free(rowIndex);
+    memcpy(tmpVal, rowVal, sizeof(double)*numCol);
+    memcpy(tmpIndex, rowIndex, sizeof(int)*numCol);
+    free(rowVal);
+    free(rowIndex);
     rowVal = tmpVal;
     rowIndex = tmpIndex;
   }
@@ -187,12 +181,6 @@ cleanModel (void *mod)
   lastVal = 0;
   sign = 1,
   numNz = 0;
-  /*
-  for (int i = 0; i < 200; i++){
-    rowIndex[i] = 0;
-    rowVal[i] = 0;
-  }
-  */
   if (rowVal){
     free(rowVal);
     rowVal = NULL;
@@ -201,8 +189,7 @@ cleanModel (void *mod)
     free(rowIndex);
     rowIndex = NULL;
   }
-  rowN = 0;
-  rowLen = 4;
+  rowLen = 2;
 }
 
 static void
