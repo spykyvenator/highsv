@@ -23,13 +23,19 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	printf("skipping comment: %s", yytext); 
 	#endif
       }
-max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) puts("changing sense to max failed"); }
-min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) puts("changing sense to min failed"); }
+max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) 
+            puts("changing sense to max failed"); 
+            }
+min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) 
+            puts("changing sense to min failed"); 
+            }
 st	{ 
 	if (state == COST) 
 		state = AVAL; 
+#ifdef DEBUG
 	else 
 		puts("error: only one st allowed"); 
+#endif
   numNz = 0;
 	if (lastVal) {
 		if (Highs_changeObjectiveOffset(model, lastVal)) puts("setting offset failed");
@@ -49,14 +55,19 @@ st	{
             setBounds(model, sign * atof(yytext), -1);
             state = AVAL;
         } else if (state == BOUNDE) {
+#ifdef DEBUG
 	    printf("found double: %s to %lf, sign %lf\n", yytext, atof(yytext), sign);
+#endif
             setBounds(model, sign * atof(yytext), 0);
             state = AVAL;
         } else if (!lastVal) {
             lastVal = sign * atof(yytext); 
-        } else {
+        } 
+#ifdef DEBUG
+        else {
             puts("don't put two floats behind each other"); 
         }
+#endif
 	sign = 1;
         }
 
@@ -70,23 +81,8 @@ st	{
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
-#include "../print.h"
+//#include "../print.h"
 #include "../printOstream.h"
-
-void
-printModel(const void* mod)
-{
-  const HighsInt numCol = Highs_getPresolvedNumCol(mod), numRow = Highs_getPresolvedNumRow(mod);
-  double offset;
-
-  const double inf = Highs_getInfinity(mod);
-
-  Highs_getObjectiveOffset(mod, &offset);
-  printf("offset: %lf\n numCol: %d, numRow: %d\n", 
-    offset,
-    numCol, numRow
-    );
-}
 
 /*
   return the column index of a variable name.
@@ -113,12 +109,13 @@ static void
 setBounds (void *mod, const double val, const char sign) 
 {
   char rowName[kHighsMaximumStringLength];
+#ifdef DEBUG
   printf("setting bounds with numNz = %d to %lf, sign %hhd\n", numNz, val, sign);
   for (uint8_t i = 0; i < numNz; i++){
     printf("setting bounds value: %o: index: %d, val: %lf \n", i, rowIndex[i], rowVal[i]);
-
   }
   puts("adding row\n");
+#endif
   switch (sign) {
     case 1:// >=
       Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
@@ -142,8 +139,10 @@ setBounds (void *mod, const double val, const char sign)
 static void
 readVar (void *mod, char *text, const char state) 
 {
+#ifdef DEBUG
 	puts("readvar:");
 	puts(text);
+#endif
 	int index = findIndex(mod, text);
 	if (lastVal == 0){
 	    lastVal = sign;
@@ -199,12 +198,13 @@ preModel (void *mod)
 	model = Highs_create();
   rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
+  Highs_setBoolOptionValue(model, "log_to_console", 0);
+  Highs_setBoolOptionValue(model, "output_flag", 0);
 }
 
 int
 parseString(const char *s, GOutputStream* ostream)
 {
-  puts(s);
   preModel(model);
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
@@ -212,10 +212,14 @@ parseString(const char *s, GOutputStream* ostream)
   const double z = 0;
   for (uint8_t i  = 0; i < numCol; i++)// make a switch for this
     Highs_changeColsBoundsByRange(model, i, i, &z, &inf);
+#ifdef DEBUG
   printModel(model);
+#endif
   Highs_presolve(model);
   Highs_run(model);
+#ifdef DEBUG
   printSol(model);
+#endif
   printSolToFile(model, ostream);
   yy_delete_buffer(buffer);
   cleanModel(model);

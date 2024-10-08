@@ -16,4 +16,22 @@ printSol(const void *mod)
   }
 }
 
+#ifdef DEBUG
+void
+printModel(const void* mod)
+{
+  const HighsInt numCol = Highs_getPresolvedNumCol(mod), numRow = Highs_getPresolvedNumRow(mod);
+  double offset;
+
+  const double inf = Highs_getInfinity(mod);
+
+  Highs_getObjectiveOffset(mod, &offset);
+  printf("offset: %lf\n numCol: %d, numRow: %d\n", 
+    offset,
+    numCol, numRow
+    );
+}
+#endif
+
+
 #endif

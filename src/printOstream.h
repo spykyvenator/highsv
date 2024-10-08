@@ -23,54 +23,6 @@ pToF(GOutputStream *ostr, const char *str, ...)
   va_end(ap);
 }
 
-void
-test(const void *mod, GOutputStream *ostr)
-{
-    HighsInt nCol = Highs_getNumCol(mod), nRow = Highs_getNumRow(mod);
-  HighsInt hasRay;
-  double pRay[nCol];
-  Highs_getDualRay(mod,&hasRay,pRay);
-  for (uint8_t i = 0; i < nCol; i++)
-  {
-    pToF(ostr, "pray: %lf,%d\n",pRay[i],hasRay);
-  }
-}
-
-/*
-static double*
-pReduced(const void *mod, GOutputStream *ostr)
-{
-    HighsInt nCol = Highs_getNumCol(mod), nRow = Highs_getNumRow(mod);
-    double col_value[nCol], row_vect[nRow], col_vect[nCol], costs, l[nCol], u[nCol], m_val[nCol];
-    HighsInt r_numNz, r_index[nRow], c_numNz, c_index[nCol], m_start, m_ind[nCol], gotNCol, gotNRow;
-    double *res = malloc(sizeof(double)*nCol);
-    Highs_getSolution(mod, col_value, NULL,NULL,NULL);
-
-    
-
-    pToF(ostr, "\n\nreducedrow:%d\n", nRow);
-
-    for (HighsInt k = 0; k < nRow; k++){
-      Highs_getBasisInverseRow(mod, k, row_vect, &gotNRow, r_index);
-      for (uint8_t j = 0; j < gotNRow; j++){
-        pToF(ostr, "r_vect: %lf, r_index: %d\n", row_vect[j], r_index[j]);
-      }
-    }
-    pToF(ostr, "\n\ncolR: %d\n", nCol);
-    for (int i = 0; i < nCol; i++){
-
-        Highs_getColsByRange(mod, i, i, &gotNCol, &costs, l, u, &c_numNz, &m_start, m_ind, m_val);
-        double sol_val[nRow];
-        HighsInt solNz, sol_index[nRow];
-        double tRow[] = {12.0, -1.0, 2.0, 1.0, 0.0, 0.0};
-        Highs_getBasisSolve(mod,tRow,sol_val,&solNz,sol_index);// ->convert m_val to actual array with correct indices
-        for (uint8_t j = 0; j < c_numNz; j++)
-            pToF(ostr, "col: %d, cost: %lf m_vect: %lf, m_index: %d,sol_val %lf,sol_index %lf\n", i, costs, m_val[j], m_ind[j],sol_val[j],sol_index[j]);
-    }
-    return res;
-}
-*/
-
 static void
 pEmpty(const void *mod, GOutputStream* ostr){
   pToF(ostr,"Your model appears empty\n");
@@ -152,14 +104,14 @@ pVal(const void *mod, GOutputStream *ostr)
       break;
     HighsInt reducedIndex;
 
+#ifdef DEBUG
     printf("num_nz: %d col_dual %lf\n", num_nz, col_dual[i]);
+#endif
     if (col_value[i] == 0.0 && signbit(col_value[i]))// remove negative 0's
         col_value[i] += 0.0;
+    if (col_dual[i] == 0.0 && signbit(col_dual[i]))
+        col_dual[i] += 0.0;
 
-    if (!col_value[i]){
-      reducedCost = 0.0;
-    } else {
-    }
     pToF(ostr, "%s\t\t%lf\t\t\t%lf\n",text, col_value[i], col_dual[i]);
   }
 
@@ -172,7 +124,13 @@ pVal(const void *mod, GOutputStream *ostr)
   for (uint8_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
+#ifdef DEBUG
     printf("row_dual %lf,row_value %lf\n", row_dual[i], row_value[i]);
+#endif
+    if (row_value[i] == 0.0 && signbit(row_value[i]))
+        row_value[i] += 0.0;
+    if (row_dual[i] == 0.0 && signbit(row_dual[i]))
+        row_dual[i] += 0.0;
     pToF(ostr, "%s\t\t%lf\t\t\t%lf\n", text,  getSlack(mod, i, num_nz, row_value), row_dual[i]);
   }
 }
@@ -195,12 +153,10 @@ pOpt(const void *mod, GOutputStream *ostr){
 }
 
 static void
-printSolToFile(void *mod, GOutputStream* ostr) {
-  test(mod, ostr);
-  Highs_writeSolutionPretty(mod,"/tmp/sol");
+printSolToFile(const void *mod, GOutputStream* ostr) {
   HighsInt status = Highs_getModelStatus(mod);
   double time = Highs_getRunTime(mod);
-  pToF(ostr, "HiGHS Version: %d.%d.%d\nTime: %lf\n",
+  pToF(ostr, "HiGHS Version: %d.%d.%d\nTime: %lfs\n",
     Highs_versionMajor(), Highs_versionMinor(), Highs_versionPatch(), time);
 
   if (status == kHighsModelStatusNotset

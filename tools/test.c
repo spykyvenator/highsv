@@ -8,10 +8,12 @@ main(void){
 
   model = Highs_create();
   HighsInt i =  Highs_getNumOptions(model);
+HighsInt type;
   printf("numOptiosn: %d",i);
   for (HighsInt j = 0; j < i; j++){
     Highs_getOptionName (model, j, &text);
-    puts(text);
+    Highs_getOptionType(model, text, &type);
+    printf("option: %d: %s type: %d \n",j,text, type);
   }
 Highs_destroy(model);
 }
