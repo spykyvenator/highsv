@@ -208,8 +208,11 @@ parseString(const char *s, GOutputStream* ostream)
   preModel(model);
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
+  const double inf = Highs_getInfinity(model);
+  const double z = 0;
+  for (uint8_t i  = 0; i < numCol; i++)// make a switch for this
+    Highs_changeColsBoundsByRange(model, i, i, &z, &inf);
   printModel(model);
-  //pRange(model, ostream);
   Highs_presolve(model);
   Highs_run(model);
   printSol(model);

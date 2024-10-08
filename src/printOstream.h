@@ -36,6 +36,7 @@ test(const void *mod, GOutputStream *ostr)
   }
 }
 
+/*
 static double*
 pReduced(const void *mod, GOutputStream *ostr)
 {
@@ -48,13 +49,6 @@ pReduced(const void *mod, GOutputStream *ostr)
     
 
     pToF(ostr, "\n\nreducedrow:%d\n", nRow);
-    /*
-    for (int i = 0; i < nRow; i++){
-        Highs_getReducedRow(mod, i, row_vect, &r_numNz, r_index);
-        for (int j = 0; j < r_numNz; j++)
-            pToF(ostr, "r_vect: %lf, r_index: %d\n", row_vect[j], r_index[j]);
-    }
-    */
 
     for (HighsInt k = 0; k < nRow; k++){
       Highs_getBasisInverseRow(mod, k, row_vect, &gotNRow, r_index);
@@ -75,6 +69,7 @@ pReduced(const void *mod, GOutputStream *ostr)
     }
     return res;
 }
+*/
 
 static void
 pEmpty(const void *mod, GOutputStream* ostr){
@@ -86,18 +81,6 @@ printInfeasible(const void *mod, GOutputStream* ostr)
 {
   pToF(ostr, "Your model is infeasible\n");
 }
-
-/*
-static double
-getReduced(const void *mod, const HighsInt col)
-{
-  double BCVal[numRow], cost[numCol], m_val[numRow];
-  HighsInt BCIndex[numRow], cNz;
-  int m_start, m_index[numCol];
-  Highs_getBasisInverseRow(mod, col, &cNz, BCIndex);
-  Highs_getColsByRange(mod, col, col, NULL, cost, NULL, NULL, &cNz, &m_start, m_index, m_val);
-}
-*/
 
 static double
 getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const double *r_value)
@@ -160,9 +143,6 @@ pVal(const void *mod, GOutputStream *ostr)
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
   Highs_getObjectiveOffset(mod, &offset);
 
-  //reduc = pReduced(mod, ostr);
-  //free(reduc);
-
   pToF(ostr, "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\nTotal nonzeros:\t\t\t%d\n\nVariable\tValue\t\tReduced Cost\n", 
        
       objectiveVal, numCol, numRow, num_nz);
@@ -212,7 +192,6 @@ static void
 pOpt(const void *mod, GOutputStream *ostr){
   pToF(ostr, "Global optimal solution found:\n");
   pVal(mod, ostr);
-  pReduced(mod, ostr);
 }
 
 static void
