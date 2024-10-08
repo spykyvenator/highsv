@@ -54,27 +54,28 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
 void
 pRange(void *mod, GOutputStream *ostr)
 {
-  double ccUpperVal, ccUpperObj, 
-         ccLowerVal, ccLowerObj,
-         cBndUpperValue, cBndUpperObj,
-         cBndLowerVal, cBndLowerObj,
-         rBndUpperVal, rBndUpperObj,
-         rBndLowerVal, rBndLowerObj;
+  double ccUpperVal[numCol], ccUpperObj[numCol], 
+         ccLowerVal[numCol], ccLowerObj[numCol],
+         cBndUpperValue[numCol], cBndUpperObj[numCol],
+         cBndLowerVal[numCol], cBndLowerObj[numCol],
+         rBndUpperVal[numRow], rBndUpperObj[numRow],
+         rBndLowerVal[numRow], rBndLowerObj[numRow];
 
-  HighsInt ccUpperInVar, ccUpperOutVar,
-         ccLowerInVar, ccLowerOutVar,
-         cBndUpInVar, cBndUpOutVar,
-         cBndLowerInVar, cBndLowerOutVar,
-         rBndUpperInVar, rBndUpperOutVar,
-         rBndLowerInVar, rBndLowerOutVar;
+  HighsInt ccUpperInVar[numCol], ccUpperOutVar[numCol],
+         ccLowerInVar[numCol], ccLowerOutVar[numCol],
+         cBndUpInVar[numCol], cBndUpOutVar[numCol],
+         cBndLowerInVar[numCol], cBndLowerOutVar[numCol],
+         rBndUpperInVar[numRow], rBndUpperOutVar[numRow],
+         rBndLowerInVar[numRow], rBndLowerOutVar[numRow];
 
-  Highs_getRanging(mod, &ccUpperVal, &ccUpperObj, &ccUpperInVar, &ccUpperOutVar,
-      &ccLowerVal, &ccLowerObj, &ccLowerInVar, &ccLowerOutVar,
-      &cBndUpperValue, &cBndUpperObj, &cBndUpInVar, &cBndUpOutVar,
-      &cBndLowerVal, &cBndLowerObj, &cBndLowerInVar, &cBndLowerOutVar,
-      &rBndUpperVal, &rBndUpperObj, &rBndUpperInVar, &rBndUpperOutVar,
-      &rBndLowerVal, &rBndLowerObj, &rBndLowerInVar, &rBndLowerOutVar);
-  pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal, ccUpperObj, ccLowerVal, ccLowerObj, cBndUpperValue, cBndUpperObj, cBndLowerVal, cBndLowerObj, rBndUpperVal, rBndUpperObj, rBndLowerVal, rBndLowerObj);
+  Highs_getRanging(mod, ccUpperVal, ccUpperObj, ccUpperInVar, ccUpperOutVar,
+      ccLowerVal, ccLowerObj, ccLowerInVar, ccLowerOutVar,
+      cBndUpperValue, cBndUpperObj, cBndUpInVar, cBndUpOutVar,
+      cBndLowerVal, cBndLowerObj, cBndLowerInVar, cBndLowerOutVar,
+      rBndUpperVal, rBndUpperObj, rBndUpperInVar, rBndUpperOutVar,
+      rBndLowerVal, rBndLowerObj, rBndLowerInVar, rBndLowerOutVar);
+  for (uint8_t i = 0; i < numCol; i++)
+    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperValue[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
 }
 
 /*
@@ -153,7 +154,9 @@ pOpt(const void *mod, GOutputStream *ostr){
 }
 
 static void
-printSolToFile(const void *mod, GOutputStream* ostr) {
+printSolToFile(void *mod, GOutputStream* ostr) {
+  pRange(mod, ostr);
+  return;
   HighsInt status = Highs_getModelStatus(mod);
   double time = Highs_getRunTime(mod);
   pToF(ostr, "HiGHS Version: %d.%d.%d\nTime: %lfs\n",
