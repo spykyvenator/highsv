@@ -2,6 +2,7 @@ FLOAT [0-9]*[\.,]?[0-9]*
 
 %{
 	#include "interfaces/highs_c_api.h"
+  #include "../sol.h"
 
 	extern int yylex(void);
 	static void readVar(void *mod, char *text, const char state);
@@ -10,7 +11,6 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	int *rowIndex = NULL, numNz = 0;
   size_t rowLen = 2, numRow = 0, numCol = 0;
 	double lastVal, sign = 1, *rowVal = NULL;
-	enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 	char state = COST;
 	char lastVarName[10];
 	void *model;
@@ -80,9 +80,7 @@ st	{
 
 #include <stdlib.h>
 #include <string.h>
-#include <gtk/gtk.h>
 //#include "../print.h"
-#include "../printOstream.h"
 
 /*
   return the column index of a variable name.
@@ -169,59 +167,4 @@ readVar (void *mod, char *text, const char state)
 	}
 	lastVal = 0;
 	strcpy(lastVarName, text);
-}
-
-static void
-cleanModel (void *mod)
-{
-  Highs_destroy(mod);
-  numCol = 0;
-  numRow = 0;
-  state = COST;
-  lastVal = 0;
-  sign = 1,
-  numNz = 0;
-  if (rowVal){
-    free(rowVal);
-    rowVal = NULL;
-  }
-  if (rowIndex){
-    free(rowIndex);
-    rowIndex = NULL;
-  }
-  rowLen = 2;
-}
-
-static void
-preModel (void *mod) 
-{
-	model = Highs_create();
-  rowVal = (double*) malloc(sizeof(double)*rowLen);
-  rowIndex = (int*) malloc(sizeof(int)*rowLen);
-  Highs_setBoolOptionValue(model, "log_to_console", 0);
-  Highs_setBoolOptionValue(model, "output_flag", 0);
-}
-
-int
-parseString(const char *s, GOutputStream* ostream)
-{
-  preModel(model);
-  YY_BUFFER_STATE buffer = yy_scan_string(s);
-  yylex();
-  const double inf = Highs_getInfinity(model);
-  const double z = 0;
-  for (uint8_t i  = 0; i < numCol; i++)// make a switch for this
-    Highs_changeColsBoundsByRange(model, i, i, &z, &inf);
-#ifdef DEBUG
-  printModel(model);
-#endif
-  Highs_presolve(model);
-  Highs_run(model);
-#ifdef DEBUG
-  printSol(model);
-#endif
-  printSolToFile(model, ostream);
-  yy_delete_buffer(buffer);
-  cleanModel(model);
-  return 0;
 }

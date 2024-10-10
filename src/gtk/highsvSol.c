@@ -20,7 +20,7 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
     gtk_text_buffer_get_end_iter(buffer, &endI);
 
     content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
-    printf("content: %s\n", content);
+    g_free(content);
 }
 
 void

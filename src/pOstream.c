@@ -1,10 +1,6 @@
-/*
- * range printing with Highs_getRanging
- */
-#ifndef PRINTO_H
-#define PRINTO_H
 #include <highs/interfaces/highs_c_api.h>
 #include <stdarg.h>
+#include <gtk/gtk.h>
 
 extern size_t numRow, numCol;
 
@@ -153,7 +149,7 @@ pOpt(const void *mod, GOutputStream *ostr){
   pVal(mod, ostr);
 }
 
-static void
+void
 printSolToFile(void *mod, GOutputStream* ostr) {
   HighsInt status = Highs_getModelStatus(mod);
   double time = Highs_getRunTime(mod);
@@ -182,4 +178,4 @@ printSolToFile(void *mod, GOutputStream* ostr) {
   else if (status == kHighsModelStatusUnbounded)
     pUnbound(mod, ostr);
 }
-#endif
+

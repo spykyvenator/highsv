@@ -2,9 +2,9 @@
 #define yyHEADER_H 1
 #define yyIN_HEADER 1
 
-#line 5 "./parse.h"
+#line 5 "../parse/parse.h"
 
-#line 7 "./parse.h"
+#line 7 "../parse/parse.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -482,9 +482,9 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 65 "./parse.l"
+#line 79 "../parse/parse.l"
 
 
-#line 488 "./parse.h"
+#line 488 "../parse/parse.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */
