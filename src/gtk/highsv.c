@@ -22,7 +22,9 @@ static GActionEntry app_entries[] =
   { "quit", quit_activated, NULL, NULL, NULL },
   { "open", open_tab, NULL, NULL, NULL },
   { "close", close_tab, NULL, NULL, NULL },
-  { "save", save_tab, NULL, NULL, NULL }
+  { "save", save_tab, NULL, NULL, NULL },
+  { "solve", solve_tab, NULL, NULL, NULL },
+  { "range", range_tab, NULL, NULL, NULL }
 };
 
 static void
@@ -32,6 +34,8 @@ highsv_app_startup(GApplication *app)
   const char *open_accels[2] = { "<ctrl>o", NULL };
   const char *close_accels[2] = { "<ctrl>w", NULL };
   const char *save_accels[2] = { "<ctrl>s", NULL };
+  const char *solve_accels[3] = { "<ctrl>r", "<ctrl>Return", NULL };
+  const char *range_accels[2] = { "<ctrl>e", NULL };
 
   G_APPLICATION_CLASS(highsv_app_parent_class)->startup (app);
 
@@ -40,6 +44,8 @@ highsv_app_startup(GApplication *app)
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.open", open_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.close", close_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.save", save_accels); 
+  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.solve", solve_accels); 
+  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.range", range_accels); 
 }
 
 static void

@@ -1,7 +1,6 @@
 #include "highsv.h"
 #include "highsvWin.h"
 #include "highsvFile.h"
-#include "../parse/parse.h"
 #include "../sol.h"
 
 void

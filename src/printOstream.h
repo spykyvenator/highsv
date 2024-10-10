@@ -155,8 +155,6 @@ pOpt(const void *mod, GOutputStream *ostr){
 
 static void
 printSolToFile(void *mod, GOutputStream* ostr) {
-  pRange(mod, ostr);
-  return;
   HighsInt status = Highs_getModelStatus(mod);
   double time = Highs_getRunTime(mod);
   pToF(ostr, "HiGHS Version: %d.%d.%d\nTime: %lfs\n",

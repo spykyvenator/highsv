@@ -1,5 +1,6 @@
 #include "highsvWin.h"
 #include "highsvFile.h"
+#include "highsvSol.h"
 
 
 void
@@ -27,5 +28,19 @@ save_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   saveActive(NULL, win);
+}
+
+void
+solve_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+  solveEntry(NULL, win);
+}
+
+void
+range_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+  rangeAnalysis(NULL, win);
 }
 
