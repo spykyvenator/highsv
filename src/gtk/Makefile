@@ -42,4 +42,3 @@ highsv: $(OBJS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
-

@@ -50,13 +50,16 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
 void
 pRange(void *mod, GOutputStream *ostr)
 {
+  char text[kHighsMaximumStringLength];
+  double cost;
+  HighsInt numResCol, numResNz, m_start, m_index[numCol];
+  double resColLower[numCol], resColUpper[numCol], resColValue[numCol];
   double ccUpperVal[numCol], ccUpperObj[numCol], 
          ccLowerVal[numCol], ccLowerObj[numCol],
-         cBndUpperValue[numCol], cBndUpperObj[numCol],
+         cBndUpperVal[numCol], cBndUpperObj[numCol],
          cBndLowerVal[numCol], cBndLowerObj[numCol],
          rBndUpperVal[numRow], rBndUpperObj[numRow],
          rBndLowerVal[numRow], rBndLowerObj[numRow];
-
   HighsInt ccUpperInVar[numCol], ccUpperOutVar[numCol],
          ccLowerInVar[numCol], ccLowerOutVar[numCol],
          cBndUpInVar[numCol], cBndUpOutVar[numCol],
@@ -66,12 +69,30 @@ pRange(void *mod, GOutputStream *ostr)
 
   Highs_getRanging(mod, ccUpperVal, ccUpperObj, ccUpperInVar, ccUpperOutVar,
       ccLowerVal, ccLowerObj, ccLowerInVar, ccLowerOutVar,
-      cBndUpperValue, cBndUpperObj, cBndUpInVar, cBndUpOutVar,
+      cBndUpperVal, cBndUpperObj, cBndUpInVar, cBndUpOutVar,
       cBndLowerVal, cBndLowerObj, cBndLowerInVar, cBndLowerOutVar,
       rBndUpperVal, rBndUpperObj, rBndUpperInVar, rBndUpperOutVar,
       rBndLowerVal, rBndLowerObj, rBndLowerInVar, rBndLowerOutVar);
-  for (uint8_t i = 0; i < numCol; i++)
-    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperValue[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
+
+  pToF(ostr, "\n\t\tCurrent\t\tAllowable\t\tAllowable\nVariable\tCoefficient\tIncrease\t\tDecrease\n");
+  for (size_t i = 0; i < numCol; i++){
+    if (Highs_getColName(mod, i, text) == kHighsStatusError)
+      break;
+    Highs_getColsByRange(mod, (HighsInt) i, (HighsInt) i, &numResCol, &cost, resColLower, resColUpper, &numResNz, &m_start, m_index, resColValue);
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, cost, cost - ccUpperVal[i], cost - ccLowerVal[i]);
+  }
+  pToF(ostr, "\n\t\tCurrent\t\tAllowable\t\tAllowable\nRow\t\tRHS\t\tIncrease\t\tDecrease\n");
+  for (size_t i = 0; i < numRow; i++){
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", "", 0.0, rBndUpperVal[i], rBndLowerVal[i]);
+    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
+  }
+}
+
+static double
+mkPos(double val){
+    if (val == 0.0 && signbit(val))// remove negative 0's
+        val += 0.0;
+    return val;
 }
 
 /*
@@ -104,12 +125,8 @@ pVal(const void *mod, GOutputStream *ostr)
 #ifdef DEBUG
     printf("num_nz: %d col_dual %lf\n", num_nz, col_dual[i]);
 #endif
-    if (col_value[i] == 0.0 && signbit(col_value[i]))// remove negative 0's
-        col_value[i] += 0.0;
-    if (col_dual[i] == 0.0 && signbit(col_dual[i]))
-        col_dual[i] += 0.0;
 
-    pToF(ostr, "%s\t\t%lf\t\t\t%lf\n",text, col_value[i], col_dual[i]);
+    pToF(ostr, "%s\t\t%lf\t\t\t%lf\n", text, mkPos(col_value[i]), mkPos(col_dual[i]));
   }
 
   pToF(ostr, "\n\nRow\t\t Slack or Surplus\tDual Price\n%s\t\t%lf\t\t\t%lf\n", 
@@ -118,7 +135,7 @@ pVal(const void *mod, GOutputStream *ostr)
   /*
    * slack/surplus = abs(diff of row)
    */
-  for (uint8_t i = 0; i < numRow; i++){
+  for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
 #ifdef DEBUG
@@ -144,9 +161,10 @@ pErr(const void *mod, GOutputStream *ostr){
 }
 
 static void
-pOpt(const void *mod, GOutputStream *ostr){
+pOpt(void *mod, GOutputStream *ostr){
   pToF(ostr, "Global optimal solution found:\n");
   pVal(mod, ostr);
+  pRange(mod, ostr);
 }
 
 void
