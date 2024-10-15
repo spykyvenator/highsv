@@ -67,7 +67,7 @@ pRange(void *mod, GOutputStream *ostr)
          rBndUpperInVar[numRow], rBndUpperOutVar[numRow],
          rBndLowerInVar[numRow], rBndLowerOutVar[numRow];
 
-  Highs_getRanging(mod, ccUpperVal, ccUpperObj, ccUpperInVar, ccUpperOutVar,
+  Highs_getRanging(mod, ccUpperVal, ccUpperObj, ccUpperInVar, ccUpperOutVar,// most of these prob can be NULL
       ccLowerVal, ccLowerObj, ccLowerInVar, ccLowerOutVar,
       cBndUpperVal, cBndUpperObj, cBndUpInVar, cBndUpOutVar,
       cBndLowerVal, cBndLowerObj, cBndLowerInVar, cBndLowerOutVar,
@@ -79,11 +79,13 @@ pRange(void *mod, GOutputStream *ostr)
     if (Highs_getColName(mod, i, text) == kHighsStatusError)
       break;
     Highs_getColsByRange(mod, (HighsInt) i, (HighsInt) i, &numResCol, &cost, resColLower, resColUpper, &numResNz, &m_start, m_index, resColValue);
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, cost, cost - ccUpperVal[i], cost - ccLowerVal[i]);
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, cost, ABS(cost - ccUpperVal[i]), ABS(cost - ccLowerVal[i]));
   }
   pToF(ostr, "\n\t\tCurrent\t\tAllowable\t\tAllowable\nRow\t\tRHS\t\tIncrease\t\tDecrease\n");
   for (size_t i = 0; i < numRow; i++){
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", "", 0.0, rBndUpperVal[i], rBndLowerVal[i]);
+    if (Highs_getRowName(mod, i, text) == kHighsStatusError)
+      break;
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, 0.0, rBndUpperVal[i], rBndLowerVal[i]);
     pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
   }
 }
