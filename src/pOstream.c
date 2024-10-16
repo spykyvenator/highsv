@@ -47,7 +47,31 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
 
 }
 
-void
+static double
+getRowConstraint(const void *mod, const HighsInt row)
+{
+  HighsInt nRow, nz, m_start, m_index[numCol];
+  double lower, upper, m_value[numCol];
+  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, &nz, &m_start, m_index, m_value);
+  return ABS(lower) < ABS(upper) ? lower : upper;
+}
+
+static double*
+getRowIntervals(const void *mod)
+{
+  HighsInt c_index[numRow], nz;
+  double c_vect[numRow][numCol], rc[numRow];
+  for (size_t i = 0; i < numRow; i++){
+    rc[i] = getRowConstraint(mod, (HighsInt) i);
+    Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
+  }
+  for (size_t i = 0; i < numCol; i++){
+
+  }
+
+}
+
+static void
 pRange(void *mod, GOutputStream *ostr)
 {
   char text[kHighsMaximumStringLength];
@@ -85,9 +109,14 @@ pRange(void *mod, GOutputStream *ostr)
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)
       break;
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, 0.0, rBndUpperVal[i], rBndLowerVal[i]);
-    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
+    double rC = getRowConstraint(mod, (HighsInt) i);
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, rC, ABS(rC - rBndUpperVal[i]), ABS(rC - rBndLowerVal[i]));
   }
+#ifdef DEBUG
+for (size_t i = 0; i < numRow; i++) {
+    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
+}
+#endif //DEBUG
 }
 
 static double

@@ -52,14 +52,8 @@ parseString(const char *s, GOutputStream* ostream)
   const double z = 0;
   for (uint8_t i  = 0; i < numCol; i++)// make a switch for this
     Highs_changeColsBoundsByRange(model, i, i, &z, &inf);
-#ifdef DEBUG
-  printModel(model);
-#endif
   Highs_presolve(model);
   Highs_run(model);
-#ifdef DEBUG
-  printSol(model);
-#endif
   printSolToFile(model, ostream);
   yy_delete_buffer(buffer);
   cleanModel(model);

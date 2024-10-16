@@ -1,6 +1,6 @@
 CC ?= gcc
 PKGCONFIG = $(shell which pkg-config)
-CFLAGS = -Wall -Wextra -g $(shell $(PKGCONFIG) --cflags gtk4) $(shell $(PKGCONFIG) --cflags highs)
+CFLAGS = -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) $(shell $(PKGCONFIG) --cflags highs)
 LIBS = $(shell $(PKGCONFIG) --libs gtk4) $(shell $(PKGCONFIG) --libs highs) -lfl
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 LDFLAGS = -Wl,--allow-multiple-definition
@@ -11,9 +11,12 @@ BUILT_SRC = resources.c
 OBJS = $(BUILT_SRC:.c=.o) $(SRC:.c=.o)
 DEPENDS := $(patsubst %.c,%.d,$(SRC))
 
-.PHONY: all clean options
+.PHONY: all clean options debug
 
 all: options highsv
+
+debug: CFLAGS += -DDEBUG -g
+debug: highsv
 
 options: 
 	@echo highsv build options:

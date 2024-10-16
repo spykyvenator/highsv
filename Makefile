@@ -8,8 +8,11 @@ testFile.out:./src/parse/parse.c ./test/stringIn2.c
 lps: 
 	cd src/gtk && $(MAKE)
 	cp --update=older src/gtk/highsv ./lps
+debug:
+	cd src/gtk && $(MAKE) debug
+	cp --update=older src/gtk/highsv ./lps
 
 clean:
 	cd src/gtk && $(MAKE) clean
 
-.PHONY: all clean lps
+.PHONY: all clean lps debug
