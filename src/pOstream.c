@@ -59,16 +59,52 @@ getRowConstraint(const void *mod, const HighsInt row)
 static double*
 getRowIntervals(const void *mod)
 {
+  double inf = Highs_getInfinity(mod);
   HighsInt c_index[numRow], nz;
   double c_vect[numRow][numCol], rc[numRow];
   for (size_t i = 0; i < numRow; i++){
     rc[i] = getRowConstraint(mod, (HighsInt) i);
     Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
   }
-  for (size_t i = 0; i < numCol; i++){
 
+  for (size_t i = 0; i < numRow; i++){// this c_vect is in fact correct
+    for (size_t j = 0; j < numCol; j++)
+      printf("%lf ", c_vect[i][j]);
+    printf("%lf\n", rc[i]);
   }
 
+  double *res = malloc(sizeof(double)*numRow*3);
+
+  for (size_t i = 0; i < numRow; i++){// this is fine => There is probably a simpler way of doing this
+    double div, lower, higher;
+    double val = 0;
+    res[i*3+1] = inf;
+    res[i*3+2] = inf;
+    for (size_t j = 0; j < numCol; j++){
+      for (size_t k = 0; k < numRow; k++){
+	if (i != k){
+	  val += c_vect[j][k]*rc[k];
+#ifdef DEBUG
+	  printf("doing: %lf += %lf (%ld, %ld) * %lf\n", val, c_vect[j][k], j, k, rc[k]);
+#endif //DEBUG
+	} else{
+	  div = c_vect[j][k];
+#ifdef DEBUG
+	  printf("setting div: %lf\n", div);
+#endif //DEBUG
+	}
+      }
+      printf("%lf b%ld +%lf >=0\n", div, i, val);
+      res[i*3] = rc[i];
+      double result = ABS(ABS(val/div) - rc[i]);
+      if (signbit(div) && result < res[i*3+1])// set decrease
+	res[i*3+1] = result;
+      else if (result < res[i*3+2])//set increase
+	res[i*3+2] = result;
+      val = 0;
+    }
+  }
+  return res;
 }
 
 static void
@@ -84,6 +120,7 @@ pRange(void *mod, GOutputStream *ostr)
          cBndLowerVal[numCol], cBndLowerObj[numCol],
          rBndUpperVal[numRow], rBndUpperObj[numRow],
          rBndLowerVal[numRow], rBndLowerObj[numRow];
+  double *rowInt = getRowIntervals(mod);
   HighsInt ccUpperInVar[numCol], ccUpperOutVar[numCol],
          ccLowerInVar[numCol], ccLowerOutVar[numCol],
          cBndUpInVar[numCol], cBndUpOutVar[numCol],
@@ -109,14 +146,15 @@ pRange(void *mod, GOutputStream *ostr)
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)
       break;
-    double rC = getRowConstraint(mod, (HighsInt) i);
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, rC, ABS(rC - rBndUpperVal[i]), ABS(rC - rBndLowerVal[i]));
+    //double rC = getRowConstraint(mod, (HighsInt) i);
+    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, rowInt[i*3], rowInt[i*3+1], rowInt[i*3+2]);
   }
 #ifdef DEBUG
 for (size_t i = 0; i < numRow; i++) {
     pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
 }
 #endif //DEBUG
+  free(rowInt);
 }
 
 static double
