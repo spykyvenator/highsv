@@ -8,3 +8,8 @@ lps
 *.test
 examples/*
 src/parse/parse.c
+*.gz
+*.zip
+*.xz
+gtk4
+highs
