@@ -1,4 +1,4 @@
-#include <highs/interfaces/highs_c_api.h>
+#include "interfaces/highs_c_api.h"
 #include <stdarg.h>
 #include <gtk/gtk.h>
 

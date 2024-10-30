@@ -2,3 +2,9 @@ https://github.com/B00merang-Project/Windows-10
 https://github.com/B00merang-Project/Windows-10-Dark
 https://download.gnome.org/sources/adwaita-icon-theme/47/adwaita-icon-theme-47.0.tar.xz
 http://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.17.tar.xz
+
+pacman -S mingw-w64-ucrt-x86_64-gtk4 mingw-w64-ucrt-x86_64-gcc flex git cmake make
+git clone https://github.com/ERGO-Code/HiGHS
+git clone https://github.com/spykyvenator/highsv
+cd HiGHS; mkdir build; cd build; cmake ..; make -j16; make install/fast
+cd ../highsv/src/gtk; make -j16
