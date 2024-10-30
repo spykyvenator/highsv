@@ -13,3 +13,4 @@ src/parse/parse.c
 *.xz
 gtk4
 highs
+win/*
