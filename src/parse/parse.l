@@ -1,7 +1,7 @@
 FLOAT [0-9]*[\.,]?[0-9]*
 
 %{
-	#include "interfaces/highs_c_api.h"
+        #include "interfaces/highs_c_api.h"
   #include "../sol.h"
 
 	extern int yylex(void);
