@@ -17,24 +17,40 @@
 	    <signal name="clicked" handler="solveEntry"/>
 	  </object>
 	</child>
-  <child>
-    <object class="GtkButton" id="OpenButton">
-      <property name="label">Open</property>
-      <signal name="clicked" handler="openNew"/>
-    </object>
-  </child>
-  <child>
-    <object class="GtkButton" id="CloseButton">
-      <property name="label">Close</property>
-      <signal name="clicked" handler="closeActive"/>
-    </object>
-  </child>
+	  <child>
+	    <object class="GtkButton" id="OpenButton">
+	      <property name="label">Open</property>
+	      <signal name="clicked" handler="openNew"/>
+	    </object>
+	  </child>
+	  <child>
+	    <object class="GtkButton" id="CloseButton">
+	      <property name="label">Close</property>
+	      <signal name="clicked" handler="closeActive"/>
+	    </object>
+	  </child>
 	<child>
 	  <object class="GtkButton" id="SaveButton">
 	    <property name="label">save As</property>
 	    <signal name="clicked" handler="saveActive"/>
 	  </object>
 	</child>
+	<child>
+	<object class="GtkBox">
+		<property name="orientation">vertical</property>
+	  <child>
+	    <object class="GtkCheckButton" id="mip">
+	      <property name="label">Integer</property>
+	    </object>
+	  </child>
+	  <child>
+	    <object class="GtkCheckButton" id="pos">
+	      <property name="label">Positive Only</property>
+	      <property name="active">True</property>
+	    </object>
+	  </child>
+  </object>
+  </child>
       </object>
     </child>
     <child>

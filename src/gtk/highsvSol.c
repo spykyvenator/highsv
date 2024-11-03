@@ -23,6 +23,18 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
     g_free(content);
 }
 
+static gboolean
+getMip(HighsvAppWindow *win)
+{
+
+}
+
+static gboolean
+getPos(HighsvAppWindow *win)
+{
+
+}
+
 void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
