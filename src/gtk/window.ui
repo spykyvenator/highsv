@@ -41,12 +41,14 @@
 	  <child>
 	    <object class="GtkCheckButton" id="mip">
 	      <property name="label">Integer</property>
+	    <signal name="toggled" handler="toggleMip"/>
 	    </object>
 	  </child>
 	  <child>
 	    <object class="GtkCheckButton" id="pos">
 	      <property name="label">Positive Only</property>
 	      <property name="active">True</property>
+	    <signal name="toggled" handler="togglePos"/>
 	    </object>
 	  </child>
   </object>

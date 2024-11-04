@@ -2,6 +2,8 @@
 #include "highsvFile.h"
 #include "highsvSol.h"
 
+extern gboolean mip, pos;
+
 
 void
 quit_activated (GSimpleAction *action, GVariant *parameter, gpointer app)
@@ -44,3 +46,17 @@ range_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
   rangeAnalysis(NULL, win);
 }
 
+/*
+ * how could I set the sol button action here instead?
+ */
+void
+toggleMip(GtkCheckButton *self, gpointer app)
+{
+	mip = gtk_check_button_get_active(self);
+}
+
+void
+togglePos(GtkCheckButton *self, gpointer app)
+{
+	pos = gtk_check_button_get_active(self);
+}
