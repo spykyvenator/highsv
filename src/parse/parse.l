@@ -1,19 +1,19 @@
 FLOAT [0-9]*[\.,]?[0-9]*
 
 %{
-        #include "interfaces/highs_c_api.h"
+  #include "interfaces/highs_c_api.h"
   #include "../sol.h"
 
-	extern int yylex(void);
-	static void readVar(void *mod, char *text, const char state);
-	static void setBounds(void *mod, const double val, char sign);
+  extern int yylex(void);
+  static void readVar(void *mod, char *text, const char state);
+  static void setBounds(void *mod, const double val, char sign);
 
-	int *rowIndex = NULL, numNz = 0;
+  int *rowIndex = NULL, numNz = 0;
   size_t rowLen = 2, numRow = 0, numCol = 0;
-	double lastVal, sign = 1, *rowVal = NULL;
-	char state = COST;
-	char lastVarName[10];
-	void *model;
+  double lastVal, sign = 1, *rowVal = NULL;
+  char state = COST;
+  char lastVarName[10];
+  void *model;
 %}
 
 %%
@@ -43,7 +43,7 @@ st	{
 	    } 
 	}
 
-">"|">=" { state = BOUNDG; /* sign = 1; */ }// TODO: allow negative values
+">"|">=" { state = BOUNDG; /* sign = 1; */ }
 "<"|"<=" { state = BOUNDL; /* sign = 1; */ }
 "="|"==" { state = BOUNDE; /* sign = 1; */ }
 

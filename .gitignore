@@ -14,3 +14,4 @@ src/parse/parse.c
 gtk4
 highs
 win/*
+*.ico

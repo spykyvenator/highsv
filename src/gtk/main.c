@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
-
 #include "highsv.h"
+
+gboolean mip = 0, pos = 1;
 
 int
 main (int argc, char *argv[])

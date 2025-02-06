@@ -11,10 +11,10 @@ extern char state;
 extern char lastVarName[10];
 extern void *model;
 
-void
-cleanModel (void *mod)
+static void
+cleanModel ()
 {
-  Highs_destroy(mod);
+  Highs_destroy(model);
   numCol = 0;
   numRow = 0;
   state = COST;
@@ -32,10 +32,10 @@ cleanModel (void *mod)
   rowLen = 2;
 }
 
-void
-preModel (void *mod) 
+static void
+preModel () 
 {
-	model = Highs_create();
+  model = Highs_create();
   rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
   Highs_setBoolOptionValue(model, "log_to_console", 0);
@@ -43,15 +43,28 @@ preModel (void *mod)
 }
 
 int
-parseString(const char *s, GOutputStream* ostream)
+parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
-  preModel(model);
+  preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
   const double inf = Highs_getInfinity(model);
-  const double z = 0;
-  for (uint8_t i  = 0; i < numCol; i++)// make a switch for this
-    Highs_changeColsBoundsByRange(model, i, i, &z, &inf);
+  if (pos) {
+    double infinity[numCol];
+    double zero[numCol];
+    for (size_t i = 0; i < numCol; i++) {
+      infinity[i] = inf;
+      zero[i] = 0;
+    }
+    Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
+  }
+  if (mip) {
+    HighsInt integrality[numCol];
+    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
+    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
+    if (res)
+      return 1;
+  }
   Highs_presolve(model);
   Highs_run(model);
   printSolToFile(model, ostream);

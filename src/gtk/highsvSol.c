@@ -3,6 +3,8 @@
 #include "highsvFile.h"
 #include "../sol.h"
 
+extern gboolean mip, pos;
+
 void
 rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 {
@@ -60,7 +62,7 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
 
-    parseString(content, ostream);
+    parseString(content, ostream, mip, pos);
 
     if (!g_output_stream_close(ostream, NULL, &error)){
         g_printerr("Error closing out-stream: %s\n", error->message);

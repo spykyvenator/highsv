@@ -4,6 +4,7 @@
 #include "highsvWin.h"
 #include "highsvFile.h"
 #include "highsvSol.h"
+#include "highsvActions.h"
 //#include "../parse/parse.h"
 
 G_DEFINE_TYPE(HighsvAppWindow, highsv_app_window, GTK_TYPE_APPLICATION_WINDOW)
@@ -25,6 +26,8 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveActive);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), toggleMip);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), togglePos);
 }
 
 HighsvAppWindow *
