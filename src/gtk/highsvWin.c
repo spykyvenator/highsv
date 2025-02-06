@@ -24,6 +24,7 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), solveEntry);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), rangeAnalysis);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNewEmpty);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), toggleMip);

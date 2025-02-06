@@ -18,6 +18,12 @@
 	  </object>
 	</child>
 	  <child>
+	    <object class="GtkButton" id="NewButton">
+	      <property name="label">New</property>
+	      <signal name="clicked" handler="openNewEmpty"/>
+	    </object>
+	  </child>
+	  <child>
 	    <object class="GtkButton" id="OpenButton">
 	      <property name="label">Open</property>
 	      <signal name="clicked" handler="openNew"/>
