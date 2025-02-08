@@ -3,6 +3,9 @@
 #include "./parse/parse.h"
 #include "./pOstream.h"
 #include "sol.h"
+#ifdef DEBUG
+#include "print.h"
+#endif
 
 extern int *rowIndex, numNz;
 extern size_t rowLen, numRow, numCol;
@@ -14,7 +17,7 @@ extern void *model;
 static void
 cleanModel ()
 {
-  Highs_destroy(model);
+  Highs_clearModel(model);
   numCol = 0;
   numRow = 0;
   state = COST;
@@ -38,6 +41,10 @@ preModel ()
   model = Highs_create();
   rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
+  for (size_t i = 0; i < rowLen; i++) {// init to zero
+      rowVal[i] = 0;
+      rowIndex[i] = 0;
+  }
   Highs_setBoolOptionValue(model, "log_to_console", 0);
   Highs_setBoolOptionValue(model, "output_flag", 0);
 }
@@ -48,6 +55,9 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
+#ifdef DEBUG
+  printModel(model);
+#endif
   const double inf = Highs_getInfinity(model);
   if (pos) {
     double infinity[numCol];

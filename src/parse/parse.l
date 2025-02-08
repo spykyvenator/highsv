@@ -23,13 +23,13 @@ FLOAT [0-9]*[\.,]?[0-9]*
 	printf("skipping comment: %s", yytext); 
 	#endif
       }
-max|MAX { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) 
+(?i:max) { if (Highs_changeObjectiveSense(model, kHighsObjSenseMaximize)) 
             puts("changing sense to max failed"); 
             }
-min|MIN { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) 
+(?i:min) { if (Highs_changeObjectiveSense(model, kHighsObjSenseMinimize)) 
             puts("changing sense to min failed"); 
             }
-st	{ 
+(?i:st)|(?i:subject\ to)	{ 
 	if (state == COST) 
 		state = AVAL; 
 #ifdef DEBUG
@@ -43,8 +43,8 @@ st	{
 	    } 
 	}
 
-">"|">=" { state = BOUNDG; /* sign = 1; */ }
-"<"|"<=" { state = BOUNDL; /* sign = 1; */ }
+">"|">="|"=>" { state = BOUNDG; /* sign = 1; */ }
+"<"|"<="|"=<" { state = BOUNDL; /* sign = 1; */ }
 "="|"==" { state = BOUNDE; /* sign = 1; */ }
 
 {FLOAT} { 
@@ -74,13 +74,14 @@ st	{
 \+ { sign = 1; }
 \- { sign = -1; }
 
-[a-zA-Z][0-9a-zA-Z]* { readVar(model, yytext, state); }
+end { return 0; }
+
+[a-zA-Z][0-9a-zA-Z|,|.|/]* { readVar(model, yytext, state); }
 
 %%
 
 #include <stdlib.h>
 #include <string.h>
-//#include "../print.h"
 
 /*
   return the column index of a variable name.
@@ -91,6 +92,9 @@ findIndex(void *mod, const char *text)
 {
   HighsInt index;
   if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
+    #ifdef DEBUG
+    printf("adding %s to index\n", text);
+    #endif
     index = Highs_getNumCol(mod);
     Highs_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
     Highs_passColName(mod, index, text);
@@ -137,10 +141,6 @@ setBounds (void *mod, const double val, const char sign)
 static void
 readVar (void *mod, char *text, const char state) 
 {
-#ifdef DEBUG
-	puts("readvar:");
-	puts(text);
-#endif
 	int index = findIndex(mod, text);
 	if (lastVal == 0){
 	    lastVal = sign;
@@ -159,6 +159,9 @@ readVar (void *mod, char *text, const char state)
     rowIndex = tmpIndex;
   }
 	if (state == COST) {
+#ifdef DEBUG
+		printf("readvar: %s, %f\n", text, lastVal);
+#endif
 		rowVal[index] += lastVal;
 		Highs_changeColCost(mod, index, rowVal[index]);
 	} else if (state == AVAL) {

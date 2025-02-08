@@ -4,6 +4,7 @@
 void
 printSol(const void *mod)
 {
+  const HighsInt numCol = Highs_getPresolvedNumCol(mod), numRow = Highs_getPresolvedNumRow(mod);
   char text[kHighsMaximumStringLength];
   double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow];// I tought I had to malloc this??
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);

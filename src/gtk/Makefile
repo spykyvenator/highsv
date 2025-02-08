@@ -23,8 +23,6 @@ options:
 	@echo "CFLAGS = $(CFLAGS)"
 	@echo "LDFLAGS = $(LDFLAGS)"
 	@echo "CC = $(CC)"
-	@echo "$(OBJS)"
-
 
 resources.c: highsv.gresource.xml window.ui
 	$(GLIB_COMPILE_RESOURCES) highsv.gresource.xml --target=$@ --sourcedir=. --generate-source

@@ -226,7 +226,8 @@ pUnbound(const void *mod, GOutputStream *ostr){
 
 static void
 pErr(const void *mod, GOutputStream *ostr){
-  pToF(ostr, "Something went wrong\n");
+  HighsInt status = Highs_getModelStatus(mod);
+  pToF(ostr, "Something went wrong: %d\n", status);
 }
 
 static void
