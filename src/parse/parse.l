@@ -1,5 +1,5 @@
 %option noyywrap
-FLOAT [0-9]*[\.,]?[0-9]*
+FLOAT [0-9]*[\.]?[0-9]*
 
 %{
   #include "interfaces/highs_c_api.h"
@@ -75,9 +75,9 @@ FLOAT [0-9]*[\.,]?[0-9]*
 \+ { sign = 1; }
 \- { sign = -1; }
 
-end { return 0; }
+^(?i:end) { return 0; }
 
-[a-zA-Z][0-9a-zA-Z|,|.|/]* { readVar(model, yytext, state); }
+[a-zA-Z][0-9a-zA-Z|,|/]* { readVar(model, yytext, state); }
 
 %%
 

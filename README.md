@@ -10,10 +10,33 @@ highsv is licenced under the GPLV3 licence, a copy has been shipped with your di
 
 is in early development at the moment, any help appreciated
 
-## Example
+## Usage
+### syntax
+
+Files should start with min or max.
+This is followed by the objective function's variables separated by either + or - and can end with an optional offset.
+Variables can be separated by spaces, newlines, tabs, + and - so x1+x2 is the same as x1 + x2.
+Values should start either with a number or a . for the comma so .5 0.5 and 5 are all three correct.
+Variables must start with a letter and can contain numbers commas and slashes.
+
+Separating the objective function from the constraints is st or subject to.
+The constraints are again variables followed by a comparator (< or <= or =< or > or >= or =>) and the value compared against.
+Constraints are best separated by newlines but spaces or tabs will work just fine.
+
+The constraints are optionally followed by end which marks the last line of the model.
+Everything after this will be ignored.
+End should be written at the beginning of a line, so no tabs or spaces can be in front of it.
+
+Comments start with ! and end with newlines
+No multiplication mark can be used but values can be separated from the variable or written right next to it so both 1.1x1 and 1.1 x1 are correct.
+"min", "max" and "st" or "subject to" have ignored case, end should be written lowercase at the moment.
+
+If this sounds complicated, maybe the example below can help you get started.
+
+### Example
 
 ```
-max 0.5x1 + 2x2 ! this is a comment
+max 0.5x1 + 2x2 + 4 ! this is a comment
 st ! or subject to
 x1 < 2 !x1 should be smaller than 2
 x2 + x1 < 3
