@@ -8,6 +8,7 @@ lps
 *.test
 examples/*
 src/parse/parse.c
+src/parse/parse.h
 *.gz
 *.zip
 *.xz
