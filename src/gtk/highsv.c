@@ -3,6 +3,7 @@
 #include "highsv.h"
 #include "highsvWin.h"
 #include "highsvActions.h"
+#include "../sol.h"
 
 struct _HighsvApp
 {
@@ -31,6 +32,7 @@ static GActionEntry app_entries[] =
 static void
 highsv_app_startup(GApplication *app)
 {
+  initModel();
   const char *quit_accels[2] = { "<ctrl>q", NULL };
   const char *open_accels[2] = { "<ctrl>o", NULL };
   const char *open_new_accels[2] = { "<ctrl>n", NULL };
@@ -88,8 +90,10 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
 void 
 highsv_shutdown(GApplication *app)
 {
+    quitModel();
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
-    g_object_unref(win->stack);// ? how to remove warning
+    //g_object_unref(win->stack);// ? how to remove warning
+    gtk_window_destroy(GTK_WINDOW(win));
 }
 
 static void
@@ -98,7 +102,7 @@ highsv_app_class_init (HighsvAppClass *class)
   G_APPLICATION_CLASS(class)->activate = highsv_app_activate;
   G_APPLICATION_CLASS(class)->open = highsv_app_open;
   G_APPLICATION_CLASS(class)->startup = highsv_app_startup;
-  //G_APPLICATION_CLASS(class)->shutdown = highsv_shutdown;
+  G_APPLICATION_CLASS(class)->shutdown = highsv_shutdown;
 }
 
 HighsvApp *

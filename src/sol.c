@@ -11,19 +11,34 @@ extern int *rowIndex, numNz;
 extern size_t rowLen, numRow, numCol;
 extern double lastVal, sign, *rowVal;
 extern char state;
-extern char lastVarName[10];
+extern char lastVarName[255];
 extern void *model;
 
 static void
 cleanModel ()
 {
-  Highs_clearModel(model);
+  Highs_destroy(model);
   numCol = 0;
   numRow = 0;
   state = COST;
   lastVal = 0;
   sign = 1,
   numNz = 0;
+  //rowLen = 2;
+}
+
+int
+initModel ()
+{
+  rowVal = (double*) malloc(sizeof(double)*rowLen);
+  rowIndex = (int*) malloc(sizeof(int)*rowLen);
+  return 0;
+}
+
+int
+quitModel ()
+{
+  //Highs_destroy(model);
   if (rowVal){
     free(rowVal);
     rowVal = NULL;
@@ -32,15 +47,13 @@ cleanModel ()
     free(rowIndex);
     rowIndex = NULL;
   }
-  rowLen = 2;
+  return 0;
 }
 
 static void
 preModel () 
 {
   model = Highs_create();
-  rowVal = (double*) malloc(sizeof(double)*rowLen);
-  rowIndex = (int*) malloc(sizeof(int)*rowLen);
   for (size_t i = 0; i < rowLen; i++) {// init to zero
       rowVal[i] = 0;
       rowIndex[i] = 0;

@@ -4,4 +4,6 @@
 int parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos);
 int parseStdin();
 enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
+int initModel();
+int quitModel();
 #endif
