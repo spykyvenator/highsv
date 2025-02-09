@@ -36,10 +36,11 @@ Running the build/highsv should work (I only briefly tested this)
 ## Build from source
 
 You will need
-* [make] (https://www.gnu.org/software/make/)
-* [HiGHS] (https://highs.dev/)
-* [flex] (https://sourceforge.net/projects/flex/)
-* [gtk4] (https://www.gtk.org/)
+* [make](https://www.gnu.org/software/make/)
+* [HiGHS](https://highs.dev/)
+* [flex](https://sourceforge.net/projects/flex/)
+* [gtk4](https://www.gtk.org/)
 * C library
 
 all these except probably HiGHS are provided with your distro (Windows users can use [MSYS2](https://www.msys2.org/) and compile using clang64)
+Once these are installed simply running ```make``` should build the gtk app and copy it to ./lps
