@@ -20,3 +20,26 @@ x2 + x1 < 3! x2 and x1 together need to be smaller than 3
 x2 - x1 <= 100! x2 minus x1 needs to be smaller than 100
 x2 >= 3! x2 needs to be larger than or equal to 2
 ```
+
+## Installation
+
+### Windows:
+
+Download the [setup](https://github.com/spykyvenator/highsv/releases/download/alpha/setup_highsv.exe) from [releases](https://github.com/spykyvenator/highsv/releases)
+You might get a pop up from windows flagging the setup as malware, select "More info" and then "Run anyway"
+
+### Linux:
+
+Download the [tar archive](https://github.com/spykyvenator/highsv/releases/download/alpha/highsv.tar.gz) from [releases](https://github.com/spykyvenator/highsv/releases)
+Running the build/highsv should work (I only briefly tested this)
+
+## Build from source
+
+You will need
+* [make] (https://www.gnu.org/software/make/)
+* [HiGHS] (https://highs.dev/)
+* [flex] (https://sourceforge.net/projects/flex/)
+* [gtk4] (https://www.gtk.org/)
+* C library
+
+all these except probably HiGHS are provided with your distro (Windows users can use [MSYS2](https://www.msys2.org/) and compile using clang64)
