@@ -17,10 +17,11 @@ Files should start with min or max.
 This is followed by the objective function's variables separated by either + or - and can end with an optional offset.
 Variables can be separated by spaces, newlines, tabs, + and - so x1+x2 is the same as x1 + x2.
 Values should start either with a number or a . for the comma so .5 0.5 and 5 are all three correct.
-Variables must start with a letter and can contain numbers commas and slashes.
+Variables must start with a letter and can contain letters, numbers, commas and slashes.
+The same variable can occur twice in the objective function or in a constraint, in that case the values are added together so 2x1 + x1 is the same as 3x1.
 
 Separating the objective function from the constraints is st or subject to.
-The constraints are again variables followed by a comparator (< or <= or =< or > or >= or =>) and the value compared against.
+The constraints are again variables written like in the objective function followed by a comparator (< or <= or =< or > or >= or =>) and the value compared against.
 Constraints are best separated by newlines but spaces or tabs will work just fine.
 
 The constraints are optionally followed by end which marks the last line of the model.
@@ -36,7 +37,7 @@ If this sounds complicated, maybe the example below can help you get started.
 ### Example
 
 ```
-max 0.5x1 + 2x2 + 4 ! this is a comment
+max 0.5x1 + x2 + 1x2 + 4 ! this is a comment
 st ! or subject to
 0.5x1 < 2 ! 1/2 times x1 should be smaller than 2
 x2 + x1 < 3
