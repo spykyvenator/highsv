@@ -38,9 +38,9 @@ If this sounds complicated, maybe the example below can help you get started.
 ```
 max 0.5x1 + 2x2 + 4 ! this is a comment
 st ! or subject to
-x1 < 2 !x1 should be smaller than 2
+0.5x1 < 2 ! 1/2 times x1 should be smaller than 2
 x2 + x1 < 3
-x2 - x1 <= 100
+.123 x2 - 5 x1 <= 100
 x2 >= 3
 end
 everything after end is ignored
