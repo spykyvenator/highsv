@@ -95,3 +95,14 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   cleanModel(model);
   return 0;
 }
+/*
+ 
+        if (!(fd = fopen(av[1], "r")))
+        {
+            perror("Error: ");
+            return (-1);
+        }
+        yyset_in(fd);
+        yylex();
+        fclose(fd);
+        */
