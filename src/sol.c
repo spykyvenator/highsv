@@ -65,6 +65,7 @@ preModel ()
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
+  cleanModel(model);
   preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
   yylex();
@@ -92,7 +93,6 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   Highs_run(model);
   printSolToFile(model, ostream);
   yy_delete_buffer(buffer);
-  cleanModel(model);
   return 0;
 }
 /*
