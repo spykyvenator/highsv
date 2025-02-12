@@ -67,11 +67,13 @@ getRowIntervals(const void *mod)
     Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
   }
 
+#ifdef DEBUG
   for (size_t i = 0; i < numRow; i++){// this c_vect is in fact correct
     for (size_t j = 0; j < numCol; j++)
       printf("%lf ", c_vect[i][j]);
     printf("%lf\n", rc[i]);
   }
+#endif
 
   double *res = malloc(sizeof(double)*numRow*3);
 
@@ -94,7 +96,9 @@ getRowIntervals(const void *mod)
 #endif //DEBUG
 	}
       }
+#ifdef DEBUG
       printf("%lf b%ld +%lf >=0\n", div, i, val);
+#endif
       res[i*3] = rc[i];
       double result = ABS(ABS(val/div) - rc[i]);
       if (signbit(div) && result < res[i*3+1])// set decrease
