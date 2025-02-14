@@ -47,6 +47,15 @@ end
 everything after end is ignored
 ```
 
+### Keybinds
+
+* <ctrl> + q: quit
+* <ctrl> + o: open file
+* <ctrl> + n: open new file
+* <ctrl> + w: close open window
+* <ctrl> + s: save open window
+* <ctrl> + r or <ctrl> + Return: solve open window
+
 ## Installation
 
 ### Windows:
