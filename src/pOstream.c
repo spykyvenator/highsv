@@ -1,6 +1,8 @@
 #include "interfaces/highs_c_api.h"
 #include <stdarg.h>
 #include <gtk/gtk.h>
+#include "./tprint/tprint.h"
+#include <stdio.h>
 
 extern size_t numRow, numCol;
 
@@ -44,7 +46,6 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
   printf("row slack: %lf- %lf\n", r_value[row], rowBound);
 #endif
   return ABS(r_value[row]-rowBound);
-
 }
 
 static double
@@ -139,23 +140,54 @@ pRange(void *mod, GOutputStream *ostr)
       rBndUpperVal, rBndUpperObj, rBndUpperInVar, rBndUpperOutVar,
       rBndLowerVal, rBndLowerObj, rBndLowerInVar, rBndLowerOutVar);
 
-  pToF(ostr, "\n\t\tCurrent\t\tAllowable\t\tAllowable\nVariable\tCoefficient\tIncrease\t\tDecrease\n");
+  TPrint *tp;
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Current", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  tprint_data_add_str(tp, 0, "Variable");
+  tprint_data_add_str(tp, 1, "Coefficient");
+  tprint_data_add_str(tp, 2, "Increase");
+  tprint_data_add_str(tp, 3, "Decrease");
   for (size_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError)
       break;
     Highs_getColsByRange(mod, (HighsInt) i, (HighsInt) i, &numResCol, &cost, resColLower, resColUpper, &numResNz, &m_start, m_index, resColValue);
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, cost, ABS(cost - ccUpperVal[i]), ABS(cost - ccLowerVal[i]));
+    tprint_data_add_str(tp, 0, text);
+    tprint_data_add_double(tp, 1, cost);
+    tprint_data_add_double(tp, 2, ABS(cost - ccUpperVal[i]));
+    tprint_data_add_double(tp, 3, ABS(cost - ccLowerVal[i]));
   }
-  pToF(ostr, "\n\t\tCurrent\t\tAllowable\t\tAllowable\nRow\t\tRHS\t\tIncrease\t\tDecrease\n");
+  tprint_print(tp);
+  tprint_free(tp);
+  pToF(ostr, "\n");
+
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Current", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  tprint_data_add_str(tp, 0, "Row");
+  tprint_data_add_str(tp, 1, "RHS");
+  tprint_data_add_str(tp, 2, "Increase");
+  tprint_data_add_str(tp, 3, "Decrease");
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)
       break;
     //double rC = getRowConstraint(mod, (HighsInt) i);
-    pToF(ostr, "%s\t\t%lf\t\t%lf\t\t%lf\n", text, rowInt[i*3], rowInt[i*3+1], rowInt[i*3+2]);
+    tprint_data_add_str(tp, 0, text);
+    tprint_data_add_double(tp, 1, rowInt[i*3]);
+    tprint_data_add_double(tp, 2, rowInt[i*3+1]);
+    tprint_data_add_double(tp, 3, rowInt[i*3+2]);
   }
+  tprint_print(tp);
+  tprint_free(tp);
+  pToF(ostr, "\n");
+
 #ifdef DEBUG
 for (size_t i = 0; i < numRow; i++) {
-    pToF(ostr, "ccUpperVal: %lf\n, ccUpperVal%lf\n, ccUpperObj%lf\n, ccLowerVal%lf\n, ccLowerObj%lf\n, cBndUpperValue%lf\n, cBndUpperObj%lf\n, cBndLowerVal%lf\n, cBndLowerObj%lf\n, rBndUpperVal%lf\n, rBndUpperObj%lf\n, rBndLowerVal%lf\n, rBndLowerObj%lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
+    pToF(ostr, "ccUpperVal: %9.9lf\n, ccUpperVal%9.9lf\n, ccUpperObj%9.9lf\n, ccLowerVal%9.9lf\n, ccLowerObj%9.9lf\n, cBndUpperValue%9.9lf\n, cBndUpperObj%9.9lf\n, cBndLowerVal%9.9lf\n, cBndLowerObj%9.9lf\n, rBndUpperVal%9.9lf\n, rBndUpperObj%9.9lf\n, rBndLowerVal%9.9lf\n, rBndLowerObj%9.9lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
 }
 #endif //DEBUG
   free(rowInt);
@@ -186,9 +218,26 @@ pVal(const void *mod, GOutputStream *ostr)
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
   Highs_getObjectiveOffset(mod, &offset);
 
-  pToF(ostr, "Objective value:\t\t%lf\nTotal Variables:\t\t\t%d\nTotal Constraints:\t\t%d\nTotal nonzeros:\t\t\t%d\n\nVariable\tValue\t\tReduced Cost\n", 
-       
-      objectiveVal, numCol, numRow, num_nz);
+  TPrint *tp;
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
+  tprint_data_add_str(tp, 0, "Objective Value:");
+  tprint_data_add_double(tp, 1, objectiveVal);
+  tprint_data_add_str(tp, 0, "Total Variables:");
+  tprint_data_add_double(tp, 1, numCol);
+  tprint_data_add_str(tp, 0, "Total Constraints:");
+  tprint_data_add_double(tp, 1, numRow);
+  tprint_data_add_str(tp, 0, "Total nonzeros:");
+  tprint_data_add_double(tp, 1, num_nz);
+  tprint_print(tp);
+  tprint_free(tp);
+  pToF(ostr, "\n");
+
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add (tp, "Variable", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Value", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Reduced Cost", TPAlign_left, TPAlign_left);
 
   for (size_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
@@ -196,30 +245,41 @@ pVal(const void *mod, GOutputStream *ostr)
     HighsInt reducedIndex;
 
 #ifdef DEBUG
-    printf("num_nz: %d col_dual %lf\n", num_nz, col_dual[i]);
+    printf("num_nz: %d col_dual %9.9lf\n", num_nz, col_dual[i]);
 #endif
 
-    pToF(ostr, "%s\t\t%lf\t\t\t%lf\n", text, mkPos(col_value[i]), mkPos(col_dual[i]));
+    tprint_data_add_str(tp, 0, text);
+    tprint_data_add_double(tp, 1, mkPos(col_value[i]));
+    tprint_data_add_double(tp, 2, mkPos(col_dual[i]));
   }
-
-  pToF(ostr, "\n\nRow\t\t Slack or Surplus\tDual Price\n%s\t\t%lf\t\t\t%lf\n", 
-      "0", objectiveVal - offset, 0.0);
+  tprint_print(tp);
+  tprint_free(tp);
+  pToF(ostr, "\n");
 
   /*
    * slack/surplus = abs(diff of row)
    */
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add (tp, "Row", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Slack or Surplus", TPAlign_left, TPAlign_left);
+  tprint_column_add (tp, "Dual Price", TPAlign_left, TPAlign_left);
+  tprint_data_add_str(tp, 0, "0");
+  tprint_data_add_double(tp, 1, mkPos(objectiveVal - offset));
+  tprint_data_add_double(tp, 2, 0.0);
+
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
 #ifdef DEBUG
     printf("row_dual %lf,row_value %lf\n", row_dual[i], row_value[i]);
 #endif
-    if (row_value[i] == 0.0 && signbit(row_value[i]))
-        row_value[i] += 0.0;
-    if (row_dual[i] == 0.0 && signbit(row_dual[i]))
-        row_dual[i] += 0.0;
-    pToF(ostr, "%s\t\t%lf\t\t\t%lf\n", text,  getSlack(mod, i, num_nz, row_value), row_dual[i]);
+    tprint_data_add_str(tp, 0, text);
+    tprint_data_add_double(tp, 1, mkPos(getSlack(mod, i, num_nz, row_value)));
+    tprint_data_add_double(tp, 2, mkPos(row_dual[i]));
   }
+  tprint_print(tp);
+  tprint_free(tp);
+  pToF(ostr, "\n");
 }
 
 static void
@@ -243,31 +303,41 @@ pOpt(void *mod, GOutputStream *ostr){
 
 void
 printSolToFile(void *mod, GOutputStream* ostr) {
+  TPrint *tp;
+  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
+  tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
+  tprint_data_add_str(tp, 0, "HiGHS Version:");
+  char bfr[7];
+  snprintf(bfr, 6, "%d.%d.%d", Highs_versionMajor(), Highs_versionMinor(), Highs_versionPatch());
+  bfr[6] = '\0';
+  tprint_data_add_str(tp, 1, bfr);
+  tprint_data_add_str(tp, 0, "Time:");
+  tprint_data_add_double(tp, 1, Highs_getRunTime(mod));
+  tprint_print(tp);
+  tprint_free(tp);
+
   HighsInt status = Highs_getModelStatus(mod);
-  double time = Highs_getRunTime(mod);
-  pToF(ostr, "HiGHS Version: %d.%d.%d\nTime: %lfs\n",
-    Highs_versionMajor(), Highs_versionMinor(), Highs_versionPatch(), time);
 
-  if (status == kHighsModelStatusNotset
-    || status == kHighsModelStatusLoadError
-    || status == kHighsModelStatusModelError
-    || status == kHighsModelStatusPresolveError
-    || status == kHighsModelStatusSolveError
-    || status == kHighsModelStatusPostsolveError
-    || status == kHighsModelStatusTimeLimit
-    || status == kHighsModelStatusIterationLimit
-    || status == kHighsModelStatusUnknown
-    || status == kHighsModelStatusSolutionLimit
-    || status == kHighsModelStatusInterrupt)
-    pErr(mod, ostr);
-  else if (status == kHighsModelStatusModelEmpty)
-    pEmpty(mod, ostr);
-  else if (status == kHighsModelStatusOptimal)
-    pOpt(mod, ostr);
-  else if (status == kHighsModelStatusInfeasible 
-      || status == kHighsModelStatusUnboundedOrInfeasible)
-    printInfeasible(mod, ostr);
-  else if (status == kHighsModelStatusUnbounded)
-    pUnbound(mod, ostr);
+   if (status == kHighsModelStatusNotset
+     || status == kHighsModelStatusLoadError
+     || status == kHighsModelStatusModelError
+     || status == kHighsModelStatusPresolveError
+     || status == kHighsModelStatusSolveError
+     || status == kHighsModelStatusPostsolveError
+     || status == kHighsModelStatusTimeLimit
+     || status == kHighsModelStatusIterationLimit
+     || status == kHighsModelStatusUnknown
+     || status == kHighsModelStatusSolutionLimit
+     || status == kHighsModelStatusInterrupt)
+     pErr(mod, ostr);
+   else if (status == kHighsModelStatusModelEmpty)
+     pEmpty(mod, ostr);
+   else if (status == kHighsModelStatusOptimal)
+     pOpt(mod, ostr);
+   else if (status == kHighsModelStatusInfeasible
+       || status == kHighsModelStatusUnboundedOrInfeasible)
+     printInfeasible(mod, ostr);
+   else if (status == kHighsModelStatusUnbounded)
+     pUnbound(mod, ostr);
 }
-

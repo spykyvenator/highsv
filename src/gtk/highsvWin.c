@@ -53,6 +53,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_widget_set_hexpand(scrolled, TRUE);
   gtk_widget_set_vexpand(scrolled, TRUE);
   view = gtk_text_view_new();
+  gtk_text_view_set_monospace(GTK_TEXT_VIEW(view), 1);
   gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
