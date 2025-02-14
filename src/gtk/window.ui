@@ -51,7 +51,7 @@
 		<property name="orientation">vertical</property>
 	  <child>
 	    <object class="GtkCheckButton" id="mip">
-	      <property name="label">Integer</property>
+	      <property name="label">Integer Only</property>
 	      <property name="tooltip-text">Only allow Integer results</property>
 	    <signal name="toggled" handler="toggleMip"/>
 	    </object>

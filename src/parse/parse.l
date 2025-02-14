@@ -13,7 +13,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 
   int *rowIndex = NULL, numNz = 0;
   size_t rowLen = 2, numRow = 0, numCol = 0;
-  double lastVal, sign = 1, *rowVal = NULL;
+  double lastVal = 0, sign = 1, *rowVal = NULL;
   char state = COST;
   char lastVarName[255];
   void *model = NULL;

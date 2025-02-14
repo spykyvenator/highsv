@@ -10,6 +10,7 @@ data/ui/icon.ico: data/ui/icon.svg
 debug:
 	cd src/gtk && $(MAKE) debug
 	cp --update=older src/gtk/highsv ./lps
+	data/ui/icon.ico
 
 clean:
 	cd src/gtk && $(MAKE) clean
