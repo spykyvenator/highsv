@@ -1,4 +1,6 @@
 %option noyywrap
+%option nodefault
+
 FLOAT [0-9]*[\.]?[0-9]*
 
 %{
@@ -78,6 +80,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 ^(?i:end) { return 0; }
 
 [a-zA-Z][0-9a-zA-Z|,|/]* { readVar(model, yytext, state); }
+<*>.|\n {}
 
 %%
 
