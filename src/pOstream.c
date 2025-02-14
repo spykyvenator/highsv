@@ -56,6 +56,10 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
   return ABS(r_value[row]-rowBound);
 }
 
+/*
+ * Get the constraint that is limiting the row
+ * Since one will always be infinite and the other not this is ok
+ */
 static double
 getRowConstraint(const void *mod, const HighsInt row)
 {

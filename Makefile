@@ -12,7 +12,7 @@ debug:
 	cp --update=older src/gtk/highsv ./lps
 
 clean:
-	rm data/ui/icon.ico
 	cd src/gtk && $(MAKE) clean
+	rm data/ui/icon.ico
 
 .PHONY: all clean lps debug

@@ -17,7 +17,12 @@ extern void *model;
 static void
 cleanModel ()
 {
-  Highs_destroy(model);
+  if (model != NULL) {
+    Highs_clear(model);
+    Highs_clearSolver(model);
+    Highs_destroy(model);
+    model = NULL;
+  }
   numCol = 0;
   numRow = 0;
   state = COST;
@@ -58,7 +63,10 @@ preModel ()
       rowVal[i] = 0;
       rowIndex[i] = 0;
   }
-  Highs_setBoolOptionValue(model, "log_to_console", 0);
+  for (size_t i = 0; i < 255; i++) {// init to zero
+    lastVarName[i] = '\0';
+  }
+  Highs_setBoolOptionValue(model, "log_to_console", 1);
   Highs_setBoolOptionValue(model, "output_flag", 0);
 }
 
