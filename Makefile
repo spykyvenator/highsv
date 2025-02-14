@@ -11,7 +11,10 @@ debug:
 	cd src/gtk && $(MAKE) debug
 	cp --update=older src/gtk/highsv ./lps
 	data/ui/icon.ico
-
+windows:
+	cd src/gtk && $(MAKE) windows
+	cp src/gtk/highsv.exe ./
+	data/ui/icon.ico
 clean:
 	cd src/gtk && $(MAKE) clean
 	rm data/ui/icon.ico
