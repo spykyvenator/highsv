@@ -152,15 +152,19 @@ readVar (void *mod, char *text, const char state)
 	}
 
   if (index >= rowLen){
-    rowLen*=2;
-    double *tmpVal = (double*) malloc(sizeof(double)*rowLen);
-    int *tmpIndex = (int*) malloc(sizeof(int)*rowLen);
-    memcpy(tmpVal, rowVal, sizeof(double)*numCol);
-    memcpy(tmpIndex, rowIndex, sizeof(int)*numCol);
+    double *tmpVal = (double*) malloc(sizeof(double)*rowLen*2);
+    int *tmpIndex = (int*) malloc(sizeof(int)*rowLen*2);
+    memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
+    memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
     free(rowVal);
     free(rowIndex);
     rowVal = tmpVal;
     rowIndex = tmpIndex;
+    for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
+	    rowVal[i] = 0;
+	    rowIndex[i] = 0;
+    }
+    rowLen*=2;
   }
 	if (state == COST) {
 #ifdef DEBUG
