@@ -91,9 +91,11 @@ void
 highsv_shutdown(GApplication *app)
 {
     quitModel();
-    HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
-    //g_object_unref(win->stack);// ? how to remove warning
-    gtk_window_destroy(GTK_WINDOW(win));
+    HighsvApp *highsv = (HighsvApp *) app;
+
+  G_APPLICATION_CLASS (highsv_app_parent_class)
+    ->shutdown (app);
+
 }
 
 static void
