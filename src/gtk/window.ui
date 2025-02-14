@@ -14,18 +14,21 @@
 	<child>
 	  <object class="GtkButton" id="SolveButton">
 	    <property name="label">Solve</property>
+	      <property name="tooltip-text">Solve the open window</property>
 	    <signal name="clicked" handler="solveEntry"/>
 	  </object>
 	</child>
 	  <child>
 	    <object class="GtkButton" id="NewButton">
 	      <property name="label">New</property>
+	      <property name="tooltip-text">Open a new clean window</property>
 	      <signal name="clicked" handler="openNewEmpty"/>
 	    </object>
 	  </child>
 	  <child>
 	    <object class="GtkButton" id="OpenButton">
 	      <property name="label">Open</property>
+	      <property name="tooltip-text">Open a new file</property>
 	      <signal name="clicked" handler="openNew"/>
 	    </object>
 	  </child>
@@ -33,11 +36,13 @@
 	    <object class="GtkButton" id="CloseButton">
 	      <property name="label">Close</property>
 	      <signal name="clicked" handler="closeActive"/>
+	      <property name="tooltip-text">Close the currently opened window</property>
 	    </object>
 	  </child>
 	<child>
 	  <object class="GtkButton" id="SaveButton">
 	    <property name="label">save As</property>
+            <property name="tooltip-text">Save the currently opened window</property>
 	    <signal name="clicked" handler="saveActive"/>
 	  </object>
 	</child>
@@ -47,6 +52,7 @@
 	  <child>
 	    <object class="GtkCheckButton" id="mip">
 	      <property name="label">Integer</property>
+	      <property name="tooltip-text">Only allow Integer results</property>
 	    <signal name="toggled" handler="toggleMip"/>
 	    </object>
 	  </child>
@@ -54,6 +60,7 @@
 	    <object class="GtkCheckButton" id="pos">
 	      <property name="label">Positive Only</property>
 	      <property name="active">True</property>
+	      <property name="tooltip-text">Only allow positive results</property>
 	    <signal name="toggled" handler="togglePos"/>
 	    </object>
 	  </child>

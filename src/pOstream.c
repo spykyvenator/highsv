@@ -21,6 +21,14 @@ pToF(GOutputStream *ostr, const char *str, ...)
   va_end(ap);
 }
 
+static double
+mkPos(double val){
+    if (val == 0.0 && signbit(val))// remove negative 0's
+        val += 0.0;
+    return val;
+}
+
+
 static void
 pEmpty(const void *mod, GOutputStream* ostr){
   pToF(ostr,"Your model appears empty\n");
@@ -112,13 +120,16 @@ getRowIntervals(const void *mod)
   return res;
 }
 
+/*
+ * TODO: split this function up in multiple funcs
+ */
 static void
 pRange(void *mod, GOutputStream *ostr)
 {
+  const HighsInt num_nz = Highs_getNumNz(mod);
   char text[kHighsMaximumStringLength];
-  double cost;
-  HighsInt numResCol, numResNz, m_start, m_index[numCol];
-  double resColLower[numCol], resColUpper[numCol], resColValue[numCol];
+  HighsInt numResCol, numResNz, m_start[numCol], m_index[num_nz];
+  double resColLower[numCol], resColUpper[numCol], resColValue[num_nz], cost[numCol];
   double ccUpperVal[numCol], ccUpperObj[numCol], 
          ccLowerVal[numCol], ccLowerObj[numCol],
          cBndUpperVal[numCol], cBndUpperObj[numCol],
@@ -150,14 +161,15 @@ pRange(void *mod, GOutputStream *ostr)
   tprint_data_add_str(tp, 1, "Coefficient");
   tprint_data_add_str(tp, 2, "Increase");
   tprint_data_add_str(tp, 3, "Decrease");
+
+  Highs_getColsByRange(mod, 0, numCol - 1, &numResCol, cost, resColLower, resColUpper, &numResNz, m_start, m_index, resColValue);
+  if (numResCol != numCol) return;
   for (size_t i = 0; i < numCol; i++){
-    if (Highs_getColName(mod, i, text) == kHighsStatusError)
-      break;
-    Highs_getColsByRange(mod, (HighsInt) i, (HighsInt) i, &numResCol, &cost, resColLower, resColUpper, &numResNz, &m_start, m_index, resColValue);
+    if (Highs_getColName(mod, i, text) == kHighsStatusError) return;
     tprint_data_add_str(tp, 0, text);
-    tprint_data_add_double(tp, 1, cost);
-    tprint_data_add_double(tp, 2, ABS(cost - ccUpperVal[i]));
-    tprint_data_add_double(tp, 3, ABS(cost - ccLowerVal[i]));
+    tprint_data_add_double(tp, 1, cost[i]);
+    tprint_data_add_double(tp, 2, ABS(cost[i] - ccUpperVal[i]));
+    tprint_data_add_double(tp, 3, ABS(cost[i] - ccLowerVal[i]));
   }
   tprint_print(tp);
   tprint_free(tp);
@@ -177,9 +189,9 @@ pRange(void *mod, GOutputStream *ostr)
       break;
     //double rC = getRowConstraint(mod, (HighsInt) i);
     tprint_data_add_str(tp, 0, text);
-    tprint_data_add_double(tp, 1, rowInt[i*3]);
-    tprint_data_add_double(tp, 2, rowInt[i*3+1]);
-    tprint_data_add_double(tp, 3, rowInt[i*3+2]);
+    tprint_data_add_double(tp, 1, mkPos(rowInt[i*3]));
+    tprint_data_add_double(tp, 2, mkPos(rowInt[i*3+1]));
+    tprint_data_add_double(tp, 3, mkPos(rowInt[i*3+2]));
   }
   tprint_print(tp);
   tprint_free(tp);
@@ -191,13 +203,6 @@ for (size_t i = 0; i < numRow; i++) {
 }
 #endif //DEBUG
   free(rowInt);
-}
-
-static double
-mkPos(double val){
-    if (val == 0.0 && signbit(val))// remove negative 0's
-        val += 0.0;
-    return val;
 }
 
 /*
@@ -219,7 +224,7 @@ pVal(const void *mod, GOutputStream *ostr)
   Highs_getObjectiveOffset(mod, &offset);
 
   TPrint *tp;
-  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tp = tprint_create (ostr, 0, 0, 0, 5);
   tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
   tprint_column_add (tp, "", TPAlign_left, TPAlign_left);
   tprint_data_add_str(tp, 0, "Objective Value:");
@@ -304,7 +309,7 @@ pOpt(void *mod, GOutputStream *ostr){
 void
 printSolToFile(void *mod, GOutputStream* ostr) {
   TPrint *tp;
-  tp = tprint_create (ostr, 0, 1, 0, 5);
+  tp = tprint_create (ostr, 0, 0, 0, 5);
   tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
   tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
   tprint_data_add_str(tp, 0, "HiGHS Version:");
