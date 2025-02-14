@@ -18,6 +18,9 @@ all: options highsv
 debug: CFLAGS += -DDEBUG -g
 debug: highsv
 
+windows: LDFLAGS += -mwindows
+windows: highsv
+
 options: 
 	@echo highsv build options:
 	@echo "CFLAGS = $(CFLAGS)"
