@@ -60,6 +60,7 @@ preModel ()
   }
   Highs_setBoolOptionValue(model, "log_to_console", 0);
   Highs_setBoolOptionValue(model, "output_flag", 0);
+  Highs_setStringOptionValue(model, "presolve", "off");
 }
 
 int

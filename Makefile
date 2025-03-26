@@ -1,4 +1,5 @@
 .POSIX:
+PKGCONFIG ?= $(shell which pkg-config)
 
 all: lps data/ui/icon.ico
 
@@ -18,5 +19,8 @@ windows:
 clean:
 	cd src/gtk && $(MAKE) clean
 	rm data/ui/icon.ico
+
+tools/options.out: tools/test.c
+	gcc $< -o $@ $(shell $(PKGCONFIG) --libs highs) $(shell $(PKGCONFIG) --cflags highs)
 
 .PHONY: all clean lps debug

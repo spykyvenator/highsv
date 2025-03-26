@@ -12,12 +12,6 @@ struct _HighsvApp
 
 G_DEFINE_TYPE(HighsvApp, highsv_app, GTK_TYPE_APPLICATION);
 
-static void
-highsv_app_init (HighsvApp *app)
-{
-}
-
-
 static GActionEntry app_entries[] =
 {
   { "quit", quit_activated, NULL, NULL, NULL },
@@ -87,7 +81,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   gtk_window_present(GTK_WINDOW (win));
 }
 
-void 
+static void 
 highsv_shutdown(GApplication *app)
 {
     quitModel();
@@ -96,6 +90,18 @@ highsv_shutdown(GApplication *app)
   G_APPLICATION_CLASS (highsv_app_parent_class)
     ->shutdown (app);
 
+    GList *windows;
+    HighsvAppWindow *win;
+    windows = gtk_application_get_windows(GTK_APPLICATION(app));
+    if (windows){
+        win = HIGHSV_APP_WINDOW(windows->data);
+        gtk_window_destroy(GTK_WINDOW(win));
+    }
+}
+
+static void
+highsv_app_init (HighsvApp *app)
+{
 }
 
 static void
