@@ -1,5 +1,11 @@
 #include "interfaces/highs_c_api.h"
+
+#ifdef CLI
+#include <stdio.h>
+#else
 #include <gtk/gtk.h>
+#endif
+
 #include "./parse/parse.h"
 #include "./pOstream.h"
 #include "sol.h"
@@ -96,14 +102,37 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   yy_delete_buffer(buffer);
   return 0;
 }
-/*
- 
-        if (!(fd = fopen(av[1], "r")))
-        {
-            perror("Error: ");
-            return (-1);
-        }
-        yyset_in(fd);
-        yylex();
-        fclose(fd);
-        */
+
+int
+parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
+{
+  cleanModel(model);
+  preModel();
+  yyset_in(fd);
+  yylex();
+  fclose(fd);
+#ifdef DEBUG
+  printModel(model);
+#endif
+  const double inf = Highs_getInfinity(model);
+  if (pos) {
+    double infinity[numCol];
+    double zero[numCol];
+    for (size_t i = 0; i < numCol; i++) {
+      infinity[i] = inf;
+      zero[i] = 0;
+    }
+    Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
+  }
+  if (mip) {
+    HighsInt integrality[numCol];
+    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
+    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
+    if (res)
+      return 1;
+  }
+  Highs_presolve(model);
+  Highs_run(model);
+  printSolToFile(model, ostream);
+  return 0;
+}

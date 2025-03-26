@@ -1,8 +1,15 @@
 #include "interfaces/highs_c_api.h"
 #include <stdarg.h>
-#include <gtk/gtk.h>
+
+#ifdef CLI
+    #include "./cli/cli.h"
+#else
+    #include <gtk/gtk.h>
+#endif
+
 #include "./tprint/tprint.h"
 #include <stdio.h>
+
 
 extern size_t numRow, numCol;
 

@@ -6,4 +6,5 @@ int parseStdin();
 enum { COST, AVAL, BOUNDG, BOUNDL, BOUNDE};
 int initModel();
 int quitModel();
+int parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos);
 #endif
