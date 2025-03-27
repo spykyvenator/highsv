@@ -37,12 +37,12 @@ mkPos(double val){
 
 
 static void
-pEmpty(const void *mod, GOutputStream* ostr){
+pEmpty(GOutputStream* ostr){
   pToF(ostr,"Your model appears empty\n");
 }
 
 static void
-printInfeasible(const void *mod, GOutputStream* ostr)
+printInfeasible(GOutputStream* ostr)
 {
   pToF(ostr, "Your model is infeasible\n");
 }
@@ -98,8 +98,7 @@ getRowIntervals(const void *mod)
   double *res = malloc(sizeof(double)*numRow*3);
 
   for (size_t i = 0; i < numRow; i++){// this is fine => There is probably a simpler way of doing this
-    double div, lower, higher;
-    double val = 0;
+    double div, val = 0;
     res[i*3+1] = inf;
     res[i*3+2] = inf;
     for (size_t j = 0; j < numCol; j++){
@@ -174,7 +173,7 @@ pRange(void *mod, GOutputStream *ostr)
   tprint_data_add_str(tp, 3, "Decrease");
 
   Highs_getColsByRange(mod, 0, numCol - 1, &numResCol, cost, resColLower, resColUpper, &numResNz, m_start, m_index, resColValue);
-  if (numResCol != numCol) return;
+  if ((size_t) numResCol != numCol) return;
   for (size_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError) return;
     tprint_data_add_str(tp, 0, text);
@@ -222,13 +221,10 @@ for (size_t i = 0; i < numRow; i++) {
 static void
 pVal(const void *mod, GOutputStream *ostr)
 {
-  gsize bw;
-  GError *error = NULL;
   const double objectiveVal = Highs_getObjectiveValue(mod);
   char text[kHighsMaximumStringLength];
   double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow],
-        col_reduced[numRow], reducedCost, offset;
-  HighsInt col_index[numRow];
+        offset;
   const HighsInt num_nz = Highs_getNumNz(mod);
 
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
@@ -258,7 +254,6 @@ pVal(const void *mod, GOutputStream *ostr)
   for (size_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
       break;
-    HighsInt reducedIndex;
 
 #ifdef DEBUG
     printf("num_nz: %d col_dual %9.9lf\n", num_nz, col_dual[i]);
@@ -348,12 +343,12 @@ printSolToFile(void *mod, GOutputStream* ostr) {
      || status == kHighsModelStatusInterrupt)
      pErr(mod, ostr);
    else if (status == kHighsModelStatusModelEmpty)
-     pEmpty(mod, ostr);
+     pEmpty(ostr);
    else if (status == kHighsModelStatusOptimal)
      pOpt(mod, ostr);
    else if (status == kHighsModelStatusInfeasible
        || status == kHighsModelStatusUnboundedOrInfeasible)
-     printInfeasible(mod, ostr);
+     printInfeasible(ostr);
    else if (status == kHighsModelStatusUnbounded)
      pUnbound(mod, ostr);
 }

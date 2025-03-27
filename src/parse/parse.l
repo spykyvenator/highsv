@@ -1,5 +1,4 @@
-%option noyywrap
-%option nodefault
+%option noyywrap nodefault nounput noinput
 
 FLOAT [0-9]*[\.]?[0-9]*
 
@@ -91,7 +90,7 @@ FLOAT [0-9]*[\.]?[0-9]*
   return the column index of a variable name.
   add it if it is not present
 */
-int
+static size_t
 findIndex(void *mod, const char *text)
 {
   HighsInt index;
@@ -104,7 +103,7 @@ findIndex(void *mod, const char *text)
     Highs_passColName(mod, index, text);
     numCol++;
   }
-  return index;
+  return (size_t) index;
 }
 
 /*
@@ -145,7 +144,7 @@ setBounds (void *mod, const double val, const char sign)
 static void
 readVar (void *mod, char *text, const char state) 
 {
-	int index = findIndex(mod, text);
+	size_t index = findIndex(mod, text);
 	if (lastVal == 0){
 	    lastVal = sign;
 	    sign = 1;
