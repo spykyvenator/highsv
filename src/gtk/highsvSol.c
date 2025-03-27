@@ -28,12 +28,12 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
 void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
-    char* content, *resBuffer, *newName;
+    char* content, *newName;
     GtkWidget *tab;
     GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
-    size_t resLen, nameLen;
+    size_t nameLen;
     
     tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
     const char *name = gtk_stack_get_visible_child_name(GTK_STACK(win->stack));
@@ -48,7 +48,6 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     GError *error = NULL;
     GFileIOStream* stream = NULL;
-    gsize bw;
 
     nameLen = strlen(name)+8;
     newName = malloc(sizeof(char)*nameLen);

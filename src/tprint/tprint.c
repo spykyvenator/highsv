@@ -18,14 +18,13 @@
  * this file was edited by spykyvenator after Fri Feb 14 13:29:51 CET 2025
  * Any printing issues in highsv should be directed to https://github.com/spykyvenator/highsv
  */
+
 #include "tprint.h"
 
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <glib/gprintf.h>
-#include <gtk/gtk.h>
 
 struct _TPrint {
     GOutputStream *ostr;

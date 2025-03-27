@@ -1,6 +1,6 @@
 CC ?= gcc
 PKGCONFIG ?= $(shell which pkg-config)
-CFLAGS = -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
+CFLAGS = -std=c23 -Wpedantic -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
 	 $(shell $(PKGCONFIG) --cflags highs)
 LIBS = $(shell $(PKGCONFIG) --libs gtk4) \
        $(shell $(PKGCONFIG) --libs highs)
@@ -13,7 +13,7 @@ BUILT_SRC = resources.c
 OBJS = $(BUILT_SRC:.c=.o) $(SRC:.c=.o)
 DEPENDS := $(patsubst %.c,%.d,$(SRC))
 
-.PHONY: all clean options debug
+.PHONY: all clean options debug windows
 
 all: options highsv
 
@@ -38,7 +38,7 @@ resources.c: highsv.gresource.xml window.ui
 clean:
 	rm -f $(BUILT_SRC)
 	rm -f $(OBJS)
-	rm -f $(DEPENDS) ../parse/parse.c
+	rm -f $(DEPENDS) ../parse/parse.c ../parse/parse.h
 	rm -f highsv
 
 highsv: $(OBJS)

@@ -22,8 +22,14 @@
 #define _T_PRINT_H_
 
 #include <stdio.h>
+#ifdef CLI
+#include "../cli/cli.h"
+#include <gio/gio.h>
 #include <glib.h>
+#else
 #include <gtk/gtk.h>
+#endif
+#include <glib/gprintf.h>
 
 typedef struct _TPrint TPrint;
 

@@ -1,25 +1,33 @@
-#include <gtk/gtk.h>
 #include "../sol.h"
 #include "../parse/parse.h"
+#include <gio/gunixoutputstream.h>
+
+static void
+pHelp()
+{
+    puts("run the program better or git gud");
+}
 
 int
 main(int argc, char *argv[])
 {
-    char Flags;
+    char Flags = 0;
     int c;
     if (argc == 1) pHelp();
-    while ((c = getopt(argc, argv, "pi")) != -1) {
+    while ((c = getopt(argc, argv, "ni")) != -1) {
         switch (c) {
-            case 'p':// only allow positive results
-                Flags + 0b1;
+            case 'n':// also allow negative results
+                Flags += 0b1;
                 break;
             case 'i':// only allow integer results
-                Flags + b10;
+                Flags += 0b10;
                 break;
         }
     }
 
     initModel();
+
+    GOutputStream *ostream = g_unix_output_stream_new(fileno(stdout), FALSE);
 
     for (int index = optind; index < argc; index++)
     {
@@ -30,6 +38,7 @@ main(int argc, char *argv[])
             perror(argv[index]);
             return (-1);
         }
-        yyset_in(fd);
+        parseFile(fd, ostream, Flags && 0b10, !(Flags && 0b01));
     }
+    g_output_stream_close(ostream, NULL, NULL);
 }

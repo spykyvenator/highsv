@@ -2,12 +2,16 @@
 #include <stdarg.h>
 
 #ifdef CLI
-    #include "./cli/cli.h"
+#include "./cli/cli.h"
+#include <gio/gio.h>
+#include <glib.h>
+#include <glib/gprintf.h>
 #else
-    #include <gtk/gtk.h>
+#include <gtk/gtk.h>
 #endif
 
 #include "./tprint/tprint.h"
+#include <glib.h>
 #include <stdio.h>
 
 
@@ -16,10 +20,10 @@ extern size_t numRow, numCol;
 static void
 pToF(GOutputStream *ostr, const char *str, ...)
 {
-  gsize bw;
-  GError *error = NULL;
   va_list ap;
   va_start(ap, str);
+  gsize bw;
+  GError *error = NULL;
   if (!g_output_stream_vprintf(ostr, &bw, NULL, &error,
         str, ap)) {
       g_printerr("Error writing to file: %s\n", error->message);

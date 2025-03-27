@@ -6,6 +6,7 @@
 
 #ifdef CLI
 #include <stdio.h>
+#include <gio/gio.h>
 #else
 #include <gtk/gtk.h>
 #endif

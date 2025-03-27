@@ -2,6 +2,8 @@
 
 #ifdef CLI
 #include <stdio.h>
+#include "./cli/cli.h"
+#include <glib.h>
 #else
 #include <gtk/gtk.h>
 #endif
@@ -21,7 +23,7 @@ extern char lastVarName[255];
 extern void *model;
 
 static void
-cleanModel ()
+cleanModel (void *model)
 {
   Highs_destroy(model);
   numCol = 0;
@@ -70,6 +72,35 @@ preModel ()
 }
 
 int
+setPositive(char pos, void *model)
+{
+  if (pos) {
+    const double inf = Highs_getInfinity(model);
+    double infinity[numCol];
+    double zero[numCol];
+    for (size_t i = 0; i < numCol; i++) {
+      infinity[i] = inf;
+      zero[i] = 0;
+    }
+    HighsInt res = Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
+    return res;
+  }
+  return 0;
+}
+
+int
+setMip(char mip, void *model)
+{
+  if (mip) {
+    HighsInt integrality[numCol];
+    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
+    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
+    return res;
+  }
+  return 0;
+}
+
+int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
   cleanModel(model);
@@ -79,23 +110,8 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 #ifdef DEBUG
   printModel(model);
 #endif
-  const double inf = Highs_getInfinity(model);
-  if (pos) {
-    double infinity[numCol];
-    double zero[numCol];
-    for (size_t i = 0; i < numCol; i++) {
-      infinity[i] = inf;
-      zero[i] = 0;
-    }
-    Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
-  }
-  if (mip) {
-    HighsInt integrality[numCol];
-    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
-    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
-    if (res)
-      return 1;
-  }
+  setPositive((char) pos, model);
+  setMip((char) mip, model);
   Highs_presolve(model);
   Highs_run(model);
   printSolToFile(model, ostream);
@@ -110,29 +126,14 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   preModel();
   yyset_in(fd);
   yylex();
-  fclose(fd);
 #ifdef DEBUG
   printModel(model);
 #endif
-  const double inf = Highs_getInfinity(model);
-  if (pos) {
-    double infinity[numCol];
-    double zero[numCol];
-    for (size_t i = 0; i < numCol; i++) {
-      infinity[i] = inf;
-      zero[i] = 0;
-    }
-    Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
-  }
-  if (mip) {
-    HighsInt integrality[numCol];
-    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
-    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
-    if (res)
-      return 1;
-  }
+  setPositive(pos, model);
+  setMip(mip, model);
   Highs_presolve(model);
   Highs_run(model);
   printSolToFile(model, ostream);
+  fclose(fd);
   return 0;
 }
