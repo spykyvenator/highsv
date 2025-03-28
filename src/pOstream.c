@@ -280,7 +280,7 @@ pVal(const void *mod, GOutputStream *ostr)
   tprint_column_add (tp, "Dual Price", TPAlign_left, TPAlign_left);
   tprint_data_add_str(tp, 0, "0");
   tprint_data_add_double(tp, 1, mkPos(objectiveVal - offset));
-  tprint_data_add_double(tp, 2, 0.0);
+  tprint_data_add_double(tp, 2, 1.0);
 
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
