@@ -86,7 +86,7 @@ getRowIntervals(const void *mod)
   double inf = Highs_getInfinity(mod);
   HighsInt c_index[numRow], nz;
   double c_vect[numRow][numCol], rc[numRow];
-  for (size_t i = 0; i < numRow; i++){
+  for (size_t i = 0; i < numRow; i++) {
     rc[i] = getRowConstraint(mod, (HighsInt) i);
     Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
   }
@@ -265,7 +265,7 @@ pVal(const void *mod, GOutputStream *ostr)
 
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, mkPos(col_value[i]));
-    tprint_data_add_double(tp, 2, mkPos(col_dual[i]));
+    tprint_data_add_double(tp, 2, -col_dual[i]);
   }
   tprint_print(tp);
   tprint_free(tp);
