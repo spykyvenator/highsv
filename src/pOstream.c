@@ -60,7 +60,7 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
   Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
         &rowNumNz, &start, 
         matrix_index, matrix_value);
-  const double rowBound = MIN(ABS(lower), ABS(upper));
+  const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
 #ifdef DEBUG
   printf("row slack: %lf- %lf\n", r_value[row], rowBound);
 #endif
