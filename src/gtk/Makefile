@@ -17,7 +17,7 @@ DEPENDS := $(patsubst %.c,%.d,$(SRC))
 
 all: options highsv
 
-debug: CFLAGS += -DDEBUG -g
+debug: CFLAGS += -DDEBUG_RINTER -g
 debug: highsv
 
 windows: LDFLAGS += -mwindows

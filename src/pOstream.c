@@ -91,11 +91,11 @@ getRowIntervals(const void *mod)
     Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_RINTER
   for (size_t i = 0; i < numRow; i++){// this c_vect is in fact correct
     for (size_t j = 0; j < numCol; j++)
       printf("%lf ", c_vect[i][j]);
-    printf("%lf\n", rc[i]);
+    printf("rc: %lf\n", rc[i]);
   }
 #endif
 
@@ -109,17 +109,17 @@ getRowIntervals(const void *mod)
       for (size_t k = 0; k < numRow; k++){
 	if (i != k){
 	  val += c_vect[j][k]*rc[k];
-#ifdef DEBUG
+#ifdef DEBUG_RINTER
 	  printf("doing: %lf += %lf (%ld, %ld) * %lf\n", val, c_vect[j][k], j, k, rc[k]);
-#endif //DEBUG
+#endif //DEBUG_RINTER
 	} else{
 	  div = c_vect[j][k];
-#ifdef DEBUG
+#ifdef DEBUG_INTER
 	  printf("setting div: %lf\n", div);
-#endif //DEBUG
+#endif //DEBUG_INTER
 	}
       }
-#ifdef DEBUG
+#ifdef DEBUG_RINTER
       printf("%lf b%ld +%lf >=0\n", div, i, val);
 #endif
       res[i*3] = rc[i];
