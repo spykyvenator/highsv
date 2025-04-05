@@ -60,7 +60,7 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
   Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
         &rowNumNz, &start, 
         matrix_index, matrix_value);
-  const double rowBound = MIN(ABS(lower), ABS(upper));
+  const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
 #ifdef DEBUG
   printf("row slack: %lf- %lf\n", r_value[row], rowBound);
 #endif
@@ -150,7 +150,7 @@ pRange(void *mod, GOutputStream *ostr)
          cBndLowerVal[numCol], cBndLowerObj[numCol],
          rBndUpperVal[numRow], rBndUpperObj[numRow],
          rBndLowerVal[numRow], rBndLowerObj[numRow];
-  double *rowInt = getRowIntervals(mod);
+  double *rowInt = getRowIntervals(mod);// in fact this should be calculated by taking the right hand side of the expression and caculating the distance to the current lefthand side
   HighsInt ccUpperInVar[numCol], ccUpperOutVar[numCol],
          ccLowerInVar[numCol], ccLowerOutVar[numCol],
          cBndUpInVar[numCol], cBndUpOutVar[numCol],
@@ -290,7 +290,7 @@ pVal(const void *mod, GOutputStream *ostr)
 #endif
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, mkPos(getSlack(mod, i, num_nz, row_value)));
-    tprint_data_add_double(tp, 2, mkPos(row_dual[i]));
+    tprint_data_add_double(tp, 2, mkPos(-row_dual[i]));
   }
   tprint_print(tp);
   tprint_free(tp);
