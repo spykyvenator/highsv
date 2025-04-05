@@ -45,9 +45,9 @@ FLOAT [0-9]*[\.]?[0-9]*
 	    } 
 	}
 
-">"|">="|"=>" { state = BOUNDG; /* sign = 1; */ }
-"<"|"<="|"=<" { state = BOUNDL; /* sign = 1; */ }
-"="|"==" { state = BOUNDE; /* sign = 1; */ }
+">"|">="|"=>" { state = BOUNDG; }
+"<"|"<="|"=<" { state = BOUNDL; }
+"="|"==" { state = BOUNDE; }
 
 {FLOAT} { 
         if (state == BOUNDG) {

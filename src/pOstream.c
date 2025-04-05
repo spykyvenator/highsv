@@ -290,7 +290,7 @@ pVal(const void *mod, GOutputStream *ostr)
 #endif
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, mkPos(getSlack(mod, i, num_nz, row_value)));
-    tprint_data_add_double(tp, 2, mkPos(-row_dual[i]));
+    tprint_data_add_double(tp, 2, row_dual[i]);
   }
   tprint_print(tp);
   tprint_free(tp);
