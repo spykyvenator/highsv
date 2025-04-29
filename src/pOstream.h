@@ -11,5 +11,5 @@
 #include <gtk/gtk.h>
 #endif
 
-void printSolToFile(void *mod, GOutputStream* ostr);
+void printSolToFile(void *mod, GOutputStream* ostr, double time);
 #endif

@@ -7,6 +7,7 @@
 #else
 #include <gtk/gtk.h>
 #endif
+#include <time.h>
 
 #include "./parse/parse.h"
 #include "./pOstream.h"
@@ -113,8 +114,10 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   setPositive((char) pos, model);
   setMip((char) mip, model);
   Highs_presolve(model);
+  clock_t before = clock();
   Highs_run(model);
-  printSolToFile(model, ostream);
+  clock_t diff = clock() - before;
+  printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
   yy_delete_buffer(buffer);
   return 0;
 }
@@ -132,8 +135,10 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   setPositive(pos, model);
   setMip(mip, model);
   Highs_presolve(model);
+  clock_t before = clock();
   Highs_run(model);
-  printSolToFile(model, ostream);
+  clock_t diff = clock() - before;
+  printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
   fclose(fd);
   return 0;
 }

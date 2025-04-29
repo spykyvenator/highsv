@@ -33,7 +33,8 @@ pToF(GOutputStream *ostr, const char *str, ...)
 }
 
 static double
-mkPos(double val){
+mkPos(double val)
+{
     if (val == 0.0 && signbit(val))// remove negative 0's
         val += 0.0;
     return val;
@@ -41,7 +42,8 @@ mkPos(double val){
 
 
 static void
-pEmpty(GOutputStream* ostr){
+pEmpty(GOutputStream* ostr)
+{
   pToF(ostr,"Your model appears empty\n");
 }
 
@@ -85,7 +87,12 @@ getRowIntervals(const void *mod)
 {
   double inf = Highs_getInfinity(mod);
   HighsInt c_index[numRow], nz;
-  double c_vect[numRow][numCol], rc[numRow];
+  double (*c_vect)[numCol] = malloc(sizeof(double[numRow][numCol]));
+  if (c_vect == NULL) {
+      puts("ERROR: no more memory");
+  }
+  //double c_vect[numRow][numCol];
+  double rc[numRow];
   for (size_t i = 0; i < numRow; i++) {
     rc[i] = getRowConstraint(mod, (HighsInt) i);
     Highs_getBasisInverseRow(mod, i, c_vect[i], &nz, c_index);
@@ -109,28 +116,29 @@ getRowIntervals(const void *mod)
       for (size_t k = 0; k < numRow; k++){
 	if (i != k){
 	  val += c_vect[j][k]*rc[k];
-#ifdef DEBUG_RINTER
+#ifdef DEBUG_PRINTER
 	  printf("doing: %lf += %lf (%ld, %ld) * %lf\n", val, c_vect[j][k], j, k, rc[k]);
 #endif //DEBUG_RINTER
 	} else{
 	  div = c_vect[j][k];
-#ifdef DEBUG_INTER
+#ifdef DEBUG_PRINTER
 	  printf("setting div: %lf\n", div);
 #endif //DEBUG_INTER
 	}
       }
-#ifdef DEBUG_RINTER
+#ifdef DEBUG_PRINTER
       printf("%lf b%ld +%lf >=0\n", div, i, val);
 #endif
       res[i*3] = rc[i];
       double result = ABS(ABS(val/div) - rc[i]);
       if (signbit(div) && result < res[i*3+1])// set decrease
-	res[i*3+1] = result;
+	res[i*3+1] = mkPos(result);
       else if (result < res[i*3+2])//set increase
 	res[i*3+2] = result;
       val = 0;
     }
   }
+  free(c_vect);
   return res;
 }
 
@@ -211,11 +219,6 @@ pRange(void *mod, GOutputStream *ostr)
   tprint_free(tp);
   pToF(ostr, "\n");
 
-#ifdef DEBUG
-for (size_t i = 0; i < numRow; i++) {
-    pToF(ostr, "ccUpperVal: %9.9lf\n, ccUpperVal%9.9lf\n, ccUpperObj%9.9lf\n, ccLowerVal%9.9lf\n, ccLowerObj%9.9lf\n, cBndUpperValue%9.9lf\n, cBndUpperObj%9.9lf\n, cBndLowerVal%9.9lf\n, cBndLowerObj%9.9lf\n, rBndUpperVal%9.9lf\n, rBndUpperObj%9.9lf\n, rBndLowerVal%9.9lf\n, rBndLowerObj%9.9lf", ccUpperVal[i], ccUpperObj[i], ccLowerVal[i], ccLowerObj[i], cBndUpperVal[i], cBndUpperObj[i], cBndLowerVal[i], cBndLowerObj[i], rBndUpperVal[i], rBndUpperObj[i], rBndLowerVal[i], rBndLowerObj[i]);
-}
-#endif //DEBUG
   free(rowInt);
 }
 
@@ -317,7 +320,7 @@ pOpt(void *mod, GOutputStream *ostr){
 }
 
 void
-printSolToFile(void *mod, GOutputStream* ostr) {
+printSolToFile(void *mod, GOutputStream* ostr, double time) {
   TPrint *tp;
   tp = tprint_create (ostr, 0, 0, 0, 5);
   tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
@@ -328,7 +331,7 @@ printSolToFile(void *mod, GOutputStream* ostr) {
   bfr[6] = '\0';
   tprint_data_add_str(tp, 1, bfr);
   tprint_data_add_str(tp, 0, "Time:");
-  tprint_data_add_double(tp, 1, Highs_getRunTime(mod));
+  tprint_data_add_double(tp, 1, time);
   tprint_print(tp);
   tprint_free(tp);
 
