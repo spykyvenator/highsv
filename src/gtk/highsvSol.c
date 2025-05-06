@@ -30,13 +30,14 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
     char* content, *newName;
     GtkWidget *tab;
+    GtkNotebookPage *page;
     GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     size_t nameLen;
     
-    tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
-    const char *name = gtk_stack_get_visible_child_name(GTK_STACK(win->stack));
+    tab = gtk_widget_get_focus_child(GTK_WIDGET(win->stack));
+    const char *name = gtk_widget_get_name(GTK_WIDGET(tab));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 

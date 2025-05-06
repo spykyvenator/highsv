@@ -1,80 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="HighsvAppWindow" parent="GtkApplicationWindow">
-    <property name="title" translatable="yes">highsv</property>
+    <property name="title" translatable="1">highsv</property>
     <property name="default-width">600</property>
     <property name="default-height">400</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
-        <child type="title">
-          <object class="GtkStackSwitcher" id="tabs">
-            <property name="stack">stack</property>
+        <child type="title"/>
+        <child>
+          <object class="GtkButton" id="SolveButton">
+            <property name="label">Solve</property>
+            <property name="tooltip-text">Solve the open window</property>
+            <signal name="clicked" handler="solveEntry"/>
           </object>
         </child>
-	<child>
-	  <object class="GtkButton" id="SolveButton">
-	    <property name="label">Solve</property>
-	      <property name="tooltip-text">Solve the open window</property>
-	    <signal name="clicked" handler="solveEntry"/>
-	  </object>
-	</child>
-	  <child>
-	    <object class="GtkButton" id="NewButton">
-	      <property name="label">New</property>
-	      <property name="tooltip-text">Open a new clean window</property>
-	      <signal name="clicked" handler="openNewEmpty"/>
-	    </object>
-	  </child>
-	  <child>
-	    <object class="GtkButton" id="OpenButton">
-	      <property name="label">Open</property>
-	      <property name="tooltip-text">Open a new file</property>
-	      <signal name="clicked" handler="openNew"/>
-	    </object>
-	  </child>
-	  <child>
-	    <object class="GtkButton" id="CloseButton">
-	      <property name="label">Close</property>
-	      <signal name="clicked" handler="closeActive"/>
-	      <property name="tooltip-text">Close the currently opened window</property>
-	    </object>
-	  </child>
-	<child>
-	  <object class="GtkButton" id="SaveButton">
-	    <property name="label">save As</property>
-            <property name="tooltip-text">Save the currently opened window</property>
-	    <signal name="clicked" handler="saveActive"/>
-	  </object>
-	</child>
-	<child>
-	<object class="GtkBox">
-		<property name="orientation">vertical</property>
-	  <child>
-	    <object class="GtkCheckButton" id="mip">
-	      <property name="label">Integer Only</property>
-	      <property name="tooltip-text">Only allow Integer results</property>
-	    <signal name="toggled" handler="toggleMip"/>
-	    </object>
-	  </child>
-	  <child>
-	    <object class="GtkCheckButton" id="pos">
-	      <property name="label">Positive Only</property>
-	      <property name="active">True</property>
-	      <property name="tooltip-text">Only allow positive results</property>
-	    <signal name="toggled" handler="togglePos"/>
-	    </object>
-	  </child>
-  </object>
-  </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox" id="content_box">
-        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkStack" id="stack"/>
+          <object class="GtkButton" id="NewButton">
+            <property name="label">New</property>
+            <property name="tooltip-text">Open a new clean window</property>
+            <signal name="clicked" handler="openNewEmpty"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="OpenButton">
+            <property name="label">Open</property>
+            <property name="tooltip-text">Open a new file</property>
+            <signal name="clicked" handler="openNew"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="CloseButton">
+            <property name="label">Close</property>
+            <signal name="clicked" handler="closeActive"/>
+            <property name="tooltip-text">Close the currently opened window</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="SaveButton">
+            <property name="label">save As</property>
+            <property name="tooltip-text">Save the currently opened window</property>
+            <signal name="clicked" handler="saveActive"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="mip">
+                <property name="label">Integer Only</property>
+                <property name="tooltip-text">Only allow Integer results</property>
+                <signal name="toggled" handler="toggleMip"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="pos">
+                <property name="label">Positive Only</property>
+                <property name="active">1</property>
+                <property name="tooltip-text">Only allow positive results</property>
+                <signal name="toggled" handler="togglePos"/>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
     </child>
+	<child>
+	  <object class="GtkNotebook" id="stack"/>
+	</child>
   </template>
 </interface>

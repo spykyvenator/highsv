@@ -54,7 +54,7 @@ range_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 /*
- * how could I set the sol button action here instead?
+ * could I set the sol button action here instead?
  */
 void
 toggleMip(GtkCheckButton *self, gpointer app)

@@ -35,7 +35,6 @@ HighsvAppWindow *
 highsv_app_window_new(HighsvApp *app)
 {
   HighsvAppWindow *win = g_object_new(HIGHSV_APP_WINDOW_TYPE, "application", app, NULL);
-  gtk_stack_set_hhomogeneous(GTK_STACK(win->stack), FALSE);
   return win;
 }
 
@@ -57,9 +56,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
-  gtk_stack_add_titled(GTK_STACK(win->stack), scrolled, basename, basename);
 
-  gtk_stack_set_visible_child(GTK_STACK(win->stack), scrolled);
+  gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
+  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
 
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
     {
