@@ -35,10 +35,9 @@ close_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 void
 close_tab_by_pointer(GtkButton *button, gpointer notebook)
 {
-  GtkWidget *box;
-
-  box = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_BOX);
-  gtk_notebook_detach_tab(GTK_NOTEBOOK(notebook), box);
+  struct closeTab *temp = (struct closeTab*) notebook;
+  gtk_notebook_detach_tab(temp->n, temp->t);
+  g_free(temp);
 }
 
 void

@@ -45,6 +45,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   char *contents;
   gsize length;
   GtkWidget *box, *label, *closeBtn;
+  struct closeTab *temp = malloc(sizeof(struct closeTab));
 
   basename = g_file_get_basename (file);
   scrolled = gtk_scrolled_window_new ();
@@ -61,7 +62,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
-  g_signal_connect(G_OBJECT(closeBtn), "clicked", G_CALLBACK(close_tab_by_pointer), GTK_NOTEBOOK(win->stack));
+  temp->n = GTK_NOTEBOOK(win->stack);
+  temp->t = scrolled;
+  g_signal_connect(G_OBJECT(closeBtn), "clicked", G_CALLBACK(close_tab_by_pointer), temp);
   gtk_box_append(GTK_BOX(box), label);
   gtk_box_append(GTK_BOX(box), closeBtn);
 

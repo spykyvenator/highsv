@@ -22,3 +22,9 @@ getNotebookActive(GtkNotebook *n)
 { 
     return gtk_notebook_get_nth_page(n, gtk_notebook_get_current_page(n));
 }
+
+struct closeTab
+{
+    GtkNotebook *n;
+    GtkWidget *t;
+};
