@@ -3,6 +3,7 @@
 #include "highsv.h"
 #include "highsvWin.h"
 
+/*
 GtkWidget* 
 get_previous_stack_child(GtkStack *stack, GtkWidget *current_child) {
     GtkSelectionModel *pages = gtk_stack_get_pages(GTK_STACK(stack));
@@ -25,17 +26,17 @@ get_previous_stack_child(GtkStack *stack, GtkWidget *current_child) {
 
     return NULL; // Should not reach here if current_child is in the stack
 }
+*/
 
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
-    GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
-    GtkWidget* new = get_previous_stack_child(GTK_STACK(win->stack), tab);
-    if (!new || !tab) {
+    GtkWidget* tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+    gtk_notebook_prev_page(GTK_NOTEBOOK(win->stack));
+    if (!tab) {
         return;
     }
-    gtk_stack_remove(GTK_STACK(win->stack), tab);
-    gtk_stack_set_visible_child(GTK_STACK(win->stack), GTK_WIDGET(new));
+    gtk_notebook_detach_tab(GTK_NOTEBOOK(win->stack), tab);
 }
 
 typedef struct {
@@ -149,7 +150,7 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
   if (!file)
       return;
 
-  tab = gtk_stack_get_visible_child(GTK_STACK(fsave->win->stack));
+  tab = getNotebookActive(GTK_NOTEBOOK(fsave->win->stack));
   view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 

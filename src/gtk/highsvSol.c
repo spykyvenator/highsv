@@ -14,7 +14,7 @@ rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     
-    tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+    tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
@@ -30,13 +30,13 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
     char* content, *newName;
     GtkWidget *tab;
-    GtkNotebookPage *page;
     GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     size_t nameLen;
     
-    tab = gtk_widget_get_focus_child(GTK_WIDGET(win->stack));
+    tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+
     const char *name = gtk_widget_get_name(GTK_WIDGET(tab));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -53,6 +53,7 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     nameLen = strlen(name)+8;
     newName = malloc(sizeof(char)*nameLen);
     snprintf(newName, nameLen, "%s-XXXXXX", name);
+    gtk_notebook_set_tab_label_text(GTK_NOTEBOOK(win->stack), tab, newName);
     GFile *new = g_file_new_tmp(newName, &stream, &error);
     if (!new) {
         g_printerr("Error creating temp file: %s\n", error->message);

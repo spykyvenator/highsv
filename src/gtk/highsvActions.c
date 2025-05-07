@@ -6,48 +6,48 @@ extern gboolean mip, pos;
 
 
 void
-quit_activated (GSimpleAction *action, GVariant *parameter, gpointer app)
+quit_activated(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   g_application_quit(G_APPLICATION(app));
 }
 
 void
-open_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+open_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   openNew(NULL, win);
 }
 
 void
-open_new_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+open_new_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   openNew(NULL, win);
 }
 
 void
-close_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+close_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   closeActive(NULL, win);
 }
 
 void
-save_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   saveActive(NULL, win);
 }
 
 void
-solve_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   solveEntry(NULL, win);
 }
 
 void
-range_tab (GSimpleAction *action, GVariant *parameter, gpointer app)
+range_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   rangeAnalysis(NULL, win);
