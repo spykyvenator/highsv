@@ -33,6 +33,15 @@ close_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 void
+close_tab_by_pointer(GtkButton *button, gpointer notebook)
+{
+  GtkWidget *box;
+
+  box = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_BOX);
+  gtk_notebook_detach_tab(GTK_NOTEBOOK(notebook), box);
+}
+
+void
 save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
@@ -44,13 +53,6 @@ solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   solveEntry(NULL, win);
-}
-
-void
-range_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
-{
-  HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
-  rangeAnalysis(NULL, win);
 }
 
 /*

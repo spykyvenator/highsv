@@ -3,31 +3,6 @@
 #include "highsv.h"
 #include "highsvWin.h"
 
-/*
-GtkWidget* 
-get_previous_stack_child(GtkStack *stack, GtkWidget *current_child) {
-    GtkSelectionModel *pages = gtk_stack_get_pages(GTK_STACK(stack));
-
-    if (pages == NULL || current_child == NULL) {
-        return NULL; // No pages or no visible child in the stack
-    }
-
-    GListModel *list_model = G_LIST_MODEL(pages);
-    guint n_pages = g_list_model_get_n_items(list_model);
-
-    for (guint i = 0; i < n_pages; i++) {
-        GtkStackPage *page = GTK_STACK_PAGE(g_list_model_get_item(list_model, i));
-        if (gtk_stack_page_get_child(page) == current_child) {
-            gint prev_index = (i - 1 + n_pages) % n_pages;
-            GtkStackPage *prev_page = GTK_STACK_PAGE(g_list_model_get_item(list_model, prev_index));
-            return gtk_stack_page_get_child(prev_page);
-        }
-    }
-
-    return NULL; // Should not reach here if current_child is in the stack
-}
-*/
-
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {

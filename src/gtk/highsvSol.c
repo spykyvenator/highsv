@@ -6,54 +6,32 @@
 extern gboolean mip, pos;
 
 void
-rangeAnalysis(GtkEntry *entry, HighsvAppWindow *win)
-{
-    char* content;
-    GtkWidget *tab;
-    GtkWidget *view;
-    GtkTextBuffer *buffer;
-    GtkTextIter startI, endI;
-    
-    tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
-    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
-
-    gtk_text_buffer_get_start_iter(buffer, &startI);
-    gtk_text_buffer_get_end_iter(buffer, &endI);
-
-    content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
-    g_free(content);
-}
-
-void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
-    char* content, *newName;
-    GtkWidget *tab;
-    GtkWidget *view;
+    char *content, *newName;
+    GtkWidget *tab, *view, *box, *label;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     size_t nameLen;
     
     tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
 
-    const char *name = gtk_widget_get_name(GTK_WIDGET(tab));
-    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->stack), GTK_WIDGET(tab));// owned by instance
+    label = gtk_widget_get_first_child(box);
+    const char *name = gtk_label_get_text(GTK_LABEL(label));
+    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));// owned by instance
 
     gtk_text_buffer_get_start_iter(buffer, &startI);
     gtk_text_buffer_get_end_iter(buffer, &endI);
-
     content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
-
 
     GError *error = NULL;
     GFileIOStream* stream = NULL;
 
     nameLen = strlen(name)+8;
-    newName = malloc(sizeof(char)*nameLen);
+    newName = alloca(sizeof(char)*nameLen);
     snprintf(newName, nameLen, "%s-XXXXXX", name);
-    gtk_notebook_set_tab_label_text(GTK_NOTEBOOK(win->stack), tab, newName);
     GFile *new = g_file_new_tmp(newName, &stream, &error);
     if (!new) {
         g_printerr("Error creating temp file: %s\n", error->message);

@@ -22,7 +22,6 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
 
   gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class), HighsvAppWindow, stack);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), solveEntry);
-  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), rangeAnalysis);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNewEmpty);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
@@ -45,20 +44,30 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   GtkWidget *scrolled, *view;
   char *contents;
   gsize length;
+  GtkWidget *box, *label, *closeBtn;
 
   basename = g_file_get_basename (file);
-
   scrolled = gtk_scrolled_window_new ();
+  view = gtk_text_view_new();
+  label = gtk_label_new(basename);
+  box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+  closeBtn = gtk_button_new_with_label("X");
+
   gtk_widget_set_hexpand(scrolled, TRUE);
   gtk_widget_set_vexpand(scrolled, TRUE);
-  view = gtk_text_view_new();
   gtk_text_view_set_monospace(GTK_TEXT_VIEW(view), 1);
   gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
+  gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
+  gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
+  g_signal_connect(G_OBJECT(closeBtn), "clicked", G_CALLBACK(close_tab_by_pointer), GTK_NOTEBOOK(win->stack));
+  gtk_box_append(GTK_BOX(box), label);
+  gtk_box_append(GTK_BOX(box), closeBtn);
 
   gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
   gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
+  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, box);
 
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
     {

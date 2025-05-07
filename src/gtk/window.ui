@@ -64,8 +64,18 @@
         </child>
       </object>
     </child>
-	<child>
-	  <object class="GtkNotebook" id="stack"/>
-	</child>
+    <child>
+        <object class="GtkBox">
+            <child>
+              <object class="GtkNotebook" id="stack"/>
+            </child>
+            <child>
+                <object class="GtkButton" id="NewButton2">
+                    <property name="label">+</property>
+                    <signal name="clicked" handler="openNew"/>
+                </object>
+            </child>
+        </object>
+    </child>
   </template>
 </interface>
