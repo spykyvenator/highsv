@@ -59,6 +59,8 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_text_view_set_monospace(GTK_TEXT_VIEW(view), 1);
   gtk_text_view_set_editable(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
+  gtk_text_view_set_left_margin(GTK_TEXT_VIEW(view), 10);
+  gtk_text_view_set_top_margin(GTK_TEXT_VIEW(view), 10);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
@@ -73,13 +75,13 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, box);
 
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
-    {
+  {
       GtkTextBuffer *buffer;
 
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
       gtk_text_buffer_set_text(buffer, contents, length);
       g_free(contents);
-    }
+  }
 
   g_free(basename);
 }
