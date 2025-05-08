@@ -1,9 +1,11 @@
 CC ?= gcc
 PKGCONFIG ?= $(shell which pkg-config)
 CFLAGS = -std=c23 -Wpedantic -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
-	 $(shell $(PKGCONFIG) --cflags highs)
+	 $(shell $(PKGCONFIG) --cflags highs) \
+	 $(shell $(PKGCONFIG) --cflags gtksourceview-5)
 LIBS = $(shell $(PKGCONFIG) --libs gtk4) \
-       $(shell $(PKGCONFIG) --libs highs)
+       $(shell $(PKGCONFIG) --libs highs) \
+       $(shell $(PKGCONFIG) --libs gtksourceview-5)
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 LDFLAGS = -Wl,--allow-multiple-definition
 

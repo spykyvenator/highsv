@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="highsv" name="highsv - a linear program solver" version="2.0" _section="Scientific">
+  <metadata>
+    <property name="mimetypes">text/plain</property>
+    <property name="globs">*.txt</property>
+    <property name="suggested-suffix">.lps</property>
+  </metadata>
+
+  <styles>
+    <style id="comment"                name="Comment"                map-to="def:comment"/>
+  </styles>
+
+  <definitions>
+    <!--Main context-->
+    <context id="comment" style-ref="comment">
+      <start>!</start>
+      <end>$</end>
+    </context>
+    <context id="minmax" style-ref="def:string">
+      <keyword>(?i)max</keyword>
+      <keyword>(?i)min</keyword>
+    </context>
+    <context id="st" style-ref="def:keyword">
+      <keyword>(?i)st</keyword>
+    </context>
+    <context id="highsv">
+      <include>
+        <context ref="comment"/>
+        <context ref="minmax"/>
+        <context ref="st"/>
+      </include>
+    </context>
+  </definitions>
+</language>

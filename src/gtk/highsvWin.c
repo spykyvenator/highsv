@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gtksourceview/gtksource.h>
 
 #include "highsv.h"
 #include "highsvWin.h"
@@ -49,7 +50,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
 
   basename = g_file_get_basename (file);
   scrolled = gtk_scrolled_window_new ();
-  view = gtk_text_view_new();
+  view = gtk_source_view_new();
   label = gtk_label_new(basename);
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
   closeBtn = gtk_button_new_with_label("X");
@@ -64,6 +65,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(view), 10);
   gtk_text_view_set_right_margin(GTK_TEXT_VIEW(view), 10);
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(view), GTK_INPUT_HINT_SPELLCHECK);
+  gtk_source_view_set_show_line_numbers(GTK_SOURCE_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
@@ -80,8 +82,12 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
   {
       GtkTextBuffer *buffer;
+      GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
+      gtk_source_language_manager_prepend_search_path(manager, ".");
+      GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
 
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+      gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
       gtk_text_buffer_set_text(buffer, contents, length);
       g_free(contents);
   }
