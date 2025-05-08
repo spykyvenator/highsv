@@ -61,6 +61,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(view), TRUE);
   gtk_text_view_set_left_margin(GTK_TEXT_VIEW(view), 10);
   gtk_text_view_set_top_margin(GTK_TEXT_VIEW(view), 10);
+  gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(view), 10);
+  gtk_text_view_set_right_margin(GTK_TEXT_VIEW(view), 10);
+  gtk_text_view_set_input_hints(GTK_TEXT_VIEW(view), GTK_INPUT_HINT_SPELLCHECK);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
