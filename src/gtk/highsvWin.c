@@ -83,7 +83,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   {
       GtkTextBuffer *buffer;
       GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
-      gtk_source_language_manager_prepend_search_path(manager, ".");
+      gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
       GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
 
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));

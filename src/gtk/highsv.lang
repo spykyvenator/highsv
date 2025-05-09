@@ -8,6 +8,7 @@
 
   <styles>
     <style id="comment"                name="Comment"                map-to="def:comment"/>
+    <style id="equality"            name="equality"            map-to="def:type"/>
   </styles>
 
   <definitions>
@@ -22,12 +23,17 @@
     </context>
     <context id="st" style-ref="def:keyword">
       <keyword>(?i)st</keyword>
+      <keyword>(?i)subject to</keyword>
+    </context>
+    <context id="eq" style-ref="equality">
+      <keyword>=</keyword>
     </context>
     <context id="highsv">
       <include>
         <context ref="comment"/>
         <context ref="minmax"/>
         <context ref="st"/>
+	<context ref="eq"/>
       </include>
     </context>
   </definitions>
