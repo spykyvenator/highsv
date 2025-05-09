@@ -47,6 +47,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gsize length;
   GtkWidget *box, *label, *closeBtn;
   struct closeTab *temp = malloc(sizeof(struct closeTab));
+  //GtkSourceCompletion *compl;
 
   basename = g_file_get_basename (file);
   scrolled = gtk_scrolled_window_new ();
@@ -54,6 +55,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   label = gtk_label_new(basename);
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
   closeBtn = gtk_button_new_with_label("X");
+  //compl = gtk_source_view_get_completion(GTK_SOURCE_VIEW(view));
 
   gtk_widget_set_hexpand(scrolled, TRUE);
   gtk_widget_set_vexpand(scrolled, TRUE);
@@ -65,6 +67,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(view), 10);
   gtk_text_view_set_right_margin(GTK_TEXT_VIEW(view), 10);
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(view), GTK_INPUT_HINT_SPELLCHECK);
+  gtk_source_view_set_highlight_current_line(GTK_SOURCE_VIEW(view), TRUE);
   gtk_source_view_set_show_line_numbers(GTK_SOURCE_VIEW(view), TRUE);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);

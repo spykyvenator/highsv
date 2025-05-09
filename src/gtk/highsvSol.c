@@ -13,6 +13,8 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     size_t nameLen;
+    GError *error = NULL;
+    GFileIOStream* stream = NULL;
     
     tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
 
@@ -25,9 +27,6 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     gtk_text_buffer_get_start_iter(buffer, &startI);
     gtk_text_buffer_get_end_iter(buffer, &endI);
     content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
-
-    GError *error = NULL;
-    GFileIOStream* stream = NULL;
 
     nameLen = strlen(name)+8;
     newName = alloca(sizeof(char)*nameLen);

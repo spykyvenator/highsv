@@ -83,7 +83,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   GtkWidget *openBtn = gtk_button_new_with_label("O");
   gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
   gtk_button_set_has_frame(GTK_BUTTON(openBtn), FALSE);
-  gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Open new file");
+  gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Create new file");
   gtk_widget_set_tooltip_text(GTK_WIDGET(openBtn), "Open file");
   g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(openNewEmpty), win);
   g_signal_connect(G_OBJECT(openBtn), "clicked", G_CALLBACK(openNew), win);

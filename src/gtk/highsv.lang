@@ -21,8 +21,10 @@
       [!=]=&gt; |
       &lt;=[!=] |
       [!=]=&lt; |
+      \+ | 
+      \-
     </define-regex> <!-- /_binary-operator -->
-    <define-regex id="_false-binary-operator" extended="true">
+    <define-regex id="_false-operator" extended="true">
       === |                            # equality
       &lt;===* |
       &gt;===* |
@@ -30,6 +32,7 @@
       =*==&gt; |
       =&lt;= |
       =*==&lt; |
+      /
     </define-regex> <!-- /_binary-operator -->
 
     <context id="comment" style-ref="comment">
@@ -51,7 +54,7 @@
       <match>\%{_binary-operator}</match>
     </context>
     <context id="false-operator" style-ref="def:error">
-      <match>\%{_false-binary-operator}</match>
+      <match>\%{_false-operator}</match>
     </context>
     <context id="float" style-ref="def:floating-point">
       <keyword>[0-9]*[\.]?[0-9]*</keyword>
@@ -62,12 +65,12 @@
     <context id="highsv">
       <include>
         <context ref="comment"/>
-        <context ref="var"/>
         <context ref="minmax"/>
         <context ref="float"/>
         <context ref="st"/>
         <context ref="false-operator"/>
         <context ref="operator"/>
+        <context ref="var"/>
       </include>
     </context>
   </definitions>
