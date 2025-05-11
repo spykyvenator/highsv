@@ -25,14 +25,9 @@
       \-
     </define-regex> <!-- /_binary-operator -->
     <define-regex id="_false-operator" extended="true">
-      === |                            # equality
-      &lt;===* |
-      &gt;===* |
-      =&gt;= |
-      =*==&gt; |
-      =&lt;= |
-      =*==&lt; |
-      /
+      [&lt;|&gt;|=]*[&gt;|&lt;|=][&lt;|&gt;|=][&lt;|&gt;|=]+ |
+      [&lt;|&gt;|=]*[&lt;|&gt;][&lt;|&gt;][&lt;|&gt;|=]* |
+      //
     </define-regex> <!-- /_binary-operator -->
 
     <context id="comment" style-ref="comment">
