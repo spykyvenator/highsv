@@ -30,7 +30,7 @@ End should be written at the beginning of a line, so no tabs or spaces can be in
 
 Comments start with ! and end with newlines
 No multiplication mark can be used but values can be separated from the variable or written right next to it so both 1.1x1 and 1.1 x1 are correct.
-"min", "max" and "st" or "subject to" have ignored case, end should be written lowercase at the moment.
+"min", "max", "end" and "st" or "subject to" have ignored case.
 
 If this sounds complicated, maybe the example below can help you get started.
 

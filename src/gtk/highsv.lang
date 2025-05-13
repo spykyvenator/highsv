@@ -7,8 +7,8 @@
   </metadata>
 
   <styles>
-    <style id="comment"                name="Comment"                map-to="def:comment"/>
-    <style id="equality"            name="equality"            map-to="def:type"/>
+    <style id="comment"			name="Comment"			map-to="def:comment"/>
+    <style id="equality"		name="equality"			map-to="def:type"/>
   </styles>
 
   <definitions>
@@ -41,6 +41,7 @@
     <context id="st" style-ref="def:keyword">
       <keyword>(?i)st</keyword>
       <keyword>(?i)subject to</keyword>
+      <keyword>end</keyword>
     </context>
     <context id="eq" style-ref="equality">
       <keyword>=</keyword>

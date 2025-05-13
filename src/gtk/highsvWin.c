@@ -43,8 +43,12 @@ setSourceCompletion(GtkSourceView *v)
 {
     GtkSourceCompletionWords *prv = gtk_source_completion_words_new(NULL);
     GtkSourceCompletion *sc = gtk_source_view_get_completion(v);
+    GtkSourceSnippet *s = gtk_source_snippet_new_parsed("max", NULL);
+
     gtk_source_completion_words_register(prv, gtk_text_view_get_buffer(GTK_TEXT_VIEW(v)));
     gtk_source_completion_add_provider(sc, GTK_SOURCE_COMPLETION_PROVIDER(prv));
+    gtk_source_view_push_snippet(v, s, NULL);
+    gtk_source_view_set_enable_snippets(v, TRUE);
 }
 
 static inline GtkWidget*
