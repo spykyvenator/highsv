@@ -14,4 +14,5 @@ void range_tab (GSimpleAction *action, GVariant *parameter, gpointer app);
 void toggleMip(GtkCheckButton *self, gpointer app);
 void togglePos(GtkCheckButton *self, gpointer app);
 void complete (GSimpleAction *action, GVariant *parameter, gpointer app);
+void zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app);
 #endif

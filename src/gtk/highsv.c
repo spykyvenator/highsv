@@ -21,6 +21,7 @@ static GActionEntry app_entries[] =
   { "save", save_tab, NULL, NULL, NULL },
   { "solve", solve_tab, NULL, NULL, NULL },
   { "complete", complete, NULL, NULL, NULL },
+  { "zoomi", zoomIn, NULL, NULL, NULL },
 };
 
 static void
@@ -34,6 +35,7 @@ highsv_app_startup(GApplication *app)
   const char *save_accels[2] = { "<ctrl>s", NULL };
   const char *solve_accels[3] = { "<ctrl>r", "<ctrl>Return", NULL };
   const char *complete_accels[3] = { "<ctrl>k", NULL };
+  const char *zoomIn_accels[3] = { "<ctrl>p", NULL };
 
   G_APPLICATION_CLASS(highsv_app_parent_class)->startup (app);
 
@@ -45,6 +47,7 @@ highsv_app_startup(GApplication *app)
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.save", save_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.solve", solve_accels); 
   gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.complete", complete_accels); 
+  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.zoomIn", zoomIn_accels); 
 }
 
 static void

@@ -12,7 +12,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 
   int *rowIndex = NULL, numNz = 0;
   size_t rowLen = 2, numRow = 0, numCol = 0;
-  double lastVal = 0, sign = 1, *rowVal = NULL;
+  double lastVal = NAN, sign = 1, *rowVal = NULL;
   char state = COST;
   char lastVarName[255];
   void *model = NULL;
@@ -39,9 +39,9 @@ FLOAT [0-9]*[\.]?[0-9]*
 		puts("error: only one st allowed"); 
 #endif
   numNz = 0;
-	if (lastVal) {
+	if (lastVal != NAN) {
 		if (Highs_changeObjectiveOffset(model, lastVal)) puts("setting offset failed");
-		lastVal = 0;
+		lastVal = NAN;
 	    } 
 	}
 
@@ -62,7 +62,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 #endif
             setBounds(model, sign * atof(yytext), 0);
             state = AVAL;
-        } else if (!lastVal) {
+        } else if (lastVal != NAN) {
             lastVal = sign * atof(yytext); 
         } 
 #ifdef DEBUG
@@ -144,11 +144,11 @@ setBounds (void *mod, const double val, const char sign)
 static void
 readVar (void *mod, char *text, const char state) 
 {
-	size_t index = findIndex(mod, text);
-	if (lastVal == 0){
-	    lastVal = sign;
-	    sign = 1;
-	}
+  size_t index = findIndex(mod, text);
+  if (lastVal == NAN){
+    lastVal = sign;
+    sign = 1;
+  }
 
   if (index >= rowLen){
     double *tmpVal = (double*) malloc(sizeof(double)*rowLen*2);
@@ -160,8 +160,8 @@ readVar (void *mod, char *text, const char state)
     rowVal = tmpVal;
     rowIndex = tmpIndex;
     for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
-	    rowVal[i] = 0;
-	    rowIndex[i] = 0;
+      rowVal[i] = 0;
+      rowIndex[i] = 0;
     }
     rowLen*=2;
   }
@@ -175,6 +175,6 @@ readVar (void *mod, char *text, const char state)
 		rowIndex[numNz] = index;
 		rowVal[numNz++] = lastVal;
 	}
-	lastVal = 0;
+	lastVal = NAN;
 	strcpy(lastVarName, text);
 }

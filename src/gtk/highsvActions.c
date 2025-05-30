@@ -72,6 +72,16 @@ togglePos(GtkCheckButton *self, gpointer app)
 }
 
 void
+zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app)
+{
+    HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+    GtkWidget *tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+    GtkWidget *view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance
+    puts("ok");
+    puts(gtk_widget_get_css_name(GTK_WIDGET(view)));
+}
+
+void
 complete(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
