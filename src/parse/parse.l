@@ -62,7 +62,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 #endif
             setBounds(model, sign * atof(yytext), 0);
             state = AVAL;
-        } else if (lastVal == NAN) {
+        } else if (!lastVal) {
             lastVal = sign * atof(yytext); 
         } 
 #ifdef DEBUG
