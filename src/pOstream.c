@@ -121,6 +121,8 @@ getDualPriceRanges(void *mod)
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       rowUBnd, NULL, NULL, NULL, rowLBnd, NULL, NULL, NULL);
     for (HighsInt i = 0; i < nbRows; i++) {
+        //res[i*2] = 0;// 0 init
+        //res[i*2+1] = 0;
         char type;
         rc = getRowConstraint(mod, (HighsInt) i, &type);
         if (rc == lhs[i]) {// we are a constraining row

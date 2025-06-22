@@ -12,7 +12,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 
   int *rowIndex = NULL, numNz = 0;
   size_t rowLen = 2, numRow = 0, numCol = 0;
-  double lastVal = NAN, sign = 1, *rowVal = NULL;
+  double lastVal = 0, sign = 1, *rowVal = NULL;
   char state = COST;
   char lastVarName[255];
   void *model = NULL;
@@ -39,9 +39,9 @@ FLOAT [0-9]*[\.]?[0-9]*
 		puts("error: only one st allowed"); 
 #endif
   numNz = 0;
-	if (lastVal != NAN) {
+	if (lastVal) {
 		if (Highs_changeObjectiveOffset(model, lastVal)) puts("setting offset failed");
-		lastVal = NAN;
+		lastVal = 0;
 	    } 
 	}
 
@@ -62,7 +62,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 #endif
             setBounds(model, sign * atof(yytext), 0);
             state = AVAL;
-        } else if (lastVal != NAN) {
+        } else if (lastVal == NAN) {
             lastVal = sign * atof(yytext); 
         } 
 #ifdef DEBUG
@@ -145,7 +145,7 @@ static void
 readVar (void *mod, char *text, const char state) 
 {
   size_t index = findIndex(mod, text);
-  if (lastVal == NAN){
+  if (lastVal == 0){
     lastVal = sign;
     sign = 1;
   }
@@ -175,6 +175,6 @@ readVar (void *mod, char *text, const char state)
 		rowIndex[numNz] = index;
 		rowVal[numNz++] = lastVal;
 	}
-	lastVal = NAN;
+	lastVal = 0;
 	strcpy(lastVarName, text);
 }
