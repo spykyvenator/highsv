@@ -253,14 +253,15 @@ pRange(void *mod, GOutputStream *ostr)
   tprint_column_add (tp, "Current", TPAlign_left, TPAlign_left);
   tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
   tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
-  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
-  tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  // don't add the lingo columns as these are false
+  //tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
+  //tprint_column_add (tp, "Allowable", TPAlign_left, TPAlign_left);
   tprint_data_add_str(tp, 0, "Row");
   tprint_data_add_str(tp, 1, "RHS");
   tprint_data_add_str(tp, 2, "Increase");
   tprint_data_add_str(tp, 3, "Decrease");
-  tprint_data_add_str(tp, 4, "Increase");
-  tprint_data_add_str(tp, 5, "Decrease");
+  //tprint_data_add_str(tp, 4, "Increase");
+  //tprint_data_add_str(tp, 5, "Decrease");
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)
       break;
@@ -269,8 +270,8 @@ pRange(void *mod, GOutputStream *ostr)
     tprint_data_add_double(tp, 1, mkPos(rowInt[i*3]));
     tprint_data_add_double(tp, 2, mkPos(rowInt[i*3+1]));
     tprint_data_add_double(tp, 3, mkPos(rowInt[i*3+2]));
-    tprint_data_add_double(tp, 4, dualRng[i*2]);
-    tprint_data_add_double(tp, 5, dualRng[i*2+1]);
+    //tprint_data_add_double(tp, 4, dualRng[i*2]);
+    //tprint_data_add_double(tp, 5, dualRng[i*2+1]);
   }
   tprint_print(tp);
   tprint_free(tp);
