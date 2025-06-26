@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <language id="highsv" name="highsv - a linear program solver" version="2.0" _section="Scientific">
+	<!--
   <metadata>
     <property name="mimetypes">text/plain</property>
     <property name="globs">*.txt</property>
     <property name="suggested-suffix">.lps</property>
   </metadata>
+  -->
 
   <styles>
     <style id="comment"			name="Comment"			map-to="def:comment"/>
     <style id="equality"		name="equality"			map-to="def:type"/>
+    <style id="minmax"			name="minmax"			map-to="def:keyword"/>
+    <style id="err"			name="err"			map-to="def:error"/>
+    <style id="float"			name="float"			map-to="def:number"/>
   </styles>
 
   <definitions>
@@ -34,11 +39,11 @@
       <start>!</start>
       <end>$</end>
     </context>
-    <context id="minmax" style-ref="def:string">
+    <context id="minmax" style-ref="minmax">
       <keyword>(?i)max</keyword>
       <keyword>(?i)min</keyword>
     </context>
-    <context id="st" style-ref="def:keyword">
+    <context id="st" style-ref="minmax">
       <keyword>(?i)st</keyword>
       <keyword>(?i)subject to</keyword>
       <keyword>end</keyword>
@@ -49,24 +54,24 @@
     <context id="operator" style-ref="def:operator">
       <match>\%{_binary-operator}</match>
     </context>
-    <context id="false-operator" style-ref="def:error">
+    <context id="false-operator" style-ref="err">
       <match>\%{_false-operator}</match>
     </context>
-    <context id="float" style-ref="def:floating-point">
+    <context id="float" style-ref="float">
       <keyword>[0-9]*[\.]?[0-9]*</keyword>
     </context>
-    <context id="var" style-ref="def:constant">
+    <context id="var" style-ref="def:builtin">
       <keyword>[a-zA-Z][0-9a-zA-Z|,|/]*</keyword>
     </context>
     <context id="highsv">
       <include>
-        <context ref="comment"/>
         <context ref="minmax"/>
-        <context ref="float"/>
         <context ref="st"/>
+        <context ref="comment"/>
+        <context ref="var"/>
+        <context ref="float"/>
         <context ref="false-operator"/>
         <context ref="operator"/>
-        <context ref="var"/>
       </include>
     </context>
   </definitions>
