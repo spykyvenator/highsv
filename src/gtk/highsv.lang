@@ -14,6 +14,8 @@
     <style id="minmax"			name="minmax"			map-to="def:keyword"/>
     <style id="err"			name="err"			map-to="def:error"/>
     <style id="float"			name="float"			map-to="def:number"/>
+    <style id="var"			name="var"			map-to="def:builtin"/>
+    <style id="operator" 		name="operator"			map-to="def:operator"/>
   </styles>
 
   <definitions>
@@ -51,17 +53,17 @@
     <context id="eq" style-ref="equality">
       <keyword>=</keyword>
     </context>
-    <context id="operator" style-ref="def:operator">
+    <context id="operator" style-ref="operator">
       <match>\%{_binary-operator}</match>
     </context>
     <context id="false-operator" style-ref="err">
       <match>\%{_false-operator}</match>
     </context>
     <context id="float" style-ref="float">
-      <keyword>[0-9]*[\.]?[0-9]*</keyword>
+      <match>[0-9]*[\.]?[0-9]*</match>
     </context>
-    <context id="var" style-ref="def:builtin">
-      <keyword>[a-zA-Z][0-9a-zA-Z|,|/]*</keyword>
+    <context id="var" style-ref="var">
+      <match>[a-zA-Z][0-9a-zA-Z|,|/]*</match>
     </context>
     <context id="highsv">
       <include>
