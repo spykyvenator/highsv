@@ -8,6 +8,7 @@
 
 %code requires {
 	%include <math.h>
+	void *model = NULL;
 }
 
 %token
@@ -16,23 +17,43 @@
 	ST
 	VAR
 	COMMENT
-	IQLT
-	IQGT
+	LT
+	GT
 	EQ
 	END
 	EOL
 ;
 %token <double> NUM "number"
+%nterm <double> coef
 
 %printer { fprintf (yyo, "%g", $$); } <double>;
 
+%%
+%start main
+
+main:
+	MIN obj ST constr { 
+		Highs_changeObjectiveSense(model, kHighsObjSenseMaximize); }
+	| MAX obj ST constr {
+		Highs_changeObjectiveSense(model, kHighsObjSenseMinimize); }
+obj: %empty 
+
+constr:
+      expr LT expr
+      | expr GT expr
+      | expr EQ expr
+
+expr:
+    %empty
+    | coef VAR expr
+	
 %left "+" "-" "*" "/" "^";
-exp:
+coef:
 	"number"
-	| exp "+" exp { $$ = $1 + $3; }
-	| exp "-" exp   { $$ = $1 - $3; }
-	| exp "*" exp   { $$ = $1 * $3; }
-	| exp "/" exp   { $$ = $1 / $3; }
-	| "(" exp ")"   { $$ = $2; }
-	| exp "^" exp   { $$ = pow($1, $3); }
-	| "sqrt(" exp ")" { $$ = sqrt($2); }
+	| coef "+" coef { $$ = $1 + $3; }
+	| coef "-" coef   { $$ = $1 - $3; }
+	| coef "*" coef   { $$ = $1 * $3; }
+	| coef "/" coef   { $$ = $1 / $3; }
+	| "(" coef ")"   { $$ = $2; }
+	| coef "^" coef   { $$ = pow($1, $3); }
+	| "sqrt(" coef ")" { $$ = sqrt($2); }
