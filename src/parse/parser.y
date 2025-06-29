@@ -15,7 +15,6 @@
 	MIN
 	MAX
 	ST
-	VAR
 	COMMENT
 	LT
 	GT
@@ -24,6 +23,7 @@
 	EOL
 ;
 %token <double> NUM "number"
+%token <char *> VAR "variable"
 %nterm <double> coef
 
 %printer { fprintf (yyo, "%g", $$); } <double>;
@@ -39,9 +39,12 @@ main:
 obj: %empty 
 
 constr:
-      expr LT expr
-      | expr GT expr
-      | expr EQ expr
+      expr LT "number" {
+	      Highs_addRow(model, Highs_getInfinity(mod), $3, numNz, $1.Index, $1.Val); }
+      | expr GT "number" {
+	      Highs_addRow(model, $3, Highs_getInfinity(mod), numNz, $1.Index, $1.Val); }
+      | expr EQ "number" {
+	      Highs_addRow(model, $3, $3, numNz, $1.Index, $1.Val); }
 
 expr:
     %empty
@@ -57,3 +60,5 @@ coef:
 	| "(" coef ")"   { $$ = $2; }
 	| coef "^" coef   { $$ = pow($1, $3); }
 	| "sqrt(" coef ")" { $$ = sqrt($2); }
+
+%%
