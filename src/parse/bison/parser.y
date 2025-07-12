@@ -5,8 +5,6 @@
 %define api.value.type union
 %define api.header.include {"parser.h"}
 
-%expect 0
-
 %code top {
 	#include "interfaces/highs_c_api.h"
 }
@@ -31,16 +29,20 @@
 %left "*" "/"
 
 %%
+
 %start input;
 
 input: %empty
-     | MAX st { puts("max"); }
-     | MIN st { puts("min"); }
+     | MAX EOL st trailingEOL { puts("max"); }
+     | MIN EOL st trailingEOL { puts("min"); }
      ;
-st:
-  ST YYEOF { puts("st"); }
-  | ST { puts("st"); }
-  ;
+
+st: ST { puts("st"); };
+
+trailingEOL: %empty
+	   | EOL trailingEOL
+	   ;
+
 %%
 
 void
