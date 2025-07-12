@@ -1,7 +1,7 @@
 %option nodefault noinput nounput noyywrap reentrant noyywrap
 
 %{
-#include "parser.tab.h"
+# include "parser.tab.h"
 %}
 
 FLOAT [0-9]*[\.]?[0-9]*

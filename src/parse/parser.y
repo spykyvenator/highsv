@@ -1,18 +1,16 @@
-%code top {
-	struct constr;
-	struct expr;
-}
-
 %define parse.trace
 %define parse.error detailed
 %define api.token.prefix {TOK_}
 
 %code requires {
-	#include <math.h>
-	#include "interfaces/highs_c_api.h"
-	#include <stddef.h>
+# include <math.h>
+# include "interfaces/highs_c_api.h"
+# include <stddef.h>
+# include "parser.h"
 
-	#define MAX_ARRAY_SIZE 100
+# define MAX_ARRAY_SIZE 100
+	struct constr;
+	struct expr;
 
 	typedef double YYSTYPE;
 	static HighsInt findIndex(void *mod, const char *text);
@@ -45,9 +43,9 @@
 
 %%
 
-%start main;
+%start file;
 
-main: MIN obj ST constrs { Highs_changeObjectiveSense(model, kHighsObjSenseMaximize); }
+file: MIN obj ST constrs { Highs_changeObjectiveSense(model, kHighsObjSenseMaximize); }
 	| MAX obj ST constrs { Highs_changeObjectiveSense(model, kHighsObjSenseMinimize); };
 
 obj: expr { }

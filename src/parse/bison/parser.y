@@ -5,6 +5,8 @@
 %define api.value.type union
 %define api.header.include {"parser.h"}
 
+%expect 0
+
 %code top {
 	#include "interfaces/highs_c_api.h"
 }
@@ -24,14 +26,21 @@
 
 %token <double> NUM "number"
 
+%printer { fprintf (yyo, "%f", $$); } <double>
 %left "+" "-"
 %left "*" "/"
 
 %%
-input:
-     MAX ST { puts("max"); }
-     | MIN ST { puts("min"); }
+%start input;
+
+input: %empty
+     | MAX st { puts("max"); }
+     | MIN st { puts("min"); }
      ;
+st:
+  ST YYEOF { puts("st"); }
+  | ST { puts("st"); }
+  ;
 %%
 
 void
