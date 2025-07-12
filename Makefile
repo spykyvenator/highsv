@@ -6,12 +6,17 @@ all: lps data/ui/icon.ico
 lps: 
 	cd src/gtk && $(MAKE)
 	cp --update=older src/gtk/highsv ./lps
+
 data/ui/icon.ico: data/ui/icon.svg
 	magick data/ui/icon.svg data/ui/icon.ico
 debug:
 	cd src/gtk && $(MAKE) debug
 	cp --update=older src/gtk/highsv ./lps
 	data/ui/icon.ico
+egypt:
+	cd src/gtk && $(MAKE) egypt
+	egypt $(shell find . -name '*.expand') | circo -Tsvg -o ./call.svg
+
 windows:
 	cd src/gtk && $(MAKE) windows
 	cp src/gtk/highsv.exe ./
@@ -19,6 +24,7 @@ windows:
 clean:
 	cd src/gtk && $(MAKE) clean
 	rm data/ui/icon.ico
+	rm $(shell find . -name '*.expand')
 
 tools/options.out: tools/test.c
 	gcc $< -o $@ $(shell $(PKGCONFIG) --libs highs) $(shell $(PKGCONFIG) --cflags highs)

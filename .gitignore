@@ -18,3 +18,5 @@ highs
 win/*
 *.ico
 *.txt
+*.expand
+*.dot

@@ -40,14 +40,16 @@ highsv_app_startup(GApplication *app)
   G_APPLICATION_CLASS(highsv_app_parent_class)->startup (app);
 
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.quit", quit_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.open", open_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.open_new", open_new_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.close", close_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.save", save_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.solve", solve_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.complete", complete_accels); 
-  gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.zoomIn", zoomIn_accels); 
+#define QUOTE(X) #X
+#define EXPAND_AND_QUOTE(X) QUOTE(X)
+#define SET_ACCELS(NAME) gtk_application_set_accels_for_action(GTK_APPLICATION(app), EXPAND_AND_QUOTE(app.NAME)  , NAME ## _accels);
+  SET_ACCELS(quit);
+  SET_ACCELS(open);
+  SET_ACCELS(open_new);
+  SET_ACCELS(close);
+  SET_ACCELS(save);
+  SET_ACCELS(solve);
+  SET_ACCELS(zoomIn);
 }
 
 static void
@@ -100,7 +102,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
 }
 
 static void 
-highsv_shutdown(GApplication *app)
+highsv_app_shutdown(GApplication *app)
 {
     quitModel();
     HighsvApp *highsv = (HighsvApp *) app;
@@ -125,10 +127,11 @@ highsv_app_init (HighsvApp *app)
 static void
 highsv_app_class_init (HighsvAppClass *class)
 {
-  G_APPLICATION_CLASS(class)->activate = highsv_app_activate;
-  G_APPLICATION_CLASS(class)->open = highsv_app_open;
-  G_APPLICATION_CLASS(class)->startup = highsv_app_startup;
-  G_APPLICATION_CLASS(class)->shutdown = highsv_shutdown;
+#define SET_FUNC(NAME) G_APPLICATION_CLASS(class)->NAME = highsv_app_ ## NAME;
+    SET_FUNC(activate);
+    SET_FUNC(open);
+    SET_FUNC(startup);
+    SET_FUNC(shutdown);
 }
 
 HighsvApp *
