@@ -1,4 +1,4 @@
-CFLAGS=$(shell pkg-config --cflags highs)
+CFLAGS= -g $(shell pkg-config --cflags highs)
 LFLAGS=$(shell pkg-config --libs highs) -lm
 
 all: parser.out
@@ -9,7 +9,7 @@ scanner.c: scanner.l
 %.o: %.c
 	gcc -c $(CFLAGS) $< $(LFLAGS)
 parser.out: parser.o scanner.o
-	gcc $^ -o $@ $(LFLAGS)
+	gcc $(CFLAGS) $^ -o $@ $(LFLAGS)
 
 clean: 
 	rm -vf parser.c scanner.c parser.out scannner.h *.o
