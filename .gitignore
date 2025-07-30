@@ -18,3 +18,12 @@ highs
 win/*
 *.ico
 *.txt
+build/
+call.dot
+call.png
+call.svg
+src/parse/bison/parser.c
+src/parse/bison/parser.h
+src/parse/bison/scanner.c
+src/parse/bison/scanner.h
+
