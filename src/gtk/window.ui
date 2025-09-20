@@ -33,9 +33,9 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="pos">
-                <property name="label">Positive Only</property>
+                <property name="label">Nonnegative Only</property>
                 <property name="active">1</property>
-                <property name="tooltip-text">Only allow positive results</property>
+                <property name="tooltip-text">Only allow nonnegative results</property>
                 <signal name="toggled" handler="togglePos"/>
               </object>
             </child>

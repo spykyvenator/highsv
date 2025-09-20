@@ -65,7 +65,7 @@ getSourceView()
   gtk_text_view_set_right_margin(GTK_TEXT_VIEW(res), 10);
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(res), GTK_INPUT_HINT_SPELLCHECK);
   gtk_css_provider_load_from_string(provider,
-     "textview { font-family: Monospace; font-size: 20pt; }");
+     "textview { font-family: Monospace; font-size: 14pt; }");
   gtk_style_context_add_provider(gtk_widget_get_style_context (res),
       GTK_STYLE_PROVIDER(provider),
       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
