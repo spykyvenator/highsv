@@ -44,7 +44,7 @@ clean:
 	rm -f highsv
 
 highsv: $(OBJS)
-	$(CC) $^ -g -o $@ $(LIBS) $(LDFLAGS)
+	$(CC) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 -include $(DEPENDS)
 
