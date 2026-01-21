@@ -1,5 +1,5 @@
 %option nodefault noinput nounput noyywrap
-FLOAT [-+]?[\s]?([0-9]*[\.])?[0-9]+
+FLOAT (?x:[-+]?[\ ]?([0-9]*[\.])?[0-9]+)
 
 %{
 #include <stdlib.h>
@@ -20,6 +20,8 @@ double highsv_atof(char *c);
   return HIGHSV_NUM;
 }
 [a-zA-Z][0-9a-zA-Z|,|/]* { yylval->HIGHSV_VAR = yytext; return HIGHSV_VAR; }
+"<" return HIGHSV_LESS;
+">" return HIGHSV_MORE;
 "\n" return HIGHSV_EOL;
 <*>. {}
 

@@ -9,6 +9,7 @@
 	#include "interfaces/highs_c_api.h"
 	#include <stddef.h>
 	void *model;
+	int h_line = 0;
 }
 %code provides {
 #define YY_DECL                                 \
@@ -23,6 +24,8 @@
 	MIN
 	ST
 	EOL
+	MORE
+	LESS
 ;
 
 %token <double> NUM "number"
@@ -37,14 +40,22 @@
 %start input;
 
 input: %empty
-     | MAX obj EOL st trailingEOL { puts("max"); }
-     | MIN obj EOL st trailingEOL { puts("min"); }
+     | MAX sum eol ST eol constraints trailingEOL { puts("max"); }
+     | MIN sum eol ST eol constraints trailingEOL { puts("min"); }
      ;
 
-st: ST { puts("st"); };
- 
-obj: %empty
-   | obj "number" VAR { printf("%s: %f\n", $3, $2); };
+constraints: %empty
+	   | constraint EOL constraints
+
+constraint: sum LESS sum { puts("less"); }
+	   | sum MORE sum { puts("more"); }
+
+eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
+
+sum: %empty
+   | "number" VAR sum { printf("%s: %f", $2, $1); }
+   | VAR sum { printf("%s: %f", $1, 1.0); }
+   | "number" { printf("%f", $1); }
 
 trailingEOL: %empty
 	   | EOL trailingEOL
