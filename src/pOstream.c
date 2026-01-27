@@ -1,5 +1,6 @@
 #include "interfaces/highs_c_api.h"
 #include <stdarg.h>
+#include "util.h"
 
 #ifdef CLI
 #include "./cli/cli.h"
@@ -94,7 +95,7 @@ getLHS(const void *mod, HighsInt *resRows)
     Highs_getRowsByRange(mod, 0, numRow - 1, resRows, 
             lower, upper, &res_nz, m_start, m_index, m_value);
     Highs_getSolution(mod, col_val, col_dual, row_val, row_dual);
-    double *res = malloc(sizeof(double)* (*resRows));
+    double *res = h_malloc(sizeof(double)* (*resRows));
     for (HighsInt i = 0; i < *resRows-1; i++) {
         res[i] = 0;
         for (HighsInt j = m_start[i]; j < m_start[i+1]; j++) {
@@ -114,7 +115,7 @@ getDualPriceRanges(void *mod)
     double* lhs = getLHS(mod, &nbRows);
     double rc;
     double rowUBnd[numRow], rowLBnd[numRow];
-    double *res = malloc(sizeof(double)*numRow*2);
+    double *res = h_malloc(sizeof(double)*numRow*2);
 
     Highs_getRanging(mod, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL,
@@ -161,17 +162,13 @@ static double*
 getRowIntervals(const void *mod)
 {
   double inf = Highs_getInfinity(mod);
-  //double (*c_vect) = malloc(sizeof(double)*numCol*numRow);// TODO: remove this malloc and replace with in place calls to Highs
-  //if (c_vect == NULL) {
-      //puts("ERROR: no more memory");
-  //}
   double c_vect[numRow];
   double rc[numRow];
   for (size_t i = 0; i < numRow; i++) {
     rc[i] = getRowConstraint(mod, (HighsInt) i, NULL);
   }
 
-  double *res = malloc(sizeof(double)*numRow*3);
+  double *res = h_malloc(sizeof(double)*numRow*3);
 
   for (size_t i = 0; i < numRow; i++){// this is fine => There is probably a simpler way of doing this
     double div, val = 0;
@@ -393,7 +390,7 @@ printSolToFile(void *mod, GOutputStream* ostr, double time) {
 
   HighsInt status = Highs_getModelStatus(mod);
 
-   if (status == kHighsModelStatusNotset
+   if (status == kHighsModelStatusNotset// case not possible with const vars
      || status == kHighsModelStatusLoadError
      || status == kHighsModelStatusModelError
      || status == kHighsModelStatusPresolveError
