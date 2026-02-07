@@ -51,6 +51,7 @@ highsv_app_startup(GApplication *app)
   SET_ACCELS(solve);
   SET_ACCELS(zoomIn);
 }
+#undef SET_ACCELS
 
 static void
 highsv_app_activate (GApplication *app)
