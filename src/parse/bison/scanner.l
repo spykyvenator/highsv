@@ -22,6 +22,7 @@ double highsv_atof(char *c);
 [a-zA-Z][0-9a-zA-Z|,|/]* { yylval->HIGHSV_VAR = yytext; return HIGHSV_VAR; }
 "<" return HIGHSV_LESS;
 ">" return HIGHSV_MORE;
+"=" return HIGHSV_EQUAL;
 "\n" return HIGHSV_EOL;
 <*>. {}
 
