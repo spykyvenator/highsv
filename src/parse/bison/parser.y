@@ -9,9 +9,15 @@
 	#include "../../highs_interface.h"
 	#include <stddef.h>
 	#include <math.h>
-	void *model;
+	#include <string.h>
+	void *model = NULL;
 	int h_line = 0;
+	int *rowIndex = NULL, numNz = 0;
+	size_t rowLen = 2, numRow = 0, numCol = 0;
+	double *rowVal = NULL;
+	static void setCost(void *mod, const char *var, const double val);
 }
+
 %code provides {
 #define YY_DECL                                 \
   yytoken_kind_t yylex(YYSTYPE* yylval)
@@ -45,21 +51,23 @@
 %start input;
 
 input: %empty
-     | MAX optfunc eol ST eol constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN optfunc eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost eol ST constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost eol ST constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-optfunc: %empty
-   | expr VAR optfunc { printf("%s: %f", $2, $1); }
-   | VAR optfunc { printf("%s: %f", $1, 1.0); }
-   | expr { printf("%f", $1); }
+appcost: %empty
+	| "+" cost
+cost: %empty
+   | expr VAR appcost { setCost(model, $2, $1); printf("%s: %f", $2, $1); }
+   | VAR appcost { setCost(model, $1, 1.0); printf("%s: %f", $1, 1.0); }
+   | expr { highsv_setObjectiveOffset(model, $1); }
 
 constraints: %empty
 	   | constraint EOL constraints
 
 constraint: statement LESS statement { puts("less"); }
 	   | statement MORE statement { puts("more"); }
-	   | statement EQUAL statement { puts("more"); }
+	   | statement EQUAL statement { puts("equal"); }
 
 eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
 
@@ -93,21 +101,53 @@ findIndex(void *mod, const char *text)
     #ifdef DEBUG
     printf("adding %s to index\n", text);
     #endif
-    index = highsv_getNumCol(mod);
-    highsv_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
+    index = highsv_getNumCol(model);
+    highsv_addVar(model);
     highsv_passColName(model, index, text);
   }
   return (size_t) index;
 }
 
 static void
-readVar(void *mod, char *text, const char state, double val)
+setCost(void *mod, const char *var, const double val)
+{
+	const size_t index = findIndex(mod, var);
+	highsv_changeColCost(model, index, val);
+}
+
+static void
+setVal(void *mod, const char *var, const double val)
+{
+	const size_t index = findIndex(mod, var);
+	if (index >= rowLen) {
+		double *tmpVal = (double*) h_malloc(sizeof(double)*rowLen*2);
+		int *tmpIndex = (int*) h_malloc(sizeof(int)*rowLen*2);
+		memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
+		memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
+		free(rowVal);
+		free(rowIndex);
+		rowVal = tmpVal;
+		rowIndex = tmpIndex;
+		for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
+			rowVal[i] = 0;
+			rowIndex[i] = 0;
+		}
+		rowLen*=2;
+	}
+	rowVal[index] += val;
+	rowIndex[numNz] = index;
+	rowVal[numNz++] = val;
+}
+
+/*
+static void
+readVar(void *mod, char *text, double val)
 {
   size_t index = findIndex(mod, text);
 
   if (index >= rowLen) {
-    double *tmpVal = (double*) malloc(sizeof(double)*rowLen*2);
-    int *tmpIndex = (int*) malloc(sizeof(int)*rowLen*2);
+    double *tmpVal = (double*) h_malloc(sizeof(double)*rowLen*2);
+    int *tmpIndex = (int*) h_malloc(sizeof(int)*rowLen*2);
     memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
     memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
     free(rowVal);
@@ -120,6 +160,7 @@ readVar(void *mod, char *text, const char state, double val)
     }
     rowLen*=2;
   }
+  rowVal[index] += lastVal;
 	if (state == COST) {
 #ifdef DEBUG
 		printf("readvar: %s, %f\n", text, lastVal);
@@ -133,11 +174,12 @@ readVar(void *mod, char *text, const char state, double val)
 	lastVal = 0;
 	strcpy(lastVarName, text);
 }
+*/
 
 void
 yyerror(const char *msg)
 {
-	puts(msg);
+	die(msg);
 }
 
 int 
