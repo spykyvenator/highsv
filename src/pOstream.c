@@ -1,5 +1,6 @@
-#include "interfaces/highs_c_api.h"
+#include "highs_interface.h"
 #include <stdarg.h>
+#include "util.h"
 
 #ifdef CLI
 #include "./cli/cli.h"
@@ -54,12 +55,11 @@ printInfeasible(GOutputStream* ostr)
 }
 
 static double
-getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const double *r_value)
+getSlack(const void *mod, const int64_t row, const int64_t num_nz, const double *r_value)
 {
-  int rowNumNz, matrix_index[num_nz];
-  HighsInt nRow, start;
+  int64_t nRow, start, rowNumNz, matrix_index[num_nz];
   double lower, upper, matrix_value[num_nz];
-  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
+  highsv_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
         &rowNumNz, &start, 
         matrix_index, matrix_value);
   const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
@@ -74,34 +74,34 @@ getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const doubl
  * Since one will always be infinite and the other not this is ok
  */
 static double
-getRowConstraint(const void *mod, const HighsInt row, char *type)
+getRowConstraint(const void *mod, const int64_t row, char *type)
 {
-  HighsInt nRow, nz, m_start, m_index[numCol];
+  int64_t nRow, nz, m_start, m_index[numCol];
   double lower, upper, m_value[numCol];
-  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, &nz, &m_start, m_index, m_value);
+  highsv_getRowsByRange(mod, row, row, &nRow, &lower, &upper, &nz, &m_start, m_index, m_value);
   if (type) 
       *type = ABS(lower) == ABS(upper) ? '=' : (ABS(lower) < ABS(upper) ? '<' : '>');
   return ABS(lower) < ABS(upper) ? lower : upper;
 }
 
 static double*
-getLHS(const void *mod, HighsInt *resRows)
+getLHS(const void *mod, int64_t *resRows)
 {
-    const HighsInt num_nz = Highs_getNumNz(mod);
-    HighsInt res_nz, m_start[numRow], m_index[num_nz];
+    const int64_t num_nz = Highs_getNumNz(mod);
+    int64_t res_nz, m_start[numRow], m_index[num_nz];
     double lower[numRow], upper[numRow], m_value[num_nz], col_val[numCol], col_dual[numCol], row_val[numRow], row_dual[numRow];
 
-    Highs_getRowsByRange(mod, 0, numRow - 1, resRows, 
+    highsv_getRowsByRange(mod, 0, numRow - 1, resRows, 
             lower, upper, &res_nz, m_start, m_index, m_value);
     Highs_getSolution(mod, col_val, col_dual, row_val, row_dual);
-    double *res = malloc(sizeof(double)* (*resRows));
-    for (HighsInt i = 0; i < *resRows-1; i++) {
+    double *res = h_malloc(sizeof(double)* (*resRows));
+    for (int64_t i = 0; i < *resRows-1; i++) {
         res[i] = 0;
-        for (HighsInt j = m_start[i]; j < m_start[i+1]; j++) {
+        for (int64_t j = m_start[i]; j < m_start[i+1]; j++) {
             res[i] += col_val[m_index[j]]*m_value[j];
         }
     }
-    for (HighsInt j = m_start[*resRows-1]; j < res_nz; j++) {
+    for (int64_t j = m_start[*resRows-1]; j < res_nz; j++) {
         res[*resRows-1] += col_val[m_index[j]]*m_value[j];
     }
     return res;
@@ -110,21 +110,21 @@ getLHS(const void *mod, HighsInt *resRows)
 static double*
 getDualPriceRanges(void *mod)
 {
-    HighsInt nbRows;
+    int64_t nbRows;
     double* lhs = getLHS(mod, &nbRows);
     double rc;
     double rowUBnd[numRow], rowLBnd[numRow];
-    double *res = malloc(sizeof(double)*numRow*2);
+    double *res = h_malloc(sizeof(double)*numRow*2);
 
     Highs_getRanging(mod, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       rowUBnd, NULL, NULL, NULL, rowLBnd, NULL, NULL, NULL);
-    for (HighsInt i = 0; i < nbRows; i++) {
+    for (int64_t i = 0; i < nbRows; i++) {
         //res[i*2] = 0;// 0 init
         //res[i*2+1] = 0;
         char type;
-        rc = getRowConstraint(mod, (HighsInt) i, &type);
+        rc = getRowConstraint(mod, (int64_t) i, &type);
         if (rc == lhs[i]) {// we are a constraining row
             res[i*2] = ABS(rc - rowUBnd[i]);
             res[i*2+1] = ABS(rc - rowLBnd[i]);
@@ -161,17 +161,13 @@ static double*
 getRowIntervals(const void *mod)
 {
   double inf = Highs_getInfinity(mod);
-  //double (*c_vect) = malloc(sizeof(double)*numCol*numRow);// TODO: remove this malloc and replace with in place calls to Highs
-  //if (c_vect == NULL) {
-      //puts("ERROR: no more memory");
-  //}
   double c_vect[numRow];
   double rc[numRow];
   for (size_t i = 0; i < numRow; i++) {
-    rc[i] = getRowConstraint(mod, (HighsInt) i, NULL);
+    rc[i] = getRowConstraint(mod, (int64_t) i, NULL);
   }
 
-  double *res = malloc(sizeof(double)*numRow*3);
+  double *res = h_malloc(sizeof(double)*numRow*3);
 
   for (size_t i = 0; i < numRow; i++){// this is fine => There is probably a simpler way of doing this
     double div, val = 0;
@@ -211,9 +207,9 @@ static void
 pRange(void *mod, GOutputStream *ostr)
 {
   double *dualRng = getDualPriceRanges(mod);
-  const HighsInt num_nz = Highs_getNumNz(mod);
+  const int64_t num_nz = Highs_getNumNz(mod);
   char text[kHighsMaximumStringLength];
-  HighsInt numResCol, numResNz, m_start[numCol], m_index[num_nz];
+  int64_t numResCol, numResNz, m_start[numCol], m_index[num_nz];
   double resColLower[numCol], resColUpper[numCol], resColValue[num_nz], cost[numCol];
   double rowUp[numRow], rowDn[numRow], ccUpperVal[numCol], 
          ccLowerVal[numCol];
@@ -235,7 +231,7 @@ pRange(void *mod, GOutputStream *ostr)
   tprint_data_add_str(tp, 2, "Increase");
   tprint_data_add_str(tp, 3, "Decrease");
 
-  Highs_getColsByRange(mod, 0, numCol - 1, &numResCol, cost, resColLower, resColUpper, &numResNz, m_start, m_index, resColValue);
+  highsv_getColsByRange(mod, 0, numCol - 1, &numResCol, cost, resColLower, resColUpper, &numResNz, m_start, m_index, resColValue);
   if ((size_t) numResCol != numCol) return;
   for (size_t i = 0; i < numCol; i++){
     if (Highs_getColName(mod, i, text) == kHighsStatusError) return;
@@ -265,7 +261,7 @@ pRange(void *mod, GOutputStream *ostr)
   for (size_t i = 0; i < numRow; i++){
     if (Highs_getRowName(mod, i, text) == kHighsStatusError)
       break;
-    //double rC = getRowConstraint(mod, (HighsInt) i);
+    //double rC = getRowConstraint(mod, (int64_t) i);
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, mkPos(rowInt[i*3]));
     tprint_data_add_double(tp, 2, mkPos(rowInt[i*3+1]));
@@ -288,7 +284,7 @@ pVal(const void *mod, GOutputStream *ostr)
   char text[kHighsMaximumStringLength];
   double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow],
         offset;
-  const HighsInt num_nz = Highs_getNumNz(mod);
+  const int64_t num_nz = Highs_getNumNz(mod);
 
   Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
   Highs_getObjectiveOffset(mod, &offset);
@@ -364,7 +360,7 @@ pUnbound(const void *mod, GOutputStream *ostr){
 
 static void
 pErr(const void *mod, GOutputStream *ostr){
-  HighsInt status = Highs_getModelStatus(mod);
+  int64_t status = Highs_getModelStatus(mod);
   pToF(ostr, "Something went wrong: %d\n", status);
 }
 
@@ -391,9 +387,9 @@ printSolToFile(void *mod, GOutputStream* ostr, double time) {
   tprint_print(tp);
   tprint_free(tp);
 
-  HighsInt status = Highs_getModelStatus(mod);
+  int64_t status = Highs_getModelStatus(mod);
 
-   if (status == kHighsModelStatusNotset
+   if (status == kHighsModelStatusNotset// case not possible with const vars
      || status == kHighsModelStatusLoadError
      || status == kHighsModelStatusModelError
      || status == kHighsModelStatusPresolveError

@@ -1,4 +1,3 @@
-#define AppName "highsv"
 #define AppExe "highsv.exe"
 
 [Setup]

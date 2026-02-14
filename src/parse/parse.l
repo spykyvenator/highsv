@@ -51,7 +51,7 @@ FLOAT [0-9]*[\.]?[0-9]*
 
 {FLOAT} { 
         if (state == BOUNDG) {
-            setBounds(model, sign * atof(yytext), 1); 
+            setBounds(model, sign * atof(yytext), 1); // sets bounds and rest of constraint
             state = AVAL; 
         } else if (state == BOUNDL) {
             setBounds(model, sign * atof(yytext), -1);

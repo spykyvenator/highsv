@@ -20,21 +20,21 @@
 
   <definitions>
     <define-regex id="_binary-operator" extended="true">
-      [!=]==? |                            # equality
+      == |                            # equality
       = |                             # assignment
-      &lt; |
-      &gt; |
-      &gt;=[!=] |
-      [!=]=&gt; |
-      &lt;=[!=] |
-      [!=]=&lt; |
+      &gt;= |
+      =&gt; |
+      &lt;= |
+      =&lt; |
       \+ | 
       \-
     </define-regex> <!-- /_binary-operator -->
     <define-regex id="_false-operator" extended="true">
-      [&lt;|&gt;|=]*[&gt;|&lt;|=][&lt;|&gt;|=][&lt;|&gt;|=]+ |
-      [&lt;|&gt;|=]*[&lt;|&gt;][&lt;|&gt;][&lt;|&gt;|=]* |
-      //
+      ([&lt;|&gt;|=]*[&gt;|&lt;|=][&lt;|&gt;|=][&lt;|&gt;|=]+|
+      [&lt;|&gt;|=]*[&lt;|&gt;][&lt;|&gt;][&lt;|&gt;|=]*|
+      &lt;| 
+      &gt;| 
+      //)
     </define-regex> <!-- /_binary-operator -->
 
     <context id="comment" style-ref="comment">
@@ -72,8 +72,8 @@
         <context ref="comment"/>
         <context ref="var"/>
         <context ref="float"/>
-        <context ref="false-operator"/>
         <context ref="operator"/>
+        <context ref="false-operator"/>
       </include>
     </context>
   </definitions>

@@ -6,10 +6,18 @@
 %define api.header.include {"parser.h"}
 
 %code top {
-	#include "interfaces/highs_c_api.h"
+	#include "../../highs_interface.h"
 	#include <stddef.h>
-	void *model;
+	#include <math.h>
+	#include <string.h>
+	void *model = NULL;
+	int h_line = 0;
+	int *rowIndex = NULL, numNz = 0;
+	size_t rowLen = 2, numRow = 0, numCol = 0;
+	double *rowVal = NULL;
+	static void setCost(void *mod, const char *var, const double val);
 }
+
 %code provides {
 #define YY_DECL                                 \
   yytoken_kind_t yylex(YYSTYPE* yylval)
@@ -23,28 +31,57 @@
 	MIN
 	ST
 	EOL
+	MORE
+	LESS
+	EQUAL
 ;
 
 %token <double> NUM "number"
 %token <char *> VAR "var"
+%nterm <double> expr
+
 
 %printer { fprintf (yyo, "%f", $$); } <double>
 %left "+" "-"
 %left "*" "/"
+%left "^";
 
 %%
 
 %start input;
 
 input: %empty
-     | MAX obj EOL st trailingEOL { puts("max"); }
-     | MIN obj EOL st trailingEOL { puts("min"); }
+     | MAX cost eol ST constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost eol ST constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-st: ST { puts("st"); };
- 
-obj: %empty
-   | obj "number" VAR { printf("%s: %f\n", $3, $2); };
+appcost: %empty
+	| "+" cost
+cost: %empty
+   | expr VAR appcost { setCost(model, $2, $1); printf("%s: %f", $2, $1); }
+   | VAR appcost { setCost(model, $1, 1.0); printf("%s: %f", $1, 1.0); }
+   | expr { highsv_setObjectiveOffset(model, $1); }
+
+constraints: %empty
+	   | constraint EOL constraints
+
+constraint: statement LESS statement { puts("less"); }
+	   | statement MORE statement { puts("more"); }
+	   | statement EQUAL statement { puts("equal"); }
+
+eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
+
+statement: %empty
+   | expr VAR statement { printf("%s: %f", $2, $1); }
+   | VAR statement { printf("%s: %f", $1, 1.0); }
+   | expr { printf("%f", $1); }
+
+expr: NUM { $$ = $1; }
+    | expr "+" expr { $$ = $1 + $3; }
+    | expr "-" expr { $$ = $1 - $3; }
+    | expr "*" expr { $$ = $1 + $3; }
+    | expr "/" expr { $$ = $1 - $3; }
+    | expr "^" expr { $$ = pow($1, $3); }
 
 trailingEOL: %empty
 	   | EOL trailingEOL
@@ -59,22 +96,90 @@ trailingEOL: %empty
 static size_t
 findIndex(void *mod, const char *text)
 {
-  HighsInt index;
-  if (Highs_getColByName(mod, text, &index) == kHighsStatusError) {// returns Error when col does not exist
+  int64_t index;
+  if (highsv_getColByName(mod, text, &index) == HIGHSV_STATUS_ERROR) {// returns Error when col does not exist
     #ifdef DEBUG
     printf("adding %s to index\n", text);
     #endif
-    index = Highs_getNumCol(mod);
-    Highs_addVar(mod, -Highs_getInfinity(mod), Highs_getInfinity(mod));
-    Highs_passColName(mod, index, text);
+    index = highsv_getNumCol(model);
+    highsv_addVar(model);
+    highsv_passColName(model, index, text);
   }
   return (size_t) index;
 }
 
+static void
+setCost(void *mod, const char *var, const double val)
+{
+	const size_t index = findIndex(mod, var);
+	highsv_changeColCost(model, index, val);
+}
+
+static void
+setVal(void *mod, const char *var, const double val)
+{
+	const size_t index = findIndex(mod, var);
+	if (index >= rowLen) {
+		double *tmpVal = (double*) h_malloc(sizeof(double)*rowLen*2);
+		int *tmpIndex = (int*) h_malloc(sizeof(int)*rowLen*2);
+		memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
+		memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
+		free(rowVal);
+		free(rowIndex);
+		rowVal = tmpVal;
+		rowIndex = tmpIndex;
+		for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
+			rowVal[i] = 0;
+			rowIndex[i] = 0;
+		}
+		rowLen*=2;
+	}
+	rowVal[index] += val;
+	rowIndex[numNz] = index;
+	rowVal[numNz++] = val;
+}
+
+/*
+static void
+readVar(void *mod, char *text, double val)
+{
+  size_t index = findIndex(mod, text);
+
+  if (index >= rowLen) {
+    double *tmpVal = (double*) h_malloc(sizeof(double)*rowLen*2);
+    int *tmpIndex = (int*) h_malloc(sizeof(int)*rowLen*2);
+    memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
+    memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
+    free(rowVal);
+    free(rowIndex);
+    rowVal = tmpVal;
+    rowIndex = tmpIndex;
+    for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
+      rowVal[i] = 0;
+      rowIndex[i] = 0;
+    }
+    rowLen*=2;
+  }
+  rowVal[index] += lastVal;
+	if (state == COST) {
+#ifdef DEBUG
+		printf("readvar: %s, %f\n", text, lastVal);
+#endif
+		rowVal[index] += lastVal;
+		Highs_changeColCost(mod, index, rowVal[index]);
+	} else if (state == AVAL) {
+		rowIndex[numNz] = index;
+		rowVal[numNz++] = lastVal;
+	}
+	lastVal = 0;
+	strcpy(lastVarName, text);
+}
+*/
+
 void
 yyerror(const char *msg)
 {
-	puts(msg);
+	die(msg);
 }
 
 int 
