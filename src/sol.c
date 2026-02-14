@@ -1,4 +1,4 @@
-#include "interfaces/highs_c_api.h"
+#include "highs_interface.h"
 
 #ifdef CLI
 #include <stdio.h>
@@ -26,7 +26,7 @@ extern void *model;
 static void
 cleanModel (void *model)
 {
-  Highs_destroy(model);
+  highsv_destroy(model);
   numCol = 0;
   numRow = 0;
   state = COST;
@@ -47,12 +47,11 @@ initModel ()
 int
 quitModel ()
 {
-  //Highs_destroy(model);
-  if (rowVal){
+  if (rowVal) {
     free(rowVal);
     rowVal = NULL;
   }
-  if (rowIndex){
+  if (rowIndex) {
     free(rowIndex);
     rowIndex = NULL;
   }
@@ -62,43 +61,38 @@ quitModel ()
 static void
 preModel () 
 {
-  model = Highs_create();
+  model = highsv_create();
   for (size_t i = 0; i < rowLen; i++) {// init to zero
       rowVal[i] = 0;
       rowIndex[i] = 0;
   }
-  Highs_setBoolOptionValue(model, "log_to_console", 0);
-  Highs_setBoolOptionValue(model, "output_flag", 0);
-  //Highs_setStringOptionValue(model, "presolve", "off");
+  highsv_setBoolOptionValue(model, "log_to_console", 0);
+  highsv_setBoolOptionValue(model, "output_flag", 0);
 }
 
-int
+void
 setPositive(char pos, void *model)
 {
   if (pos) {
-    const double inf = Highs_getInfinity(model);
+    const double inf = highsv_getInfinity(model);
     double infinity[numCol];
     double zero[numCol];
     for (size_t i = 0; i < numCol; i++) {
       infinity[i] = inf;
       zero[i] = 0;
     }
-    HighsInt res = Highs_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
-    return res;
+    highsv_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
   }
-  return 0;
 }
 
-int
+void
 setMip(char mip, void *model)
 {
   if (mip) {
-    HighsInt integrality[numCol];
-    for (size_t i = 0; i < numCol; i++) integrality[i] = kHighsVarTypeInteger;
-    HighsInt res = Highs_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
-    return res;
+    int64_t integrality[numCol];
+    for (size_t i = 0; i < numCol; i++) integrality[i] = HIGHSV_T_INT;
+    highsv_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
   }
-  return 0;
 }
 
 int
@@ -113,9 +107,9 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 #endif
   setPositive((char) pos, model);
   setMip((char) mip, model);
-  Highs_presolve(model);
+  highsv_presolve(model);
   clock_t before = clock();
-  Highs_run(model);
+  highsv_run(model);
   clock_t diff = clock() - before;
   printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
   yy_delete_buffer(buffer);
@@ -134,9 +128,9 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
 #endif
   setPositive(pos, model);
   setMip(mip, model);
-  Highs_presolve(model);
+  highsv_presolve(model);
   clock_t before = clock();
-  Highs_run(model);
+  highsv_run(model);
   clock_t diff = clock() - before;
   printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
   fclose(fd);

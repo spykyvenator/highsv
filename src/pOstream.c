@@ -87,13 +87,13 @@ getRowConstraint(const void *mod, const int64_t row, char *type)
 static double*
 getLHS(const void *mod, int64_t *resRows)
 {
-    const int64_t num_nz = Highs_getNumNz(mod);
+    const int64_t num_nz = highsv_getNumNz(mod);
     int64_t res_nz, m_start[numRow], m_index[num_nz];
     double lower[numRow], upper[numRow], m_value[num_nz], col_val[numCol], col_dual[numCol], row_val[numRow], row_dual[numRow];
 
     highsv_getRowsByRange(mod, 0, numRow - 1, resRows, 
             lower, upper, &res_nz, m_start, m_index, m_value);
-    Highs_getSolution(mod, col_val, col_dual, row_val, row_dual);
+    highsv_getSolution(mod, col_val, col_dual, row_val, row_dual);
     double *res = h_malloc(sizeof(double)* (*resRows));
     for (int64_t i = 0; i < *resRows-1; i++) {
         res[i] = 0;
@@ -116,7 +116,7 @@ getDualPriceRanges(void *mod)
     double rowUBnd[numRow], rowLBnd[numRow];
     double *res = h_malloc(sizeof(double)*numRow*2);
 
-    Highs_getRanging(mod, NULL, NULL, NULL, NULL,
+    highsv_getRanging(mod, NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       rowUBnd, NULL, NULL, NULL, rowLBnd, NULL, NULL, NULL);
@@ -132,19 +132,19 @@ getDualPriceRanges(void *mod)
             switch (type) {
                 case '=':
                     if (rc > lhs[i]){
-                        res[i*2] = Highs_getInfinity(mod);// increase
+                        res[i*2] = highsv_getInfinity(mod);// increase
                         res[i*2+1] = ABS(rc - lhs[i]);// decrease
                     } else{
                         res[i*2] = ABS(rc - lhs[i]);// increase
-                        res[i*2+1] = Highs_getInfinity(mod);// decrease
+                        res[i*2+1] = highsv_getInfinity(mod);// decrease
                     } break;
                 case '>':
-                    res[i*2] = Highs_getInfinity(mod);
+                    res[i*2] = highsv_getInfinity(mod);
                     res[i*2+1] = ABS(rc - lhs[i]);
                     break;
                 case '<':
                     res[i*2] = ABS(rc - lhs[i]);
-                    res[i*2+1] = Highs_getInfinity(mod);
+                    res[i*2+1] = highsv_getInfinity(mod);
                     break;
                 default:
                     res[i*2] = NAN;
@@ -160,7 +160,7 @@ getDualPriceRanges(void *mod)
 static double*
 getRowIntervals(const void *mod)
 {
-  double inf = Highs_getInfinity(mod);
+  double inf = highsv_getInfinity(mod);
   double c_vect[numRow];
   double rc[numRow];
   for (size_t i = 0; i < numRow; i++) {
@@ -175,7 +175,7 @@ getRowIntervals(const void *mod)
     res[i*3+2] = inf;
     for (size_t j = 0; j < numCol; j++){
       for (size_t k = 0; k < numRow; k++){
-        Highs_getBasisInverseRow(mod, j, c_vect, NULL, NULL);
+        highsv_getBasisInverseRow(mod, j, c_vect, NULL, NULL);
 	if (i != k){
 	  val += c_vect[k]*rc[k];
 #ifdef DEBUG_PRINTER
@@ -207,15 +207,15 @@ static void
 pRange(void *mod, GOutputStream *ostr)
 {
   double *dualRng = getDualPriceRanges(mod);
-  const int64_t num_nz = Highs_getNumNz(mod);
-  char text[kHighsMaximumStringLength];
+  const int64_t num_nz = highsv_getNumNz(mod);
+  char text[HIGHSV_MAX_STRING_LENGTH];
   int64_t numResCol, numResNz, m_start[numCol], m_index[num_nz];
   double resColLower[numCol], resColUpper[numCol], resColValue[num_nz], cost[numCol];
   double rowUp[numRow], rowDn[numRow], ccUpperVal[numCol], 
          ccLowerVal[numCol];
   double *rowInt = getRowIntervals(mod);
 
-  Highs_getRanging(mod, ccUpperVal, NULL, NULL, NULL,
+  highsv_getRanging(mod, ccUpperVal, NULL, NULL, NULL,
       ccLowerVal, NULL, NULL, NULL,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       rowUp, NULL, NULL, NULL, rowDn, NULL, NULL, NULL);
@@ -234,7 +234,7 @@ pRange(void *mod, GOutputStream *ostr)
   highsv_getColsByRange(mod, 0, numCol - 1, &numResCol, cost, resColLower, resColUpper, &numResNz, m_start, m_index, resColValue);
   if ((size_t) numResCol != numCol) return;
   for (size_t i = 0; i < numCol; i++){
-    if (Highs_getColName(mod, i, text) == kHighsStatusError) return;
+    highsv_getColName(mod, i, text);
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, cost[i]);
     tprint_data_add_double(tp, 2, ABS(cost[i] - ccUpperVal[i]));
@@ -259,8 +259,7 @@ pRange(void *mod, GOutputStream *ostr)
   //tprint_data_add_str(tp, 4, "Increase");
   //tprint_data_add_str(tp, 5, "Decrease");
   for (size_t i = 0; i < numRow; i++){
-    if (Highs_getRowName(mod, i, text) == kHighsStatusError)
-      break;
+    highsv_getRowName(mod, i, text);
     //double rC = getRowConstraint(mod, (int64_t) i);
     tprint_data_add_str(tp, 0, text);
     tprint_data_add_double(tp, 1, mkPos(rowInt[i*3]));
@@ -280,14 +279,14 @@ pRange(void *mod, GOutputStream *ostr)
 static void
 pVal(const void *mod, GOutputStream *ostr)
 {
-  const double objectiveVal = Highs_getObjectiveValue(mod);
-  char text[kHighsMaximumStringLength];
+  const double objectiveVal = highsv_getObjectiveValue(mod);
+  char text[HIGHSV_MAX_STRING_LENGTH];
   double col_value[numCol], row_value[numRow], col_dual[numCol], row_dual[numRow],
         offset;
-  const int64_t num_nz = Highs_getNumNz(mod);
+  const int64_t num_nz = highsv_getNumNz(mod);
 
-  Highs_getSolution(mod, col_value, col_dual, row_value, row_dual);
-  Highs_getObjectiveOffset(mod, &offset);
+  highsv_getSolution(mod, col_value, col_dual, row_value, row_dual);
+  offset = highsv_getObjectiveOffset(mod);
 
   TPrint *tp;
   tp = tprint_create (ostr, 0, 0, 0, 5);
@@ -311,7 +310,7 @@ pVal(const void *mod, GOutputStream *ostr)
   tprint_column_add (tp, "Reduced Cost", TPAlign_left, TPAlign_left);
 
   for (size_t i = 0; i < numCol; i++){
-    if (Highs_getColName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
+    highsv_getColName(mod, i, text);
       break;
 
 #ifdef DEBUG
@@ -338,8 +337,7 @@ pVal(const void *mod, GOutputStream *ostr)
   tprint_data_add_double(tp, 2, 1.0);
 
   for (size_t i = 0; i < numRow; i++){
-    if (Highs_getRowName(mod, i, text) == kHighsStatusError)// stop printing if variable has no name
-      break;
+    highsv_getRowName(mod, i, text);
 #ifdef DEBUG
     printf("row_dual %lf,row_value %lf\n", row_dual[i], row_value[i]);
 #endif
@@ -360,7 +358,7 @@ pUnbound(const void *mod, GOutputStream *ostr){
 
 static void
 pErr(const void *mod, GOutputStream *ostr){
-  int64_t status = Highs_getModelStatus(mod);
+  int64_t status = highsv_getModelStatus(mod);
   pToF(ostr, "Something went wrong: %d\n", status);
 }
 
@@ -379,7 +377,7 @@ printSolToFile(void *mod, GOutputStream* ostr, double time) {
   tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
   tprint_data_add_str(tp, 0, "HiGHS Version:");
   char bfr[7];
-  snprintf(bfr, 6, "%d.%d.%d", Highs_versionMajor(), Highs_versionMinor(), Highs_versionPatch());
+  snprintf(bfr, 6, "%d.%d.%d", highsv_versionMajor(), highsv_versionMinor(), highsv_versionPatch());
   bfr[6] = '\0';
   tprint_data_add_str(tp, 1, bfr);
   tprint_data_add_str(tp, 0, "Time:");
@@ -387,27 +385,27 @@ printSolToFile(void *mod, GOutputStream* ostr, double time) {
   tprint_print(tp);
   tprint_free(tp);
 
-  int64_t status = Highs_getModelStatus(mod);
+  int64_t status = highsv_getModelStatus(mod);
 
-   if (status == kHighsModelStatusNotset// case not possible with const vars
-     || status == kHighsModelStatusLoadError
-     || status == kHighsModelStatusModelError
-     || status == kHighsModelStatusPresolveError
-     || status == kHighsModelStatusSolveError
-     || status == kHighsModelStatusPostsolveError
-     || status == kHighsModelStatusTimeLimit
-     || status == kHighsModelStatusIterationLimit
-     || status == kHighsModelStatusUnknown
-     || status == kHighsModelStatusSolutionLimit
-     || status == kHighsModelStatusInterrupt)
+   if  (status == HIGHSV_STATUS_NOTSET// case not possible with const vars
+     || status == HIGHSV_STATUS_LOADERROR
+     || status == HIGHSV_STATUS_MODELERROR
+     || status == HIGHSV_STATUS_PRESOLVEERROR
+     || status == HIGHSV_STATUS_SOLVEERROR
+     || status == HIGHSV_STATUS_POSTSOLVEERROR
+     || status == HIGHSV_STATUS_TIMELIMIT
+     || status == HIGHSV_STATUS_ITERATIONLIMIT
+     || status == HIGHSV_STATUS_UNKNOWN
+     || status == HIGHSV_STATUS_SOLUTIONLIMIT
+     || status == HIGHSV_STATUS_INTERRUPT)
      pErr(mod, ostr);
-   else if (status == kHighsModelStatusModelEmpty)
+   else if (status == HIGHSV_STATUS_MODELEMPTY)
      pEmpty(ostr);
-   else if (status == kHighsModelStatusOptimal)
+   else if (status == HIGHSV_STATUS_OPTIMAL)
      pOpt(mod, ostr);
-   else if (status == kHighsModelStatusInfeasible
-       || status == kHighsModelStatusUnboundedOrInfeasible)
+   else if (status == HIGHSV_STATUS_INFEASIBLE
+       || status == HIGHSV_STATUS_UNBOUNDEDORINFEASIBLE)
      printInfeasible(ostr);
-   else if (status == kHighsModelStatusUnbounded)
+   else if (status == HIGHSV_STATUS_UNBOUNDED)
      pUnbound(mod, ostr);
 }
