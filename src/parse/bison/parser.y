@@ -10,12 +10,15 @@
 	#include <stddef.h>
 	#include <math.h>
 	#include <string.h>
+	#include "pt.c"
+
 	void *model = NULL;
 	int h_line = 0;
 	int *rowIndex = NULL, numNz = 0;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
 	static void setCost(void *mod, const char *var, const double val);
+
 }
 
 %code provides {
@@ -39,6 +42,7 @@
 %token <double> NUM "number"
 %token <char *> VAR "var"
 %nterm <double> expr
+%nterm <sm*> statement
 
 
 %printer { fprintf (yyo, "%f", $$); } <double>
@@ -65,13 +69,13 @@ cost: %empty
 constraints: %empty
 	   | constraint EOL constraints
 
-constraint: statement LESS statement { puts("less"); }
-	   | statement MORE statement { puts("more"); }
-	   | statement EQUAL statement { puts("equal"); }
+constraint: statement LESS statement {  mergeSm($1, $3); puts("less"); }
+	   | statement MORE statement { mergeSm($1, $3); puts("more"); }
+	   | statement EQUAL statement { mergeSm($1, $3); puts("equal"); }
 
 eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
 
-statement: %empty
+statement: %empty { $$ = init_sm(); }
    | expr VAR statement { printf("%s: %f", $2, $1); }
    | VAR statement { printf("%s: %f", $1, 1.0); }
    | expr { printf("%f", $1); }
@@ -88,6 +92,26 @@ trailingEOL: %empty
 	   ;
 
 %%
+
+static void
+
+static sm*
+mergeSm(sm* a, sm* b)
+{
+}
+
+static sm*
+init_sm(void)
+{
+	sm* res = (sm*) h_malloc(sizeof(sm));
+	res->offset = 0.0;
+	res->rL = 2;
+	res->vals = h_malloc(sizeof(double)*res->rL);
+	res->indices = h_malloc(sizeof(size_t)*res->rL);
+	return res;
+}
+
+
 
 /*
   return the column index of a variable name.
