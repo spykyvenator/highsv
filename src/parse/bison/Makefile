@@ -1,5 +1,6 @@
-CFLAGS= -g $(shell pkg-config --cflags highs)
+CFLAGS= -DHIGHS_BACKEND -g $(shell pkg-config --cflags highs)
 LFLAGS=$(shell pkg-config --libs highs) -lm
+LDFLAGS = -Wl,--allow-multiple-definition
 
 all: parser.out
 parser.c: parser.y
@@ -8,8 +9,8 @@ scanner.c: scanner.l
 	flex -o $@ --header-file=$(patsubst %.l,%.h,$<) $<
 %.o: %.c
 	gcc -c $(CFLAGS) $< $(LFLAGS)
-parser.out: parser.o scanner.o ../../util.o
-	gcc $(CFLAGS) $^ -o $@ $(LFLAGS)
+parser.out: parser.o scanner.o ../../util.o ./pt.o
+	gcc $(CFLAGS) $^ -o $@ $(LFLAGS) $(LDFLAGS)
 
 clean: 
 	rm -vf parser.c scanner.c parser.out scannner.h *.o
