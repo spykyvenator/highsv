@@ -13,5 +13,5 @@ parser.out: parser.o scanner.o ../../util.o ./pt.o
 	gcc $(CFLAGS) $^ -o $@ $(LFLAGS) $(LDFLAGS)
 
 clean: 
-	rm -vf parser.c scanner.c parser.out scannner.h *.o
+	rm -vf parser.c parser.h scanner.c scanner.h parser.out scannner.h *.o
 .PHONY: clean

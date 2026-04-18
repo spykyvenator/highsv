@@ -5,11 +5,14 @@
 %define api.value.type union
 %define api.header.include {"parser.h"}
 
+%code requires {
+	#include "pt.h"
+}
+
 %code top {
 	#include <stddef.h>
 	#include <math.h>
 	#include <string.h>
-	#include "pt.h"
 
 	void *model = NULL;
 	int h_line = 0;
@@ -94,7 +97,13 @@ statement: %empty { $$ = init_sm(); }
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   printf("%s: %f", $1, 1.0); 
    }
-   | expr statement { $2->offset+=$1; $$ = $2; printf("%f", $1); }
+   /*
+   | expr statement { 
+   	   $2->offset+=$1; 
+	   $$ = $2; 
+	   printf("%f", $1); 
+   }
+   */
 
 expr: NUM { $$ = $1; }
     | expr "+" expr { $$ = $1 + $3; }
@@ -102,6 +111,7 @@ expr: NUM { $$ = $1; }
     | expr "*" expr { $$ = $1 + $3; }
     | expr "/" expr { $$ = $1 - $3; }
     | expr "^" expr { $$ = pow($1, $3); }
+    | "(" expr ")" { $$ = $2; }
 
 trailingEOL: %empty
 	   | EOL trailingEOL
