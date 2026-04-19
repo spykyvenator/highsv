@@ -42,8 +42,11 @@ mergeSm(sm* a, sm* b)
 }
 
 void
-apply_sm(sm *a)
+apply_sm(sm *a, void *model)
 {
+    for (size_t i = 0; i < a->numNz; i++) {
+        highsv_getColByName
+    }
 }
 
 void
@@ -59,7 +62,7 @@ init_sm(void)
 {
 	sm* res = (sm*) h_malloc(sizeof(sm));
 	res->offset = 0.0;
-	res->rL = 2;
+	res->rL = 2;// row length
 	res->vals = h_malloc(sizeof(double)*res->rL);
 	res->indices = h_malloc(sizeof(size_t)*res->rL);
 	return res;

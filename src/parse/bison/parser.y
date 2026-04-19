@@ -60,15 +60,30 @@ input: %empty
      | MIN cost eol ST constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-appcost: %empty
-	| "+" cost
+//cost: statement
 cost: %empty
-   | expr VAR appcost { setCost(model, $2, $1); printf("%s: %f", $2, $1); }
-   | VAR appcost { setCost(model, $1, 1.0); printf("%s: %f", $1, 1.0); }
-   | expr { highsv_setObjectiveOffset(model, $1); }
+   | expr VAR cost { 
+   	setCost(model, $2, $1); 
+	printf("setting cost: %s: %f", $2, $1); 
+	char *name = $2; 
+	free(name);
+   }
+   | VAR cost { 
+   	setCost(model, $1, 1.0); 
+	printf(" setting cost: %s: %f", $1, 1.0); 
+	char *name = $1; 
+	free(name); 
+   }
+   | expr { 
+   	highsv_setObjectiveOffset(model, $1); 
+	printf("setting offset %f", $1); 
+   }
 
 constraints: %empty
-	   | constraint EOL constraints { }
+	   | constraint eol constraints { 
+		apply_sm($1, model);
+		destroy_sm($1);
+	   }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  
 		  $$ = mergeSm($1, $3); 
@@ -97,13 +112,11 @@ statement: %empty { $$ = init_sm(); }
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   printf("%s: %f", $1, 1.0); 
    }
-   /*
-   | expr statement { 
-   	   $2->offset+=$1; 
-	   $$ = $2; 
+   | expr { 
+	   $$ = init_sm();
+   	   $$->offset+=$1; 
 	   printf("%f", $1); 
    }
-   */
 
 expr: NUM { $$ = $1; }
     | expr "+" expr { $$ = $1 + $3; }
@@ -165,6 +178,7 @@ yyerror(const char *msg)
 int 
 main(int argc, const char *argv[])
 {
+  model = highsv_create();
   yyparse();
   return 0;
 }
