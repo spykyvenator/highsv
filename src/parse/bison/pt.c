@@ -1,4 +1,5 @@
 #include "pt.h"
+#include "../../util.h"
 
 static sm*
 appendSm(sm* a, double val, int index)
@@ -19,11 +20,16 @@ appendSm(sm* a, double val, int index)
     a->rL*=2;
   }
   a->vals[index] += val;
+  a->indices[index] = index;
+  a->numNz++;
 }
 
 sm*
 mergeSm(sm* a, sm* b)
 {
+    a->offset = b->offset - a->offset;
+    if (b->numNz == 0)
+        return a;
     char found = 0;
     for (size_t i = 0; i < a->numNz; i++) {
         for (size_t j = 0; j < b->numNz; j++) {
@@ -44,9 +50,6 @@ mergeSm(sm* a, sm* b)
 void
 apply_sm(sm *a, void *model)
 {
-    for (size_t i = 0; i < a->numNz; i++) {
-        highsv_getColByName
-    }
 }
 
 void
@@ -57,14 +60,28 @@ destroy_sm(sm *a)
     free(a);
 }
 
+void
+print_sm(sm *a)
+{
+    printf("printing sm: size: %ld, rL\n:  %ld", a->numNz, a->rL);
+    for (size_t i = 0; i < a->numNz; i++) {
+            printf("index: %d is %f\n", a->indices[i], a->vals[i]);
+    }
+}
+
 sm*
 init_sm(void)
 {
 	sm* res = (sm*) h_malloc(sizeof(sm));
 	res->offset = 0.0;
+        res->numNz = 0;
 	res->rL = 2;// row length
 	res->vals = h_malloc(sizeof(double)*res->rL);
 	res->indices = h_malloc(sizeof(size_t)*res->rL);
+        for (size_t i = 0; i < res->rL; i++) {// zero init
+                res->vals[i] = 0;
+                res->indices[i] = 0;
+        }
 	return res;
 }
 
@@ -101,4 +118,5 @@ setVal(void *mod, sm *a, const char *var, const double val)
 {
 	const size_t index = findIndex(mod, var);
         appendSm(a, val, index);
+        return a;
 }

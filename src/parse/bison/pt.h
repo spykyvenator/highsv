@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef HIGHS_BACKEND
 #include "../../highs_interface.h"
@@ -19,6 +20,7 @@ void setCost(void *mod, const char *var, const double val);
 sm* init_sm(void);
 sm* setVal(void *mod, sm *a, const char *var, const double val);
 sm* mergeSm(sm *a, sm *b);
-sm* apply_sm(sm *a, void *model);
+void apply_sm(sm *a, void *model);
 void destroy_sm(sm *a);
+void print_sm(sm *a);
 #endif

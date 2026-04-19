@@ -56,63 +56,73 @@
 %start input;
 
 input: %empty
-     | MAX cost eol ST constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost eol ST constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost eol ST eol constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
 //cost: statement
 cost: %empty
    | expr VAR cost { 
    	setCost(model, $2, $1); 
-	printf("setting cost: %s: %f", $2, $1); 
+	//printf("setting cost: %s: %f", $2, $1); 
 	char *name = $2; 
 	free(name);
    }
    | VAR cost { 
    	setCost(model, $1, 1.0); 
-	printf(" setting cost: %s: %f", $1, 1.0); 
+	//printf(" setting cost: %s: %f", $1, 1.0); 
 	char *name = $1; 
 	free(name); 
    }
    | expr { 
    	highsv_setObjectiveOffset(model, $1); 
-	printf("setting offset %f", $1); 
+	//printf("setting offset %f", $1); 
    }
 
 constraints: %empty
-	   | constraint eol constraints { 
-		apply_sm($1, model);
-		destroy_sm($1);
-	   }// here we have to add the constraint to the model
+	   | constraint eol constraints { }// here we have to add the constraint to the model
 
-constraint: statement LESS statement {  
+constraint: statement LESS statement {  // <=
+	  	print_sm($1);
+		print_sm($3);
 		  $$ = mergeSm($1, $3); 
 		  destroy_sm($3); 
 		  puts("less"); 
-	  }
-	   | statement MORE statement { 
+		  highsv_addRow(model, -highsv_getInfinity(model), $1->offset, $1->numNz, $1->indices, $1->vals);
+		  destroy_sm($1);
+	   }
+	   | statement MORE statement { // >=
+	  	print_sm($1);
+		print_sm($3);
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
 		   puts("more"); 
+		   highsv_addRow(model, $1->offset, highsv_getInfinity(model), $1->numNz, $1->indices, $1->vals);
+		   destroy_sm($1);
 	   }
-	   | statement EQUAL statement { 
+	   | statement EQUAL statement { // =
+	  	print_sm($1);
+		print_sm($3);
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
 		   puts("equal"); 
+		   highsv_addRow(model, $1->offset, $1->offset, $1->numNz, $1->indices, $1->vals);
+		   destroy_sm($1);
 	   }
 
 eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
 
-statement: %empty { $$ = init_sm(); }
-   | expr VAR statement { 
+statement: %empty { printf("init sm"); $$ = init_sm(); }
+   | expr VAR statement {
 	   $$ = setVal(model, $3, $2, $1); 
 	   printf("%s: %f", $2, $1); 
    }
-   | VAR statement { 
+   | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   printf("%s: %f", $1, 1.0); 
    }
-   | expr { 
+   | expr {
+	   printf("init sm"); 
 	   $$ = init_sm();
    	   $$->offset+=$1; 
 	   printf("%f", $1); 
