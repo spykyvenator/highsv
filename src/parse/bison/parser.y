@@ -9,6 +9,7 @@
 	#include "pt.h"
 	#include "../../sol.h"
 	#include <math.h>
+	#include "../../print.h"
 }
 
 %code top {
@@ -183,12 +184,13 @@ yyerror(const char *msg)
 	die(msg);
 }
 
-/*
 int 
 main(int argc, const char *argv[])
 {
   initModel();
   yyparse();
+  #ifdef DEBUG
+  printModel(model);
+  #endif
   return 0;
 }
-*/

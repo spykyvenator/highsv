@@ -24,9 +24,9 @@ printModel(const void* mod)
   const int64_t numCol = highsv_getPresolvedNumCol(mod), numRow = highsv_getPresolvedNumRow(mod);
   double offset;
 
-  highsv_getObjectiveOffset(mod, &offset);
+  offset = highsv_getObjectiveOffset(mod);
   puts("printing model: ");
-  printf("offset: %lf\n numCol: %d, numRow: %d\n", 
+  printf("offset: %lf\n numCol: %ld, numRow: %ld\n", 
     offset,
     numCol, numRow
     );

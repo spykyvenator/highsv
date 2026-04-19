@@ -1,4 +1,4 @@
-CFLAGS= -DHIGHS_BACKEND -g $(shell pkg-config --cflags highs --cflags gtk4)
+CFLAGS= -DDEBUG -DHIGHS_BACKEND -g $(shell pkg-config --cflags highs --cflags gtk4)
 LFLAGS=$(shell pkg-config --libs highs --libs gtk4) -lm
 LDFLAGS = -Wl,--allow-multiple-definition
 
@@ -9,7 +9,7 @@ scanner.c: scanner.l
 	flex -o $@ --header-file=$(patsubst %.l,%.h,$<) $<
 %.o: %.c
 	gcc -c $(CFLAGS) $< $(LFLAGS)
-parser.out: parser.o scanner.o ../../util.o ./pt.o
+parser.out: parser.o scanner.o ../../util.o ./pt.o ../../sol.o
 	gcc $(CFLAGS) $^ -o $@ $(LFLAGS) $(LDFLAGS)
 
 clean: 
