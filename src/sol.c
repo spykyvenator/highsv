@@ -41,6 +41,7 @@ initModel ()
 {
   //rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
+  model = highsv_create();
   return 0;
 }
 

@@ -109,22 +109,40 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($1);
 	   }
 
-eol: EOL { h_line++; printf("\nline: %d\n", h_line); }
+eol: EOL { 
+   h_line++; 
+   #ifdef DEBUG
+   printf("\nline: %d\n", h_line); 
+   #endif
+   }
 
-statement: %empty { printf("init sm"); $$ = init_sm(); }
+statement: %empty { 
+	 #ifdef DEBUG
+	 printf("init sm"); 
+	 #endif
+	 $$ = init_sm(); 
+   }
    | expr VAR statement {
 	   $$ = setVal(model, $3, $2, $1); 
+	   #ifdef DEBUG
 	   printf("%s: %f", $2, $1); 
+	   #endif
    }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
+	   #ifdef DEBUG
 	   printf("%s: %f", $1, 1.0); 
+	   #endif
    }
    | expr {
+	   #ifdef DEBUG
 	   printf("init sm"); 
+	   #endif
 	   $$ = init_sm();
    	   $$->offset+=$1; 
+	   #ifdef DEBUG
 	   printf("%f", $1); 
+	   #endif
    }
 
 expr: NUM { $$ = $1; }
@@ -141,43 +159,6 @@ trailingEOL: %empty
 
 %%
 
-/*
-static void
-readVar(void *mod, char *text, double val)
-{
-  size_t index = findIndex(mod, text);
-
-  if (index >= rowLen) {
-    double *tmpVal = (double*) h_malloc(sizeof(double)*rowLen*2);
-    int *tmpIndex = (int*) h_malloc(sizeof(int)*rowLen*2);
-    memcpy(tmpVal, rowVal, sizeof(double)*rowLen);
-    memcpy(tmpIndex, rowIndex, sizeof(int)*rowLen);
-    free(rowVal);
-    free(rowIndex);
-    rowVal = tmpVal;
-    rowIndex = tmpIndex;
-    for (size_t i = rowLen; i < rowLen*2; i++) {// allocate to zero
-      rowVal[i] = 0;
-      rowIndex[i] = 0;
-    }
-    rowLen*=2;
-  }
-  rowVal[index] += lastVal;
-	if (state == COST) {
-#ifdef DEBUG
-		printf("readvar: %s, %f\n", text, lastVal);
-#endif
-		rowVal[index] += lastVal;
-		Highs_changeColCost(mod, index, rowVal[index]);
-	} else if (state == AVAL) {
-		rowIndex[numNz] = index;
-		rowVal[numNz++] = lastVal;
-	}
-	lastVal = 0;
-	strcpy(lastVarName, text);
-}
-*/
-
 void
 yyerror(const char *msg)
 {
@@ -187,6 +168,7 @@ yyerror(const char *msg)
 int 
 main(int argc, const char *argv[])
 {
+  model = highsv_create();
   initModel();
   yyparse();
   #ifdef DEBUG

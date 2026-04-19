@@ -9,7 +9,7 @@ scanner.c: scanner.l
 	flex -o $@ --header-file=$(patsubst %.l,%.h,$<) $<
 %.o: %.c
 	gcc -c $(CFLAGS) $< $(LFLAGS)
-parser.out: parser.o scanner.o ../../util.o ./pt.o ../../sol.o
+parser.out: parser.o scanner.o ../../util.o ./pt.o ../../sol.o ../../pOstream.o ../../tprint/tprint.o
 	gcc $(CFLAGS) $^ -o $@ $(LFLAGS) $(LDFLAGS)
 
 clean: 
