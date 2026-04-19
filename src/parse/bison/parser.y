@@ -7,12 +7,12 @@
 
 %code requires {
 	#include "pt.h"
+	#include "../../sol.h"
+	#include <math.h>
 }
 
 %code top {
 	#include <stddef.h>
-	#include <math.h>
-	#include <string.h>
 
 	void *model = NULL;
 	int h_line = 0;
@@ -21,13 +21,11 @@
 	double *rowVal = NULL;
 
 }
-
-%code provides {
+%code provides {	
 #define YY_DECL                                 \
   yytoken_kind_t yylex(YYSTYPE* yylval)
   YY_DECL;
   void yyerror(const char *msg);
-  static size_t findIndex(void *mod, const char *text);
 }
 
 %token 
@@ -185,10 +183,12 @@ yyerror(const char *msg)
 	die(msg);
 }
 
+/*
 int 
 main(int argc, const char *argv[])
 {
-  model = highsv_create();
+  initModel();
   yyparse();
   return 0;
 }
+*/

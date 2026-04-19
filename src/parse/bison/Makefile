@@ -1,5 +1,5 @@
-CFLAGS= -DHIGHS_BACKEND -g $(shell pkg-config --cflags highs)
-LFLAGS=$(shell pkg-config --libs highs) -lm
+CFLAGS= -DHIGHS_BACKEND -g $(shell pkg-config --cflags highs --cflags gtk4)
+LFLAGS=$(shell pkg-config --libs highs --libs gtk4) -lm
 LDFLAGS = -Wl,--allow-multiple-definition
 
 all: parser.out

@@ -18,9 +18,9 @@
 
 extern int *rowIndex, numNz;
 extern size_t rowLen, numRow, numCol;
-extern double lastVal, sign, *rowVal;
+//extern double lastVal, sign, *rowVal;
 extern char state;
-extern char lastVarName[255];
+//extern char lastVarName[255];
 extern void *model;
 
 static void
@@ -29,9 +29,9 @@ cleanModel (void *model)
   highsv_destroy(model);
   numCol = 0;
   numRow = 0;
-  state = COST;
-  lastVal = 0;
-  sign = 1,
+  //state = COST;
+ // lastVal = 0;
+ // sign = 1,
   numNz = 0;
   //rowLen = 2;
 }
@@ -39,7 +39,7 @@ cleanModel (void *model)
 int
 initModel ()
 {
-  rowVal = (double*) malloc(sizeof(double)*rowLen);
+  //rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
   return 0;
 }
@@ -47,10 +47,10 @@ initModel ()
 int
 quitModel ()
 {
-  if (rowVal) {
-    free(rowVal);
-    rowVal = NULL;
-  }
+  //if (rowVal) {
+   // free(rowVal);
+    //rowVal = NULL;
+  //}
   if (rowIndex) {
     free(rowIndex);
     rowIndex = NULL;
@@ -62,10 +62,10 @@ static void
 preModel () 
 {
   model = highsv_create();
-  for (size_t i = 0; i < rowLen; i++) {// init to zero
-      rowVal[i] = 0;
-      rowIndex[i] = 0;
-  }
+  //for (size_t i = 0; i < rowLen; i++) {// init to zero
+      //rowVal[i] = 0;
+      //rowIndex[i] = 0;
+  //}
   highsv_setBoolOptionValue(model, "log_to_console", 0);
   highsv_setBoolOptionValue(model, "output_flag", 0);
 }
