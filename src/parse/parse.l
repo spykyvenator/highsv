@@ -123,13 +123,13 @@ setBounds (void *mod, const double val, const char sign)
 #endif
   switch (sign) {
     case 1:// >=
-      Highs_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
+      highsv_addRow(mod, val, Highs_getInfinity(mod), numNz, rowIndex, rowVal);
       break;
     case 0:// =
-      Highs_addRow(mod, val, val, numNz, rowIndex, rowVal);
+      highsv_addRow(mod, val, val, numNz, rowIndex, rowVal);
       break;
     case -1:// <=
-      Highs_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
+      highsv_addRow(mod, -Highs_getInfinity(mod), val, numNz, rowIndex, rowVal);
       break;
   }
   snprintf(rowName, 512, "%ld", numRow + 1);

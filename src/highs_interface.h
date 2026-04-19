@@ -318,4 +318,14 @@ highsv_getPresolvedNumRow(const void* highs)
 {
     return (int64_t) Highs_getPresolvedNumRow(highs);
 }
+
+static inline void
+highsv_addRow(void* highs, const double lower, const double upper,
+              const HighsInt num_new_nz, const HighsInt* index,
+              const double* value)
+{
+    if (Highs_addRow(highs, lower, upper, num_new_nz, index, value))
+        die("could not set row");
+}
+
 #endif
