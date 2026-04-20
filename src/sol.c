@@ -9,7 +9,8 @@
 #endif
 #include <time.h>
 
-#include "./parse/parse.h"
+#include "./parse/bison/parser.h"
+#include "./parse/bison/scanner.h"
 #include "./pOstream.h"
 #include "sol.h"
 #ifdef DEBUG
@@ -29,17 +30,12 @@ cleanModel (void *model)
   highsv_destroy(model);
   numCol = 0;
   numRow = 0;
-  //state = COST;
- // lastVal = 0;
- // sign = 1,
   numNz = 0;
-  //rowLen = 2;
 }
 
 int
 initModel ()
 {
-  //rowVal = (double*) malloc(sizeof(double)*rowLen);
   rowIndex = (int*) malloc(sizeof(int)*rowLen);
   model = highsv_create();
   return 0;
@@ -96,13 +92,14 @@ setMip(char mip, void *model)
   }
 }
 
+/*
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
   cleanModel(model);
   preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
-  yylex();
+  yyparse();
 #ifdef DEBUG
   printModel(model);
 #endif
@@ -116,6 +113,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   yy_delete_buffer(buffer);
   return 0;
 }
+*/
 
 int
 parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
@@ -123,7 +121,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   cleanModel(model);
   preModel();
   yyset_in(fd);
-  yylex();
+  yyparse();
 #ifdef DEBUG
   printModel(model);
 #endif

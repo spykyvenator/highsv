@@ -10,7 +10,8 @@
 	#include "../../sol.h"
 	#include <math.h>
 	//#include "../../print.h"
-}
+        #include "../../util.h"
+    }
 
 %code top {
 	#include <stddef.h>

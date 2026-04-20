@@ -1,6 +1,4 @@
 #include "../sol.h"
-#include "../parse/bison/parser.h"
-//#include "../parse/parse.h"
 #include <gio/gunixoutputstream.h>
 
 static void

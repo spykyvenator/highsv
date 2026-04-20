@@ -314,7 +314,7 @@ pVal(const void *mod, GOutputStream *ostr)
       break;
 
 #ifdef DEBUG
-    printf("num_nz: %d col_dual %9.9lf\n", num_nz, col_dual[i]);
+    printf("num_nz: %ld col_dual %9.9lf\n", num_nz, col_dual[i]);
 #endif
 
     tprint_data_add_str(tp, 0, text);
