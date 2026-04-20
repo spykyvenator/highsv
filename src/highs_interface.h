@@ -328,4 +328,10 @@ highsv_addRow(void* highs, const double lower, const double upper,
         die("could not set row");
 }
 
+static inline void
+highsv_writeModel(void *highs, const char *filename)
+{
+    if (Highs_writeModel(highs, filename))
+        die("failed to write model to: %s\n", filename);
+}
 #endif

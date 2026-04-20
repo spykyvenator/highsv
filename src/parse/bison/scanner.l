@@ -20,9 +20,9 @@ double highsv_atof(char *c);
   return HIGHSV_NUM;
 }
 [a-zA-Z][0-9a-zA-Z|,|/]* { yylval->HIGHSV_VAR = strdup(yytext); return HIGHSV_VAR; }// maybe we can pass it with passColName and use the col index
-"<" return HIGHSV_LESS;
-">" return HIGHSV_MORE;
-"=" return HIGHSV_EQUAL;
+"<"|"<="|"=<" return HIGHSV_LESS;
+">"|">="|"=>" return HIGHSV_MORE;
+"="|"==" return HIGHSV_EQUAL;
 "\n" return HIGHSV_EOL;
 <*>. {}
 

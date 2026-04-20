@@ -19,9 +19,11 @@ appendSm(sm* a, double val, int index)
     }
     a->rL*=2;
   }
-  a->vals[index] += val;
-  a->indices[index] = index;
-  a->numNz++;
+  a->vals[a->rI] += val;
+  a->indices[a->rI] = index;
+  a->numNz++; // right now should still check if index is already present
+  a->rI++;
+  printf("appended: %lf at index: %d\n", val, index);
 }
 
 sm*
@@ -63,7 +65,7 @@ destroy_sm(sm *a)
 void
 print_sm(sm *a)
 {
-    printf("printing sm: size: %ld, rL\n:  %ld", a->numNz, a->rL);
+    printf("printing sm: size: %ld, rL:  %ld\n", a->numNz, a->rL);
     for (size_t i = 0; i < a->numNz; i++) {
             printf("index: %d is %f\n", a->indices[i], a->vals[i]);
     }
@@ -75,6 +77,7 @@ init_sm(void)
 	sm* res = (sm*) h_malloc(sizeof(sm));
 	res->offset = 0.0;
         res->numNz = 0;
+        res->rI = 0;
 	res->rL = 2;// row length
 	res->vals = h_malloc(sizeof(double)*res->rL);
 	res->indices = h_malloc(sizeof(size_t)*res->rL);

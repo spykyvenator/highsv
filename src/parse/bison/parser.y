@@ -77,37 +77,36 @@ cost: %empty
    	highsv_setObjectiveOffset(model, $1); 
 	//printf("setting offset %f", $1); 
    }
+   ;
 
 constraints: %empty
 	   | constraint eol constraints { }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  // <=
-	  	print_sm($1);
-		print_sm($3);
 		  $$ = mergeSm($1, $3); 
 		  destroy_sm($3); 
 		  puts("less"); 
 		  highsv_addRow(model, -highsv_getInfinity(model), $1->offset, $1->numNz, $1->indices, $1->vals);
+	  	  print_sm($1);
 		  destroy_sm($1);
 	   }
 	   | statement MORE statement { // >=
-	  	print_sm($1);
-		print_sm($3);
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
 		   puts("more"); 
 		   highsv_addRow(model, $1->offset, highsv_getInfinity(model), $1->numNz, $1->indices, $1->vals);
+	  	   print_sm($1);
 		   destroy_sm($1);
 	   }
 	   | statement EQUAL statement { // =
-	  	print_sm($1);
-		print_sm($3);
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
 		   puts("equal"); 
 		   highsv_addRow(model, $1->offset, $1->offset, $1->numNz, $1->indices, $1->vals);
+		   print_sm($1);
 		   destroy_sm($1);
 	   }
+	   ;
 
 eol: EOL { 
    h_line++; 
@@ -115,43 +114,46 @@ eol: EOL {
    printf("\nline: %d\n", h_line); 
    #endif
    }
+   ;
 
 statement: %empty { 
 	 #ifdef DEBUG
-	 printf("init sm"); 
+	 printf("init sm\n"); 
 	 #endif
 	 $$ = init_sm(); 
    }
    | expr VAR statement {
 	   $$ = setVal(model, $3, $2, $1); 
 	   #ifdef DEBUG
-	   printf("%s: %f", $2, $1); 
+	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   #ifdef DEBUG
-	   printf("%s: %f", $1, 1.0); 
+	   printf("%s: %f\n", $1, 1.0); 
 	   #endif
    }
    | expr {
 	   #ifdef DEBUG
-	   printf("init sm"); 
+	   printf("init sm\n"); 
 	   #endif
 	   $$ = init_sm();
    	   $$->offset+=$1; 
 	   #ifdef DEBUG
-	   printf("%f", $1); 
+	   printf("%f\n", $1); 
 	   #endif
    }
+   ;
 
 expr: NUM { $$ = $1; }
     | expr "+" expr { $$ = $1 + $3; }
     | expr "-" expr { $$ = $1 - $3; }
-    | expr "*" expr { $$ = $1 + $3; }
-    | expr "/" expr { $$ = $1 - $3; }
+    | expr "*" expr { $$ = $1 * $3; }
+    | expr "/" expr { $$ = $1 / $3; }
     | expr "^" expr { $$ = pow($1, $3); }
     | "(" expr ")" { $$ = $2; }
+    ;
 
 trailingEOL: %empty
 	   | EOL trailingEOL
@@ -171,8 +173,10 @@ main(int argc, const char *argv[])
   model = highsv_create();
   initModel();
   yyparse();
+  highsv_presolve(model);
   #ifdef DEBUG
   printModel(model);
+  highsv_writeModel(model, "/tmp/model.lp");
   #endif
   return 0;
 }

@@ -13,7 +13,7 @@ typedef struct {
         double *vals;
         int *indices;
         double offset;
-        size_t rL, numNz;
+        size_t rL, rI, numNz;
 } sm;
 
 void setCost(void *mod, const char *var, const double val);
