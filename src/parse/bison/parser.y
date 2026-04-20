@@ -9,7 +9,7 @@
 	#include "pt.h"
 	#include "../../sol.h"
 	#include <math.h>
-	#include "../../print.h"
+	//#include "../../print.h"
 }
 
 %code top {
@@ -167,6 +167,7 @@ yyerror(const char *msg)
 	die(msg);
 }
 
+/*
 int 
 main(int argc, const char *argv[])
 {
@@ -180,3 +181,4 @@ main(int argc, const char *argv[])
   #endif
   return 0;
 }
+*/

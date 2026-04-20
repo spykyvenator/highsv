@@ -4,7 +4,7 @@ LDFLAGS = -Wl,--allow-multiple-definition
 
 all: parser.out
 parser.c: parser.y
-	bison -Wcounterexamples -o $@ -d $<
+	bison -g -Wcounterexamples -o $@ -d $<
 scanner.c: scanner.l
 	flex -o $@ --header-file=$(patsubst %.l,%.h,$<) $<
 %.o: %.c

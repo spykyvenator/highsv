@@ -1,5 +1,6 @@
 #ifndef PRINT_H
 #define PRINT_H
+#include "./highs_interface.h"
 
 void
 printSol(const void *mod)
