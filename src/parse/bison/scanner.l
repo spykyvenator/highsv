@@ -1,4 +1,4 @@
-%option nodefault noinput nounput noyywrap
+%option nodefault noinput nounput noyywrap reentrant
 FLOAT (?x:[-+]?[\ ]?([0-9]*[\.])?[0-9]+)
 
 %{
@@ -7,6 +7,7 @@ FLOAT (?x:[-+]?[\ ]?([0-9]*[\.])?[0-9]+)
 #include <ctype.h>
 
 double highsv_atof(char *c);
+extern yyscan_t yyscanner;
 %}
 
 %%
