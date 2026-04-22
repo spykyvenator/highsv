@@ -1,6 +1,6 @@
 *.o
 highsv
-cli
+src/cli/cli
 lps
 *.d
 *.out
