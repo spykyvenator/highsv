@@ -3,7 +3,7 @@ PKGCONFIG ?= $(shell which pkg-config)
 CFLAGS = -DCLI -DDEBUG -DHIGHS_BACKEND -Wall -Wextra $(shell $(PKGCONFIG) --cflags highs) $(shell $(PKGCONFIG) --cflags glib-2.0) $(shell $(PKGCONFIG) --cflags gio-2.0) $(shell $(PKGCONFIG) --cflags gio-unix-2.0)
 LIBS = -lm $(shell $(PKGCONFIG) --libs highs) $(shell $(PKGCONFIG) --libs glib-2.0) $(shell $(PKGCONFIG) --libs gio-2.0)
 LDFLAGS = -Wl,--allow-multiple-definition
-SRC =  ./main.c ../sol.c ../pOstream.c ../tprint/tprint.c ../util.c ../parse/bison/parser.c ../parse/bison/scanner.c ../parse/bison/pt.c
+SRC =  ./main.c ../parse/bison/scanner.c ../parse/bison/parser.c ./sol.c ../pOstream.c ../tprint/tprint.c ../util.c ../parse/bison/pt.c
 OBJS = $(SRC:.c=.o)
 DEPENDS := $(patsubst %.c,%.d,$(SRC))
 
