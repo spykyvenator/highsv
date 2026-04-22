@@ -56,11 +56,12 @@
 %start input;
 
 input: %empty
-     | MAX cost eol ST eol constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost st constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost st constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-//cost: statement
+st: EOL ST EOL
+
 cost: %empty
    | expr VAR cost { 
    	setCost(model, $2, $1); 
@@ -109,11 +110,12 @@ constraint: statement LESS statement {  // <=
 	   }
 	   ;
 
-eol: EOL { 
-   h_line++; 
-   #ifdef DEBUG
-   printf("\nline: %d\n", h_line); 
-   #endif
+eol: %empty
+   | EOL { 
+       h_line++; 
+       #ifdef DEBUG
+       printf("\nline: %d\n", h_line); 
+       #endif
    }
    ;
 

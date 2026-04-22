@@ -23,7 +23,6 @@ extern size_t rowLen, numRow, numCol;
 extern char state;
 //extern char lastVarName[255];
 extern void *model;
-yyscan_t yyscanner;
 
 static void
 cleanModel (void *model)
@@ -121,7 +120,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
 {
   cleanModel(model);
   preModel();
-  yyset_in(fd, yyscanner);
+  yyset_in(fd);// add yyscanner here for reentrant
   yyparse();
 #ifdef DEBUG
   printModel(model);
