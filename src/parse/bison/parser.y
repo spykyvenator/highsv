@@ -56,11 +56,9 @@
 %start input;
 
 input: %empty
-     | MAX cost st constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost st constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost eol ST eol constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
      ;
-
-st: EOL ST EOL
 
 cost: %empty
    | expr VAR cost { 
