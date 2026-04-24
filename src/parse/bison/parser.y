@@ -60,6 +60,7 @@ input: %empty
      | MIN cost eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
+//cost: statement
 cost: %empty
    | expr VAR cost { 
    	setCost(model, $2, $1); 
@@ -108,12 +109,11 @@ constraint: statement LESS statement {  // <=
 	   }
 	   ;
 
-eol: %empty
-   | EOL { 
-       h_line++; 
-       #ifdef DEBUG
-       printf("\nline: %d\n", h_line); 
-       #endif
+eol: EOL { 
+   h_line++; 
+   #ifdef DEBUG
+   printf("\nline: %d\n", h_line); 
+   #endif
    }
    ;
 
