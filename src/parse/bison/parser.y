@@ -56,9 +56,11 @@
 %start input;
 
 input: %empty
-     | MAX cost eol ST eol constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost eol ST eol constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost st constraintsE trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost st constraintsE trailingEOL { highsv_setSenseMin(model); }
      ;
+
+st: trailingEOLS ST trailingEOLS
 
 //cost: statement
 cost: %empty
@@ -80,6 +82,7 @@ cost: %empty
    }
    ;
 
+constraintsE: constraint eol constraints;// constraints entry, we require at least one
 constraints: %empty
 	   | constraint eol constraints { }// here we have to add the constraint to the model
 
@@ -129,6 +132,12 @@ statement: %empty {
 	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
+   | "-" VAR statement {
+	   $$ = setVal(model, $3, $2, -1.0); 
+	   #ifdef DEBUG
+	   printf("%s: %f\n", $2, 1.0); 
+	   #endif
+   }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   #ifdef DEBUG
@@ -156,8 +165,9 @@ expr: NUM { $$ = $1; }
     | "(" expr ")" { $$ = $2; }
     ;
 
+trailingEOLS: eol trailingEOL;// trailing start, require at least one eol
 trailingEOL: %empty
-	   | EOL trailingEOL
+	   | eol trailingEOL
 	   ;
 
 %%

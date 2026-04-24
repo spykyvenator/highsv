@@ -133,5 +133,6 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   clock_t diff = clock() - before;
   printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
   fclose(fd);
+  highsv_writeModel(model, "/tmp/model.lp");
   return 0;
 }
