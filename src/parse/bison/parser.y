@@ -64,20 +64,20 @@ st: trailingEOLS ST trailingEOLS
 
 //cost: statement
 cost: %empty
-   | expr VAR cost { 
-   	setCost(model, $2, $1); 
+   | cost expr VAR { 
+   	setCost(model, $3, $2); 
 	//printf("setting cost: %s: %f", $2, $1); 
-	char *name = $2; 
+	char *name = $3; 
 	free(name);
    }
-   | VAR cost { 
-   	setCost(model, $1, 1.0); 
+   | cost VAR { 
+   	setCost(model, $2, 1.0); 
 	//printf(" setting cost: %s: %f", $1, 1.0); 
-	char *name = $1; 
+	char *name = $2; 
 	free(name); 
    }
-   | expr { 
-   	highsv_setObjectiveOffset(model, $1); 
+   | cost expr { 
+   	highsv_setObjectiveOffset(model, $2); 
 	//printf("setting offset %f", $1); 
    }
    ;
@@ -132,12 +132,6 @@ statement: %empty {
 	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
-   | "-" VAR statement {
-	   $$ = setVal(model, $3, $2, -1.0); 
-	   #ifdef DEBUG
-	   printf("%s: %f\n", $2, 1.0); 
-	   #endif
-   }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   #ifdef DEBUG
@@ -157,6 +151,7 @@ statement: %empty {
    ;
 
 expr: NUM { $$ = $1; }
+    | "-" { $$ = -1; }
     | expr "+" expr { $$ = $1 + $3; }
     | expr "-" expr { $$ = $1 - $3; }
     | expr "*" expr { $$ = $1 * $3; }

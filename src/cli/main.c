@@ -4,7 +4,7 @@
 static void
 pHelp()
 {
-    puts("run the program better and git gud");
+    puts("opts: h: help, o: outfile, i = integer, n = negative too");
 }
 
 int
@@ -33,7 +33,7 @@ main(int argc, char *argv[])
         }
     }
 
-    initModel();
+    //initModel();
 
     ostream = g_unix_output_stream_new(fileno(out ? out : stdout), FALSE);
 
