@@ -68,7 +68,7 @@ cost: %empty
    	setCost(model, $3, $2); 
 	//printf("setting cost: %s: %f", $2, $1); 
 	char *name = $3; 
-	free(name);
+	free(name);// TODO: don't think this is necessary anymore in left recursive parsing
    }
    | cost VAR { 
    	setCost(model, $2, 1.0); 
@@ -76,8 +76,12 @@ cost: %empty
 	char *name = $2; 
 	free(name); 
    }
-   | cost expr { 
-   	highsv_setObjectiveOffset(model, $2); 
+   | cost "+" expr { 
+   	highsv_setObjectiveOffset(model, $3); 
+	//printf("setting offset %f", $1); 
+   }
+   | cost "-" expr { 
+   	highsv_setObjectiveOffset(model, $3*-1); 
 	//printf("setting offset %f", $1); 
    }
    ;
@@ -91,6 +95,9 @@ constraint: statement LESS statement {  // <=
 		  destroy_sm($3); 
 		  puts("less"); 
 		  highsv_addRow(model, -highsv_getInfinity(model), $1->offset, $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 	  	  print_sm($1);
 		  destroy_sm($1);
 	   }
@@ -99,6 +106,9 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($3); 
 		   puts("more"); 
 		   highsv_addRow(model, $1->offset, highsv_getInfinity(model), $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 	  	   print_sm($1);
 		   destroy_sm($1);
 	   }
@@ -107,6 +117,9 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($3); 
 		   puts("equal"); 
 		   highsv_addRow(model, $1->offset, $1->offset, $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 		   print_sm($1);
 		   destroy_sm($1);
 	   }

@@ -334,4 +334,10 @@ highsv_writeModel(void *highs, const char *filename)
     if (Highs_writeModel(highs, filename))
         die("failed to write model to: %s\n", filename);
 }
+
+static inline void
+highsv_passRowName(void *mod, size_t numRow, const char* rowName)
+{
+  Highs_passRowName(mod, numRow, rowName);
+}
 #endif
