@@ -102,19 +102,19 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
 {
     int64_t l = to_row - from_row + 1;
     HighsInt nr;
-    HighsInt ms[l], mi[l], nz;
+    HighsInt ms[*num_nz], mi[*num_nz], nz;
     if (Highs_getRowsByRange(highs, (HighsInt) from_row,
                               (HighsInt) to_row, &nr,
                               lower, upper, &nz,
                               ms, mi,
                               matrix_value))
         die("could not get rows by range");
-    *num_row = (int64_t) nr;
-    *num_nz = (int64_t) nz;
+    if (num_row) *num_row = (int64_t) nr;
+    if (num_nz) *num_nz = (int64_t) nz;
 
     for (int64_t i = 0; i < l; i++) {
-        matrix_start[i] = (int64_t) ms[i];
-        matrix_index[i] = (int64_t) mi[i];
+        if (matrix_start) matrix_start[i] = (int64_t) ms[i];
+        if (matrix_index) matrix_index[i] = (int64_t) mi[i];
     }
 }
 

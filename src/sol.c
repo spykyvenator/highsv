@@ -17,7 +17,7 @@
 #include "print.h"
 #endif
 
-extern int *rowIndex, numNz;
+extern int *rowIndex;
 extern size_t rowLen, numRow, numCol;
 //extern double lastVal, sign, *rowVal;
 extern char state;
@@ -30,7 +30,6 @@ cleanModel (void *model)
   highsv_destroy(model);
   numCol = 0;
   numRow = 0;
-  numNz = 0;
 }
 
 int

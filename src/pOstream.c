@@ -55,13 +55,13 @@ printInfeasible(GOutputStream* ostr)
 }
 
 static double
-getSlack(const void *mod, const int64_t row, const int64_t num_nz, const double *r_value)
+getSlack(const void *mod, const int64_t row, int64_t num_nz, const double *r_value)
 {
-  int64_t nRow, start, rowNumNz, matrix_index[num_nz];
-  double lower, upper, matrix_value[num_nz];
-  highsv_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
-        &rowNumNz, &start, 
-        matrix_index, matrix_value);
+  int64_t start;
+  double lower, upper;
+  highsv_getRowsByRange(mod, row, row, NULL, &lower, &upper, 
+        &num_nz, &start, 
+        NULL, NULL);
   const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
 #ifdef DEBUG
   printf("row slack: %lf- %lf\n", r_value[row], rowBound);

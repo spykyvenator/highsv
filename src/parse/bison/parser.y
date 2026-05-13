@@ -18,7 +18,7 @@
 
 	void *model = NULL;
 	int h_line = 0;
-	int *rowIndex = NULL, numNz = 0;
+	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
 
