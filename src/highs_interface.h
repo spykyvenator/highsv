@@ -99,12 +99,14 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
                               int64_t* matrix_start, int64_t* matrix_index,
                               double* matrix_value)
 {
+    HighsInt nr;
     if (Highs_getRowsByRange(highs, (HighsInt) from_row,
-                              (HighsInt) to_row, (HighsInt*) num_row,
+                              (HighsInt) to_row, (HighsInt*) &nr,
                               lower, upper, (HighsInt*) num_nz,
                               (HighsInt*) matrix_start, (HighsInt*) matrix_index,
                               matrix_value))
         die("could not get rows by range");
+    *num_row = (int64_t) nr;
 }
 
 static inline void
