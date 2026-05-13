@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "util.h"
 #include "interfaces/highs_c_api.h"
+#include <stdlib.h>
 
 #define HIGHSV_STATUS_ERROR 	                kHighsStatusError
 #define HIGHSV_STATUS_NOTSET 	                kHighsModelStatusNotset
@@ -99,14 +100,22 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
                               int64_t* matrix_start, int64_t* matrix_index,
                               double* matrix_value)
 {
+    int64_t l = to_row - from_row + 1;
     HighsInt nr;
+    HighsInt ms[l], mi[l], nz;
     if (Highs_getRowsByRange(highs, (HighsInt) from_row,
-                              (HighsInt) to_row, (HighsInt*) &nr,
-                              lower, upper, (HighsInt*) num_nz,
-                              (HighsInt*) matrix_start, (HighsInt*) matrix_index,
+                              (HighsInt) to_row, &nr,
+                              lower, upper, &nz,
+                              ms, mi,
                               matrix_value))
         die("could not get rows by range");
     *num_row = (int64_t) nr;
+    *num_nz = (int64_t) nz;
+
+    for (int64_t i = 0; i < l; i++) {
+        matrix_start[i] = (int64_t) ms[i];
+        matrix_index[i] = (int64_t) mi[i];
+    }
 }
 
 static inline void
