@@ -101,6 +101,7 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
                               double* matrix_value)
 {
     int64_t l = to_row - from_row + 1;
+    int64_t cpnz = *num_nz;
     HighsInt nr;
     HighsInt ms[*num_nz], mi[*num_nz], nz;
     if (Highs_getRowsByRange(highs, (HighsInt) from_row,
@@ -112,7 +113,7 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
     if (num_row) *num_row = (int64_t) nr;
     if (num_nz) *num_nz = (int64_t) nz;
 
-    for (int64_t i = 0; i < l; i++) {
+    for (int64_t i = 0; i < cpnz; i++) {
         if (matrix_start) matrix_start[i] = (int64_t) ms[i];
         if (matrix_index) matrix_index[i] = (int64_t) mi[i];
     }
