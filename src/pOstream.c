@@ -365,7 +365,6 @@ pVal(const void *mod, GOutputStream *ostr)
 
   for (size_t i = 0; i < numCol; i++){
     highsv_getColName(mod, i, text);
-      break;
 
 #ifdef DEBUG
     printf("num_nz: %ld col_dual %9.9lf\n", num_nz, col_dual[i]);
