@@ -18,7 +18,7 @@
 
 	void *model = NULL;
 	int h_line = 0;
-	int *rowIndex = NULL, numNz = 0;
+	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
 
@@ -64,20 +64,24 @@ st: trailingEOLS ST trailingEOLS
 
 //cost: statement
 cost: %empty
-   | expr VAR cost { 
-   	setCost(model, $2, $1); 
+   | cost expr VAR { 
+   	setCost(model, $3, $2); 
 	//printf("setting cost: %s: %f", $2, $1); 
-	char *name = $2; 
-	free(name);
+	char *name = $3; 
+	free(name);// TODO: don't think this is necessary anymore in left recursive parsing
    }
-   | VAR cost { 
-   	setCost(model, $1, 1.0); 
+   | cost VAR { 
+   	setCost(model, $2, 1.0); 
 	//printf(" setting cost: %s: %f", $1, 1.0); 
-	char *name = $1; 
+	char *name = $2; 
 	free(name); 
    }
-   | expr { 
-   	highsv_setObjectiveOffset(model, $1); 
+   | cost "+" expr { 
+   	highsv_setObjectiveOffset(model, $3); 
+	//printf("setting offset %f", $1); 
+   }
+   | cost "-" expr { 
+   	highsv_setObjectiveOffset(model, $3*-1); 
 	//printf("setting offset %f", $1); 
    }
    ;
@@ -91,6 +95,9 @@ constraint: statement LESS statement {  // <=
 		  destroy_sm($3); 
 		  puts("less"); 
 		  highsv_addRow(model, -highsv_getInfinity(model), $1->offset, $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 	  	  print_sm($1);
 		  destroy_sm($1);
 	   }
@@ -99,6 +106,9 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($3); 
 		   puts("more"); 
 		   highsv_addRow(model, $1->offset, highsv_getInfinity(model), $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 	  	   print_sm($1);
 		   destroy_sm($1);
 	   }
@@ -107,6 +117,9 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($3); 
 		   puts("equal"); 
 		   highsv_addRow(model, $1->offset, $1->offset, $1->numNz, $1->indices, $1->vals);
+		  char rowName[512];
+		  snprintf(rowName, 512, "%ld", numRow + 1);
+		  highsv_passRowName(model, numRow++, rowName);
 		   print_sm($1);
 		   destroy_sm($1);
 	   }
@@ -132,12 +145,6 @@ statement: %empty {
 	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
-   | "-" VAR statement {
-	   $$ = setVal(model, $3, $2, -1.0); 
-	   #ifdef DEBUG
-	   printf("%s: %f\n", $2, 1.0); 
-	   #endif
-   }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
 	   #ifdef DEBUG
@@ -157,6 +164,7 @@ statement: %empty {
    ;
 
 expr: NUM { $$ = $1; }
+    | "-" { $$ = -1; }
     | expr "+" expr { $$ = $1 + $3; }
     | expr "-" expr { $$ = $1 - $3; }
     | expr "*" expr { $$ = $1 * $3; }

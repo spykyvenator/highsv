@@ -1,6 +1,8 @@
 #include "pt.h"
 #include "../../util.h"
 
+extern size_t numCol;
+
 static sm*
 appendSm(sm* a, double val, int index)
 {
@@ -105,6 +107,7 @@ findIndex(void *mod, const char *text)
     index = highsv_getNumCol(mod);
     highsv_addVar(mod);
     highsv_passColName(mod, index, text);
+    numCol++;
   }
   return (size_t) index;
 }

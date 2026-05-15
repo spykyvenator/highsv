@@ -17,7 +17,7 @@
 #include "print.h"
 #endif
 
-extern int *rowIndex, numNz;
+extern int *rowIndex;
 extern size_t rowLen, numRow, numCol;
 //extern double lastVal, sign, *rowVal;
 extern char state;
@@ -30,13 +30,12 @@ cleanModel (void *model)
   highsv_destroy(model);
   numCol = 0;
   numRow = 0;
-  numNz = 0;
 }
 
 int
 initModel ()
 {
-  rowIndex = (int*) malloc(sizeof(int)*rowLen);
+  //rowIndex = (int*) malloc(sizeof(int)*rowLen);
   model = highsv_create();
   return 0;
 }
@@ -63,6 +62,7 @@ preModel ()
       //rowVal[i] = 0;
       //rowIndex[i] = 0;
   //}
+  printf("model: %p\n", model);
   highsv_setBoolOptionValue(model, "log_to_console", 0);
   highsv_setBoolOptionValue(model, "output_flag", 0);
 }
@@ -92,7 +92,6 @@ setMip(char mip, void *model)
   }
 }
 
-/*
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
@@ -113,7 +112,6 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   yy_delete_buffer(buffer);
   return 0;
 }
-*/
 
 int
 parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
@@ -125,7 +123,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
 #ifdef DEBUG
   printModel(model);
 #endif
-  setPositive(pos, model);
+  setPositive((char) pos, model);
   setMip(mip, model);
   highsv_presolve(model);
   clock_t before = clock();

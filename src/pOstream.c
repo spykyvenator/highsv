@@ -55,11 +55,12 @@ printInfeasible(GOutputStream* ostr)
 }
 
 static double
-getSlack(const void *mod, const int64_t row, const int64_t num_nz, const double *r_value)
+getSlack(const void *mod, const HighsInt row, const HighsInt num_nz, const double *r_value)
 {
-  int64_t nRow, start, rowNumNz, matrix_index[num_nz];
+  int rowNumNz, matrix_index[num_nz];
+  HighsInt nRow, start;
   double lower, upper, matrix_value[num_nz];
-  highsv_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
+  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, 
         &rowNumNz, &start, 
         matrix_index, matrix_value);
   const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
@@ -68,11 +69,38 @@ getSlack(const void *mod, const int64_t row, const int64_t num_nz, const double 
 #endif
   return ABS(r_value[row]-rowBound);
 }
+/*
+static double
+getSlack(const void *mod, const int64_t row, int64_t num_nz, const double *r_value)
+{
+  int64_t start;
+  double lower, upper;
+  highsv_getRowsByRange(mod, row, row, NULL, &lower, &upper, 
+        &num_nz, &start, 
+        NULL, NULL);
+  const double rowBound = ABS(lower) < ABS(upper) ? lower : upper;
+#ifdef DEBUG
+  printf("row slack: %lf- %lf\n", r_value[row], rowBound);
+#endif
+  return ABS(r_value[row]-rowBound);
+}
+*/
 
 /*
  * Get the constraint that is limiting the row
  * Since one will always be infinite and the other not this is ok
  */
+static double
+getRowConstraint(const void *mod, const HighsInt row, char *type)
+{
+  HighsInt nRow, nz, m_start, m_index[numCol];
+  double lower, upper, m_value[numCol];
+  Highs_getRowsByRange(mod, row, row, &nRow, &lower, &upper, &nz, &m_start, m_index, m_value);
+  if (type) 
+      *type = ABS(lower) == ABS(upper) ? '=' : (ABS(lower) < ABS(upper) ? '<' : '>');
+  return ABS(lower) < ABS(upper) ? lower : upper;
+}
+/*
 static double
 getRowConstraint(const void *mod, const int64_t row, char *type)
 {
@@ -83,34 +111,59 @@ getRowConstraint(const void *mod, const int64_t row, char *type)
       *type = ABS(lower) == ABS(upper) ? '=' : (ABS(lower) < ABS(upper) ? '<' : '>');
   return ABS(lower) < ABS(upper) ? lower : upper;
 }
+*/
 
+static double*
+getLHS(const void *mod, HighsInt *resRows)
+{
+    const HighsInt num_nz = Highs_getNumNz(mod);
+    HighsInt res_nz, m_start[numRow], m_index[num_nz];
+    double lower[numRow], upper[numRow], m_value[num_nz], col_val[numCol], col_dual[numCol], row_val[numRow], row_dual[numRow];
+
+    Highs_getRowsByRange(mod, 0, numRow - 1, resRows, 
+            lower, upper, &res_nz, m_start, m_index, m_value);
+    Highs_getSolution(mod, col_val, col_dual, row_val, row_dual);
+    double *res = malloc(sizeof(double)* (*resRows));
+    for (HighsInt i = 0; i < *resRows-1; i++) {
+        res[i] = 0;
+        for (HighsInt j = m_start[i]; j < m_start[i+1]; j++) {
+            res[i] += col_val[m_index[j]]*m_value[j];
+        }
+    }
+    for (HighsInt j = m_start[*resRows-1]; j < res_nz; j++) {
+        res[*resRows-1] += col_val[m_index[j]]*m_value[j];
+    }
+    return res;
+}
+/*
 static double*
 getLHS(const void *mod, int64_t *resRows)
 {
-    const int64_t num_nz = highsv_getNumNz(mod);
-    int64_t res_nz, m_start[numRow], m_index[num_nz];
+    int64_t num_nz = highsv_getNumNz(mod);
+    int64_t m_start[numRow], m_index[num_nz];
     double lower[numRow], upper[numRow], m_value[num_nz], col_val[numCol], col_dual[numCol], row_val[numRow], row_dual[numRow];
 
     highsv_getRowsByRange(mod, 0, numRow - 1, resRows, 
-            lower, upper, &res_nz, m_start, m_index, m_value);
+            lower, upper, &num_nz, m_start, m_index, m_value);
     highsv_getSolution(mod, col_val, col_dual, row_val, row_dual);
-    double *res = h_malloc(sizeof(double)* (*resRows));
+    double *res = h_malloc(sizeof(double) * (*resRows));
     for (int64_t i = 0; i < *resRows-1; i++) {
         res[i] = 0;
         for (int64_t j = m_start[i]; j < m_start[i+1]; j++) {
             res[i] += col_val[m_index[j]]*m_value[j];
         }
     }
-    for (int64_t j = m_start[*resRows-1]; j < res_nz; j++) {
+    for (int64_t j = m_start[*resRows-1]; j < num_nz; j++) {
         res[*resRows-1] += col_val[m_index[j]]*m_value[j];
     }
     return res;
 }
+*/
 
 static double*
 getDualPriceRanges(void *mod)
 {
-    int64_t nbRows;
+    HighsInt nbRows;
     double* lhs = getLHS(mod, &nbRows);
     double rc;
     double rowUBnd[numRow], rowLBnd[numRow];
@@ -175,7 +228,8 @@ getRowIntervals(const void *mod)
     res[i*3+2] = inf;
     for (size_t j = 0; j < numCol; j++){
       for (size_t k = 0; k < numRow; k++){
-        highsv_getBasisInverseRow(mod, j, c_vect, NULL, NULL);
+        Highs_getBasisInverseRow(mod, j, c_vect, NULL, NULL);
+        //highsv_getBasisInverseRow(mod, j, c_vect, NULL, NULL);
 	if (i != k){
 	  val += c_vect[k]*rc[k];
 #ifdef DEBUG_PRINTER
@@ -311,7 +365,6 @@ pVal(const void *mod, GOutputStream *ostr)
 
   for (size_t i = 0; i < numCol; i++){
     highsv_getColName(mod, i, text);
-      break;
 
 #ifdef DEBUG
     printf("num_nz: %ld col_dual %9.9lf\n", num_nz, col_dual[i]);

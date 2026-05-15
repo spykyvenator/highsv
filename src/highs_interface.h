@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "util.h"
 #include "interfaces/highs_c_api.h"
+#include <stdlib.h>
 
 #define HIGHSV_STATUS_ERROR 	                kHighsStatusError
 #define HIGHSV_STATUS_NOTSET 	                kHighsModelStatusNotset
@@ -99,12 +100,23 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
                               int64_t* matrix_start, int64_t* matrix_index,
                               double* matrix_value)
 {
+    int64_t l = to_row - from_row + 1;
+    int64_t cpnz = *num_nz;
+    HighsInt nr;
+    HighsInt ms[*num_nz], mi[*num_nz], nz;
     if (Highs_getRowsByRange(highs, (HighsInt) from_row,
-                              (HighsInt) to_row, (HighsInt*) num_row,
-                              lower, upper, (HighsInt*) num_nz,
-                              (HighsInt*) matrix_start, (HighsInt*) matrix_index,
+                              (HighsInt) to_row, &nr,
+                              lower, upper, &nz,
+                              ms, mi,
                               matrix_value))
         die("could not get rows by range");
+    if (num_row) *num_row = (int64_t) nr;
+    if (num_nz) *num_nz = (int64_t) nz;
+
+    for (int64_t i = 0; i < cpnz; i++) {
+        if (matrix_start) matrix_start[i] = (int64_t) ms[i];
+        if (matrix_index) matrix_index[i] = (int64_t) mi[i];
+    }
 }
 
 static inline void
@@ -333,5 +345,11 @@ highsv_writeModel(void *highs, const char *filename)
 {
     if (Highs_writeModel(highs, filename))
         die("failed to write model to: %s\n", filename);
+}
+
+static inline void
+highsv_passRowName(void *mod, size_t numRow, const char* rowName)
+{
+  Highs_passRowName(mod, numRow, rowName);
 }
 #endif
