@@ -17,6 +17,7 @@
 	#include <stddef.h>
 
 	void *model = NULL;
+	extern char* yytext;
 	int h_line = 0;
 	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
@@ -86,9 +87,9 @@ cost: %empty
    }
    ;
 
-constraintsE: constraint eol constraints;// constraints entry, we require at least one
+constraintsE: constraints eol constraint;// constraints entry, we require at least one
 constraints: %empty
-	   | constraint eol constraints { }// here we have to add the constraint to the model
+	   | constraints eol constraint { }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  // <=
 		  $$ = mergeSm($1, $3); 
@@ -139,26 +140,36 @@ statement: %empty {
 	 #endif
 	 $$ = init_sm(); 
    }
-   | expr VAR statement {
-	   $$ = setVal(model, $3, $2, $1); 
+   | statement expr VAR {
+	   $$ = setVal(model, $1, $3, $2); 
 	   #ifdef DEBUG
-	   printf("%s: %f\n", $2, $1); 
+	   printf("%s: %f\n", $3, $2); 
 	   #endif
    }
-   | VAR statement {
-	   $$ = setVal(model, $2, $1, 1.0); 
+   | statement VAR {
+	   $$ = setVal(model, $1, $2, 1.0); 
 	   #ifdef DEBUG
-	   printf("%s: %f\n", $1, 1.0); 
+	   printf("%s: %f\n", $2, 1.0); 
 	   #endif
    }
-   | expr {
+   | statement "+" expr {
 	   #ifdef DEBUG
 	   printf("init sm\n"); 
 	   #endif
 	   $$ = init_sm();
-   	   $$->offset+=$1; 
+   	   $$->offset+=$3; 
 	   #ifdef DEBUG
-	   printf("%f\n", $1); 
+	   printf("%f\n", $3); 
+	   #endif
+   }
+   | statement "-" expr {
+	   #ifdef DEBUG
+	   printf("init sm\n"); 
+	   #endif
+	   $$ = init_sm();
+   	   $$->offset-=$3; 
+	   #ifdef DEBUG
+	   printf("%f\n", $3); 
 	   #endif
    }
    ;
@@ -183,7 +194,7 @@ trailingEOL: %empty
 void
 yyerror(const char *msg)
 {
-	die(msg);
+	die("parser failed at line: %d around: %s\n %s", h_line, yytext, msg);
 }
 
 /*
