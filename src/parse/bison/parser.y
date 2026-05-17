@@ -173,9 +173,9 @@ expr: NUM { $$ = $1; }
     | "(" expr ")" { $$ = $2; }
     ;
 
-trailingEOLS: eol trailingEOL;// trailing start, require at least one eol
+trailingEOLS: trailingEOL eol;// trailing start, require at least one eol
 trailingEOL: %empty
-	   | eol trailingEOL
+	   | trailingEOL eol
 	   ;
 
 %%

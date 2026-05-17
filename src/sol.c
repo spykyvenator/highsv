@@ -67,7 +67,7 @@ preModel ()
   highsv_setBoolOptionValue(model, "output_flag", 0);
 }
 
-void
+static void
 setPositive(char pos, void *model)
 {
   if (pos) {
@@ -82,7 +82,7 @@ setPositive(char pos, void *model)
   }
 }
 
-void
+static void
 setMip(char mip, void *model)
 {
   if (mip) {
