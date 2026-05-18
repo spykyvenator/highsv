@@ -18,7 +18,7 @@
 
 	void *model = NULL;
 	extern char* yytext;
-	int h_line = 0;
+	int h_line = 1;
 	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
@@ -57,11 +57,11 @@
 %start input;
 
 input: %empty
-     | MAX cost st constraintsE trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost st constraintsE trailingEOL { highsv_setSenseMin(model); }
+     | MAX cost st constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN cost st constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-st: trailingEOLS ST trailingEOLS
+st: eol ST eol
 
 //cost: statement
 cost: %empty
@@ -87,9 +87,8 @@ cost: %empty
    }
    ;
 
-constraintsE: constraints eol constraint;// constraints entry, we require at least one
-constraints: %empty
-	   | constraints eol constraint { }// here we have to add the constraint to the model
+constraints: constraint
+	   | constraints trailingEOLS constraint { }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  // <=
 		  $$ = mergeSm($1, $3); 
@@ -125,14 +124,6 @@ constraint: statement LESS statement {  // <=
 		   destroy_sm($1);
 	   }
 	   ;
-
-eol: EOL { 
-   h_line++; 
-   #ifdef DEBUG
-   printf("\nline: %d\n", h_line); 
-   #endif
-   }
-   ;
 
 statement: %empty { 
 	 #ifdef DEBUG
@@ -184,9 +175,12 @@ expr: NUM { $$ = $1; }
     | "(" expr ")" { $$ = $2; }
     ;
 
-trailingEOLS: trailingEOL eol;// trailing start, require at least one eol
+eol: EOL { h_line++; };
+trailingEOLS: eol
+	    | eol trailingEOLS
+	    ;
 trailingEOL: %empty
-	   | trailingEOL eol
+	   | eol trailingEOL
 	   ;
 
 %%
