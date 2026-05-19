@@ -1,5 +1,5 @@
 %option nodefault noinput nounput noyywrap
-FLOAT (?x:[-+]?[\ ]?([0-9]*[\.])?[0-9]+)
+FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 
 %{
 #include <stdlib.h>
@@ -18,11 +18,16 @@ double highsv_atof(char *c);
 (?i:max) return HIGHSV_MAX;
 (?i:st)|(?i:subject\ to) return HIGHSV_ST;
 {FLOAT} {
-  double n = highsv_atof(yytext);
-  yylval->HIGHSV_NUM = (int) n;
+  double n = atof(yytext);
+  yylval->HIGHSV_NUM = n;
+  printf("GOT NUMBER: %lf from %s\n", n, yytext);
   return HIGHSV_NUM;
 }
+"+" return HIGHSV_PLUS;
 "-" return HIGHSV_SUB;
+"*" return HIGHSV_MULT;
+"/" return HIGHSV_DIV;
+"^" return HIGHSV_POW;
 [a-zA-Z][0-9a-zA-Z|,|/]* { yylval->HIGHSV_VAR = strdup(yytext); return HIGHSV_VAR; }// maybe we can pass it with passColName and use the col index
 "<"|"<="|"=<" return HIGHSV_LESS;
 ">"|">="|"=>" return HIGHSV_MORE;

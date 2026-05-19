@@ -39,7 +39,11 @@
 	MORE
 	LESS
 	EQUAL
-	SUB
+	PLUS
+        SUB
+        MULT
+        DIV
+        POW
 ;
 
 %token <double> NUM "number"
@@ -49,9 +53,9 @@
 
 
 %printer { fprintf (yyo, "%f", $$); } <double>
-%left "+" "-"
-%left "*" "/"
-%left "^";
+%left NUM PLUS SUB
+%left MULT DIV
+%left POW;
 
 %%
 
@@ -158,13 +162,16 @@ statement: %empty {
    ;
 
 expr: NUM { $$ = $1; }
-    | SUB { $$ = -1; }
-    | expr "+" expr { $$ = $1 + $3; }
-    | expr "-" expr { $$ = $1 - $3; }
-    | expr "*" expr { $$ = $1 * $3; }
-    | expr "/" expr { $$ = $1 / $3; }
-    | expr "^" expr { $$ = pow($1, $3); }
+    | expr PLUS expr { $$ = $1 + $3; }
+    | expr SUB expr { $$ = $1 - $3; }
+    | expr MULT expr { $$ = $1 * $3; }
+    | expr DIV expr { $$ = $1 / $3; }
+    | expr POW expr { $$ = pow($1, $3); }
     | "(" expr ")" { $$ = $2; }
+    | PLUS { $$ = 1; }
+    | SUB { $$ = -1; }
+    | PLUS expr { $$ = $2; }
+    | SUB expr { $$ = $2*-1; }
     ;
 
 eol: EOL { 

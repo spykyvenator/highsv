@@ -6,6 +6,13 @@ extern size_t numCol;
 static sm*
 appendSm(sm* a, double val, int index)
 {
+  for (size_t i = 0; i < a->rI; i++) {
+      if (a->indices[i] == index) {
+          a->vals[i] += val;
+          printf("found index already: set to %lf", a->vals[i]);
+          return a;
+      }
+  }
   if (index >= a->rL) {
     double *tmpVal = (double*) h_malloc(sizeof(double)*a->rL*2);
     int *tmpIndex = (int*) h_malloc(sizeof(int)*a->rL*2);
@@ -17,7 +24,7 @@ appendSm(sm* a, double val, int index)
     a->indices = tmpIndex;
     for (size_t i = a->rL; i < a->rL*2; i++) {// allocate to zero
       a->vals[i] = 0;
-      a->indices[i] = 0;
+      a->indices[i] = -1;
     }
     a->rL*=2;
   }
@@ -28,6 +35,7 @@ appendSm(sm* a, double val, int index)
 #ifdef DEBUG
   printf("appended: %lf at index: %d\n", val, index);
 #endif
+  return a;
 }
 
 sm*
@@ -87,7 +95,7 @@ init_sm(void)
 	res->indices = h_malloc(sizeof(size_t)*res->rL);
         for (size_t i = 0; i < res->rL; i++) {// zero init
                 res->vals[i] = 0;
-                res->indices[i] = 0;
+                res->indices[i] = -1;
         }
 	return res;
 }
@@ -117,8 +125,17 @@ findIndex(void *mod, const char *text)
 void
 setCost(void *mod, const char *var, const double val)
 {
+        int64_t nz = highsv_getNumNz(mod);
 	const size_t index = findIndex(mod, var);
-	highsv_changeColCost(mod, index, val);
+        int64_t nnz, ms, mi[nz], nc;
+
+        double cost, l, u, mv[nz];
+        highsv_getColsByRange(mod, (int64_t) index,// better use a statement for this
+                              (int64_t) index, &nc,
+                              &cost, &l, &u,
+                              &nnz, &ms,
+                              mi, mv);
+	highsv_changeColCost(mod, index, cost+val);
 }
 
 sm*
