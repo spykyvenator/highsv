@@ -64,7 +64,7 @@ input: %empty
 st: trailingEOLS ST trailingEOLS
 
 costE: cost
-     | cost expr { highsv_setObjectiveOffset(model, $2); printf("set offset to: %lf\n", $2); }
+     | cost expr { highsv_setObjectiveOffset(model, $2); }
 cost: %empty
    | cost expr VAR { 
    	setCost(model, $3, $2); 
@@ -130,12 +130,16 @@ statement: %empty {
    }
    | expr VAR statement {
 	   $$ = setVal(model, $3, $2, $1); 
+	   char *name = $2;
+	   free(name);
 	   #ifdef DEBUG
 	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
    | VAR statement {
 	   $$ = setVal(model, $2, $1, 1.0); 
+	   char *name = $1;
+	   free(name);
 	   #ifdef DEBUG
 	   printf("%s: %f\n", $1, 1.0); 
 	   #endif
