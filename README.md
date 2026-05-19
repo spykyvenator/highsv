@@ -74,6 +74,7 @@ You will need
 * [make](https://www.gnu.org/software/make/)
 * [HiGHS](https://highs.dev/)
 * [flex](https://sourceforge.net/projects/flex/)
+* [bison](https://www.gnu.org/software/bison/)
 * [gtk4](https://www.gtk.org/)
 * C library
 
