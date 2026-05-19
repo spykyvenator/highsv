@@ -62,7 +62,9 @@ preModel ()
       //rowVal[i] = 0;
       //rowIndex[i] = 0;
   //}
+#ifdef DEBUG
   printf("model: %p\n", model);
+#endif
   highsv_setBoolOptionValue(model, "log_to_console", 0);
   highsv_setBoolOptionValue(model, "output_flag", 0);
 }
@@ -98,6 +100,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   cleanModel(model);
   preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
+  yydebug=1;
   yyparse();
 #ifdef DEBUG
   printModel(model);
@@ -119,6 +122,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   cleanModel(model);
   preModel();
   yyset_in(fd);// add yyscanner here for reentrant
+  yydebug=1;
   yyparse();
 #ifdef DEBUG
   printModel(model);

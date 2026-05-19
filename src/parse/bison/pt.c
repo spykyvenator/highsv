@@ -25,7 +25,9 @@ appendSm(sm* a, double val, int index)
   a->indices[a->rI] = index;
   a->numNz++; // right now should still check if index is already present
   a->rI++;
+#ifdef DEBUG
   printf("appended: %lf at index: %d\n", val, index);
+#endif
 }
 
 sm*

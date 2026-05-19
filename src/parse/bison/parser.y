@@ -21,6 +21,7 @@
 	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
+	extern char* yytext;
 
 }
 %code provides {	
@@ -56,13 +57,14 @@
 %start input;
 
 input: %empty
-     | MAX cost st constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN cost st constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX costE st constraints trailingEOL { highsv_setSenseMax(model); }
+     | MIN costE st constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
 st: trailingEOLS ST trailingEOLS
 
-//cost: statement
+costE: cost
+     | cost expr { highsv_setObjectiveOffset(model, $2); printf("set offset to: %lf\n", $2); }
 cost: %empty
    | cost expr VAR { 
    	setCost(model, $3, $2); 
@@ -76,14 +78,6 @@ cost: %empty
 	char *name = $2; 
 	free(name); 
    }
-   | cost "+" expr { 
-   	highsv_setObjectiveOffset(model, $3); 
-	//printf("setting offset %f", $1); 
-   }
-   | cost "-" expr { 
-   	highsv_setObjectiveOffset(model, $3*-1); 
-	//printf("setting offset %f", $1); 
-   }
    ;
 
 constraints: constraint
@@ -92,34 +86,37 @@ constraints: constraint
 constraint: statement LESS statement {  // <=
 		  $$ = mergeSm($1, $3); 
 		  destroy_sm($3); 
-		  puts("less"); 
 		  highsv_addRow(model, -highsv_getInfinity(model), $1->offset, $1->numNz, $1->indices, $1->vals);
 		  char rowName[512];
 		  snprintf(rowName, 512, "%ld", numRow + 1);
 		  highsv_passRowName(model, numRow++, rowName);
+		  #ifdef DEBUG
 	  	  print_sm($1);
+		  #endif
 		  destroy_sm($1);
 	   }
 	   | statement MORE statement { // >=
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
-		   puts("more"); 
 		   highsv_addRow(model, $1->offset, highsv_getInfinity(model), $1->numNz, $1->indices, $1->vals);
-		  char rowName[512];
-		  snprintf(rowName, 512, "%ld", numRow + 1);
-		  highsv_passRowName(model, numRow++, rowName);
+		   char rowName[512];
+		   snprintf(rowName, 512, "%ld", numRow + 1);
+		   highsv_passRowName(model, numRow++, rowName);
+		   #ifdef DEBUG
 	  	   print_sm($1);
+		   #endif
 		   destroy_sm($1);
 	   }
 	   | statement EQUAL statement { // =
 		   $$ = mergeSm($1, $3); 
 		   destroy_sm($3); 
-		   puts("equal"); 
 		   highsv_addRow(model, $1->offset, $1->offset, $1->numNz, $1->indices, $1->vals);
 		  char rowName[512];
 		  snprintf(rowName, 512, "%ld", numRow + 1);
 		  highsv_passRowName(model, numRow++, rowName);
+		   #ifdef DEBUG
 		   print_sm($1);
+		   #endif
 		   destroy_sm($1);
 	   }
 	   ;
@@ -156,7 +153,6 @@ statement: %empty {
    ;
 
 expr: NUM { $$ = $1; }
-    | "-" { $$ = -1; }
     | expr "+" expr { $$ = $1 + $3; }
     | expr "-" expr { $$ = $1 - $3; }
     | expr "*" expr { $$ = $1 * $3; }
@@ -183,7 +179,7 @@ trailingEOL: %empty
 void
 yyerror(const char *msg)
 {
-	die(msg);
+	die("parser stopped at line: %d because of %s at: %s", h_line, msg, yytext);
 }
 
 /*
