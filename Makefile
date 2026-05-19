@@ -6,12 +6,9 @@ all: lps data/ui/icon.ico
 lps: 
 	cd src/gtk && $(MAKE)
 	cp --update=older src/gtk/highsv ./lps
-<<<<<<< HEAD
 cli: 
 	cd src/cli && $(MAKE)
 	cp --update=older src/cli/cli ./cli
-=======
->>>>>>> f0dc94e795f47a327dfba255d8350f23d712db89
 
 data/ui/icon.ico: data/ui/icon.svg
 	magick data/ui/icon.svg data/ui/icon.ico
