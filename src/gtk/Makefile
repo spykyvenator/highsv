@@ -23,6 +23,10 @@ all: options highsv
 debug: CFLAGS += -DDEBUG_RINTER -g
 debug: highsv
 
+egypt: clean
+egypt: CFLAGS += -fdump-rtl-expand
+egypt: highsv
+
 windows: LDFLAGS += -mwindows
 windows: highsv
 
