@@ -17,8 +17,7 @@
 	#include <stddef.h>
 
 	void *model = NULL;
-	extern char* yytext;
-	int h_line = 1;
+	int h_line = 0;
 	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
@@ -61,7 +60,7 @@ input: %empty
      | MIN cost st constraints trailingEOL { highsv_setSenseMin(model); }
      ;
 
-st: eol ST eol
+st: trailingEOLS ST trailingEOLS
 
 //cost: statement
 cost: %empty
@@ -88,7 +87,7 @@ cost: %empty
    ;
 
 constraints: constraint
-	   | constraints trailingEOLS constraint { }// here we have to add the constraint to the model
+	   | constraints eol constraint { }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  // <=
 		  $$ = mergeSm($1, $3); 
@@ -125,42 +124,33 @@ constraint: statement LESS statement {  // <=
 	   }
 	   ;
 
+
 statement: %empty { 
 	 #ifdef DEBUG
 	 printf("init sm\n"); 
 	 #endif
 	 $$ = init_sm(); 
    }
-   | statement expr VAR {
-	   $$ = setVal(model, $1, $3, $2); 
+   | expr VAR statement {
+	   $$ = setVal(model, $3, $2, $1); 
 	   #ifdef DEBUG
-	   printf("%s: %f\n", $3, $2); 
+	   printf("%s: %f\n", $2, $1); 
 	   #endif
    }
-   | statement VAR {
-	   $$ = setVal(model, $1, $2, 1.0); 
+   | VAR statement {
+	   $$ = setVal(model, $2, $1, 1.0); 
 	   #ifdef DEBUG
-	   printf("%s: %f\n", $2, 1.0); 
+	   printf("%s: %f\n", $1, 1.0); 
 	   #endif
    }
-   | statement "+" expr {
+   | expr {
 	   #ifdef DEBUG
 	   printf("init sm\n"); 
 	   #endif
 	   $$ = init_sm();
-   	   $$->offset+=$3; 
+   	   $$->offset+=$1; 
 	   #ifdef DEBUG
-	   printf("%f\n", $3); 
-	   #endif
-   }
-   | statement "-" expr {
-	   #ifdef DEBUG
-	   printf("init sm\n"); 
-	   #endif
-	   $$ = init_sm();
-   	   $$->offset-=$3; 
-	   #ifdef DEBUG
-	   printf("%f\n", $3); 
+	   printf("%f\n", $1); 
 	   #endif
    }
    ;
@@ -175,12 +165,17 @@ expr: NUM { $$ = $1; }
     | "(" expr ")" { $$ = $2; }
     ;
 
-eol: EOL { h_line++; };
+eol: EOL { 
+   h_line++; 
+   #ifdef DEBUG
+   printf("\nline: %d\n", h_line); 
+   #endif
+   }
+   ;
 trailingEOLS: eol
-	    | eol trailingEOLS
-	    ;
+	    | eol trailingEOLS ;// trailing start, require at least one eol
 trailingEOL: %empty
-	   | eol trailingEOL
+	   | eol trailingEOL 
 	   ;
 
 %%
@@ -188,7 +183,7 @@ trailingEOL: %empty
 void
 yyerror(const char *msg)
 {
-	die("parser failed at line: %d around: %s\n %s", h_line, yytext, msg);
+	die(msg);
 }
 
 /*
