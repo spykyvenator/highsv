@@ -101,7 +101,9 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
   cleanModel(model);
   preModel();
   YY_BUFFER_STATE buffer = yy_scan_string(s);
+#ifdef DEBUG
   yydebug=1;
+#endif
   yyparse();
 #ifdef DEBUG
   printModel(model);
@@ -123,7 +125,9 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
   cleanModel(model);
   preModel();
   yyset_in(fd);// add yyscanner here for reentrant
+#ifdef DEBUG
   yydebug=1;
+#endif
   yyparse();
 #ifdef DEBUG
   printModel(model);

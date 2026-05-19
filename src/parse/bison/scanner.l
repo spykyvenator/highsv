@@ -20,7 +20,6 @@ double highsv_atof(char *c);
 {FLOAT} {
   double n = atof(yytext);
   yylval->HIGHSV_NUM = n;
-  printf("GOT NUMBER: %lf from %s\n", n, yytext);
   return HIGHSV_NUM;
 }
 "+" return HIGHSV_PLUS;
@@ -28,6 +27,8 @@ double highsv_atof(char *c);
 "*" return HIGHSV_MULT;
 "/" return HIGHSV_DIV;
 "^" return HIGHSV_POW;
+"(" return HIGHSV_BO;
+")" return HIGHSV_BC;
 [a-zA-Z][0-9a-zA-Z|,|/]* { yylval->HIGHSV_VAR = strdup(yytext); return HIGHSV_VAR; }// maybe we can pass it with passColName and use the col index
 "<"|"<="|"=<" return HIGHSV_LESS;
 ">"|">="|"=>" return HIGHSV_MORE;

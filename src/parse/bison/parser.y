@@ -44,6 +44,8 @@
         MULT
         DIV
         POW
+	BO
+	BC
 ;
 
 %token <double> NUM "number"
@@ -167,7 +169,7 @@ expr: NUM { $$ = $1; }
     | expr MULT expr { $$ = $1 * $3; }
     | expr DIV expr { $$ = $1 / $3; }
     | expr POW expr { $$ = pow($1, $3); }
-    | "(" expr ")" { $$ = $2; }
+    | BO expr BC { $$ = $2; }
     | PLUS { $$ = 1; }
     | SUB { $$ = -1; }
     | PLUS expr { $$ = $2; }

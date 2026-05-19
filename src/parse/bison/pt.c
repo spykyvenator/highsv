@@ -9,7 +9,6 @@ appendSm(sm* a, double val, int index)
   for (size_t i = 0; i < a->rI; i++) {
       if (a->indices[i] == index) {
           a->vals[i] += val;
-          printf("found index already: set to %lf", a->vals[i]);
           return a;
       }
   }
