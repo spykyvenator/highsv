@@ -11,6 +11,7 @@ double highsv_atof(char *c);
 
 %%
 
+"-" return HIGHSV_SUB;
 (?i:min) return HIGHSV_MIN;
 (?i:max) return HIGHSV_MAX;
 (?i:st)|(?i:subject\ to) return HIGHSV_ST;

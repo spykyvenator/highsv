@@ -39,6 +39,7 @@
 	MORE
 	LESS
 	EQUAL
+	SUB
 ;
 
 %token <double> NUM "number"
@@ -157,6 +158,7 @@ statement: %empty {
    ;
 
 expr: NUM { $$ = $1; }
+    | SUB { $$ = -1; }
     | expr "+" expr { $$ = $1 + $3; }
     | expr "-" expr { $$ = $1 - $3; }
     | expr "*" expr { $$ = $1 * $3; }
