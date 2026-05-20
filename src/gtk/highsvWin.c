@@ -128,7 +128,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
     GTK_POLICY_AUTOMATIC
     );
   setSourceCompletion(GTK_SOURCE_VIEW(view));
-  gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
+  int new = gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
   gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
   gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file));
 
@@ -144,4 +144,5 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
       gtk_text_buffer_set_text(buffer, contents, length);
       g_free(contents);
   }
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(win->stack), new);
 }
