@@ -65,7 +65,7 @@ getSourceView()
   gtk_text_view_set_right_margin(GTK_TEXT_VIEW(res), 10);
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(res), GTK_INPUT_HINT_SPELLCHECK);
   gtk_css_provider_load_from_string(provider,
-     "textview { font-family: Monospace; font-size: 14pt; }");
+     "textview { font-family: Monospace; font-size: 12pt; }");
   gtk_style_context_add_provider(gtk_widget_get_style_context (res),
       GTK_STYLE_PROVIDER(provider),
       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -122,6 +122,11 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   view = getSourceView();
 
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
+  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue
+    GTK_SCROLLED_WINDOW(scrolled),
+    GTK_POLICY_AUTOMATIC,
+    GTK_POLICY_AUTOMATIC
+    );
   setSourceCompletion(GTK_SOURCE_VIEW(view));
   gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
   gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
