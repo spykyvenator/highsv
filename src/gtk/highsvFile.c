@@ -76,6 +76,7 @@ openNewEmpty(GtkEntry *entry, HighsvAppWindow *win)
       return;
   }
   highsv_app_window_open(win, file);
+  g_object_unref(file);
 }
 
 void
@@ -144,6 +145,7 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 
   saveFile(file, content);
 
+  g_object_unref(file);
   g_free(fsave);
   g_free(content);
 } 

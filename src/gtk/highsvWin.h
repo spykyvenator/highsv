@@ -26,7 +26,7 @@ getNotebookActive(GtkNotebook *n)
 struct closeTab
 {
     GtkNotebook *n;
-    GtkWidget *t;
+    int i;
 };
 struct saveTab
 {

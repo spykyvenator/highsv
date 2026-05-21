@@ -38,7 +38,7 @@ void
 close_tab_by_pointer(GtkButton *button, gpointer data)
 {
   struct closeTab *temp = (struct closeTab*) data;
-  gtk_notebook_detach_tab(temp->n, temp->t);
+  gtk_notebook_remove_page(temp->n, temp->i);
   g_free(temp);
 }
 
@@ -50,7 +50,7 @@ save_tab_by_pointer(GtkButton *button, gpointer data)
   if (!temp->f) return;// silently ignore if no filename is present
   GFile *f = g_file_new_for_path (temp->f);
   saveFile(f, getContentFromTab(temp->t));
-  g_free(temp);
+  g_object_unref(f);
 }
 
 void
