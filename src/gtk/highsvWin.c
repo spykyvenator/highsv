@@ -88,7 +88,7 @@ getScrolledWin()
   return res;
 }
 static inline GtkWidget*
-getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index)
+getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index, GtkTextBuffer *b)
 {
   GtkWidget *box, *label, *closeBtn, *saveBtn;
   struct closeTab *ct = h_malloc(sizeof(struct closeTab));
@@ -117,7 +117,12 @@ getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index)
   gtk_box_append(GTK_BOX(box), label);
   gtk_box_append(GTK_BOX(box), saveBtn);
   gtk_box_append(GTK_BOX(box), closeBtn);
+  gtk_text_buffer_add_commit_notify(b, GTK_TEXT_BUFFER_NOTIFY_AFTER_INSERT | GTK_TEXT_BUFFER_NOTIFY_AFTER_DELETE, 
+          showSaveBtn, 
+          saveBtn, NULL);
 
+
+  gtk_widget_set_visible(saveBtn, false);
   g_free(basename);
 
   return box;
@@ -129,12 +134,13 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   GtkWidget *scrolled, *view;
   char *contents;
   gsize length;
+  GtkTextBuffer *buffer;
 
   scrolled = getScrolledWin();
   view = getSourceView();
 
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
-  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue
+  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
     GTK_SCROLLED_WINDOW(scrolled),
     GTK_POLICY_AUTOMATIC,
     GTK_POLICY_AUTOMATIC
@@ -142,11 +148,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   setSourceCompletion(GTK_SOURCE_VIEW(view));
   int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
   gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
-  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file, index));
 
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
   {
-      GtkTextBuffer *buffer;
       GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
       gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
       GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
@@ -156,5 +160,6 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
       gtk_text_buffer_set_text(buffer, contents, length);
       g_free(contents);
   }
+  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file, index, buffer));
   gtk_notebook_set_current_page(GTK_NOTEBOOK(win->stack), index);
 }

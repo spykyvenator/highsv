@@ -47,11 +47,20 @@ save_tab_by_pointer(GtkButton *button, gpointer data)
 {
   struct saveTab *temp = (struct saveTab*) data;
 
+  gtk_widget_set_visible(GTK_WIDGET(button), false);
   if (!temp->f) return;// silently ignore if no filename is present
   GFile *f = g_file_new_for_path (temp->f);
   saveFile(f, getContentFromTab(temp->t));
   g_object_unref(f);
 }
+
+void
+showSaveBtn(GtkTextBuffer* buffer, GtkTextBufferNotifyFlags flags, guint position, guint length, gpointer data) 
+{
+    GtkWidget *t = data;
+    gtk_widget_set_visible(t, true);
+}
+
 
 void
 save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
