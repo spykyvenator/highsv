@@ -89,21 +89,30 @@ getScrolledWin()
 static inline GtkWidget*
 getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file)
 {
-  GtkWidget *box, *label, *closeBtn;
+  GtkWidget *box, *label, *closeBtn, *saveBtn;
   struct closeTab *temp = malloc(sizeof(struct closeTab));
+  struct saveTab *st = malloc(sizeof(struct saveTab));
   char *basename = g_file_get_basename (file);
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
   label = gtk_label_new(basename);
+  saveBtn = gtk_button_new_with_label("S");// TODO make icon
   closeBtn = gtk_button_new_with_label("X");
 
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(closeBtn), FALSE);
+  gtk_button_set_can_shrink(GTK_BUTTON(saveBtn), TRUE);
+  gtk_button_set_has_frame(GTK_BUTTON(saveBtn), FALSE);
   temp->n = n;
   temp->t = t;
+  st->f = g_file_get_path(file);
+  st->t = t;
   g_signal_connect(G_OBJECT(closeBtn), "clicked", 
           G_CALLBACK(close_tab_by_pointer), temp);
+  g_signal_connect(G_OBJECT(saveBtn), "clicked", 
+          G_CALLBACK(save_tab_by_pointer), st);
   gtk_box_append(GTK_BOX(box), label);
+  gtk_box_append(GTK_BOX(box), saveBtn);
   gtk_box_append(GTK_BOX(box), closeBtn);
 
   g_free(basename);

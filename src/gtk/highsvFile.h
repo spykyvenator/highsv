@@ -6,5 +6,7 @@ void openNew(GtkEntry *entry, HighsvAppWindow *win);
 void openNewEmpty(GtkEntry *entry, HighsvAppWindow *win);
 void openWithText(HighsvAppWindow *win, const char *text, const size_t len);
 void saveActive(GtkEntry *entry, HighsvAppWindow *win);
+void saveFile(GFile *file, const char *content);
+char* getContentFromTab(GtkWidget *tab);
 #endif
 

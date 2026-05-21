@@ -35,10 +35,21 @@ close_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 void
-close_tab_by_pointer(GtkButton *button, gpointer notebook)
+close_tab_by_pointer(GtkButton *button, gpointer data)
 {
-  struct closeTab *temp = (struct closeTab*) notebook;
+  struct closeTab *temp = (struct closeTab*) data;
   gtk_notebook_detach_tab(temp->n, temp->t);
+  g_free(temp);
+}
+
+void
+save_tab_by_pointer(GtkButton *button, gpointer data)
+{
+  struct saveTab *temp = (struct saveTab*) data;
+
+  if (!temp->f) return;// silently ignore if no filename is present
+  GFile *f = g_file_new_for_path (temp->f);
+  saveFile(f, getContentFromTab(temp->t));
   g_free(temp);
 }
 

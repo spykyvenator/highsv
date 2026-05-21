@@ -78,7 +78,7 @@ openNewEmpty(GtkEntry *entry, HighsvAppWindow *win)
   highsv_app_window_open(win, file);
 }
 
-static void
+void
 saveFile(GFile *file, const char *content)
 {
   GError *error = NULL;
@@ -108,14 +108,26 @@ saveFile(GFile *file, const char *content)
   }
 }
 
+char*
+getContentFromTab(GtkWidget *tab)
+{
+  GtkTextBuffer *buffer;
+  GtkTextIter startI, endI;
+
+  GtkWidget *view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+  gtk_text_buffer_get_start_iter(buffer, &startI);
+  gtk_text_buffer_get_end_iter(buffer, &endI);
+
+  const char *content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
+  return content;
+}
+
 static void
 handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 {
-  char* content;
   GtkWidget *tab;
-  GtkWidget *view;
-  GtkTextBuffer *buffer;
-  GtkTextIter startI, endI;
 
   gboolean success = FALSE;
   FileData *fsave = (FileData *)data;
@@ -126,13 +138,9 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   tab = getNotebookActive(GTK_NOTEBOOK(fsave->win->stack));
-  view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
-  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
-  gtk_text_buffer_get_start_iter(buffer, &startI);
-  gtk_text_buffer_get_end_iter(buffer, &endI);
+  char *content = getContentFromTab(tab);
 
-  content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
 
   saveFile(file, content);
 

@@ -28,3 +28,8 @@ struct closeTab
     GtkNotebook *n;
     GtkWidget *t;
 };
+struct saveTab
+{
+    char *f;
+    GtkWidget *t;
+};
