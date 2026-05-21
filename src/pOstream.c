@@ -123,7 +123,7 @@ getLHS(const void *mod, HighsInt *resRows)
     Highs_getRowsByRange(mod, 0, numRow - 1, resRows, 
             lower, upper, &res_nz, m_start, m_index, m_value);
     Highs_getSolution(mod, col_val, col_dual, row_val, row_dual);
-    double *res = malloc(sizeof(double)* (*resRows));
+    double *res = h_malloc(sizeof(double)* (*resRows));
     for (HighsInt i = 0; i < *resRows-1; i++) {
         res[i] = 0;
         for (HighsInt j = m_start[i]; j < m_start[i+1]; j++) {

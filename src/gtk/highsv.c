@@ -133,6 +133,7 @@ highsv_app_class_init (HighsvAppClass *class)
     SET_FUNC(open);
     SET_FUNC(startup);
     SET_FUNC(shutdown);
+#undef SET_FUNC 
 }
 
 HighsvApp *
