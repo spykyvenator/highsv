@@ -54,12 +54,28 @@ highsv_app_startup(GApplication *app)
 #undef SET_ACCELS
 
 static void
-highsv_app_activate (GApplication *app)
+highsv_app_activate(GApplication *app)
 {
   HighsvAppWindow *win;
 
-  win = highsv_app_window_new (HIGHSV_APP (app));
-  gtk_window_present (GTK_WINDOW (win));
+  win = highsv_app_window_new(HIGHSV_APP (app));
+  gtk_window_present(GTK_WINDOW(win));
+}
+
+typedef struct {
+   HighsvAppWindow *win; 
+   int n_files;
+   GFile **f;
+} Files;
+
+static gboolean
+open_files(gpointer data)
+{
+    Files *f = (Files*) data;
+    for (int i = 0; i < f->n_files; i++)
+      highsv_app_window_open(f->win, f->f[i]);
+    g_free(f->f);
+    free(f);
 }
 
 static void
@@ -73,20 +89,8 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   if (windows)
     win = HIGHSV_APP_WINDOW(windows->data);
   else
-    win = highsv_app_window_new(HIGHSV_APP (app));
+    win = highsv_app_window_new(HIGHSV_APP(app));
 
-  for (i = 0; i < n_files; i++)
-    highsv_app_window_open(win, files[i]);
-
-  if (n_files == 0) {
-    GFileIOStream *tmpio = NULL;
-    GFile *tmp = g_file_new_tmp(NULL, &tmpio, NULL);
-    highsv_app_window_open(win, tmp);
-  }
-
-  gtk_window_present(GTK_WINDOW (win));
-
-  // where does this go?
   GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   GtkWidget *button = gtk_button_new_with_label("+");
   GtkWidget *openBtn = gtk_button_new_with_label("O");
@@ -100,6 +104,19 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   gtk_box_append(GTK_BOX(box), button);
   gtk_widget_set_halign(GTK_WIDGET(box), GTK_ALIGN_START);
   gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->stack), box, GTK_PACK_END);
+
+  gtk_window_present(GTK_WINDOW(win));
+
+  Files *f = (Files*) malloc(sizeof(Files));
+  f->win = win;
+  f->n_files = n_files;
+  f->f = g_malloc(sizeof(GFile*) *n_files);
+  for (int i = 0; i < n_files; i++)
+      f->f[i] = g_object_ref(files[i]);
+
+  g_idle_add(open_files, f);
+
+
 }
 
 static void 
@@ -137,7 +154,7 @@ highsv_app_class_init (HighsvAppClass *class)
 }
 
 HighsvApp *
-highsv_app_new (void)
+highsv_app_new(void)
 {
   return g_object_new(HIGHSV_APP_TYPE, "application-id", "org.gtk.highsvapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
 }

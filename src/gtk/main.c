@@ -25,10 +25,10 @@ main (int argc, char *argv[])
         return 1;
     }
 
-    res = g_application_run(G_APPLICATION(highsv_app_new ()), 2, argv_new);
+    res = g_application_run(G_APPLICATION(highsv_app_new()), 2, argv_new);
     g_free(argv_new[1]);
   } else {
-    res = g_application_run(G_APPLICATION(highsv_app_new ()), argc, argv);
+    res = g_application_run(G_APPLICATION(highsv_app_new()), argc, argv);
   }
   return res;
 }

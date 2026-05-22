@@ -129,7 +129,7 @@ getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index, GtkTextBuffer 
 }
 
 void
-highsv_app_window_open (HighsvAppWindow *win, GFile *file)
+highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 {
   GtkWidget *scrolled, *view;
   char *contents;
@@ -149,7 +149,7 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
   int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
   gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
 
-  if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
+  if (g_file_load_contents(file, NULL, &contents, &length, NULL, NULL))
   {
       GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
       gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
@@ -158,8 +158,9 @@ highsv_app_window_open (HighsvAppWindow *win, GFile *file)
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
       gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
       gtk_text_buffer_set_text(buffer, contents, length);
+      gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file, index, buffer));
+
       g_free(contents);
   }
-  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file, index, buffer));
   gtk_notebook_set_current_page(GTK_NOTEBOOK(win->stack), index);
 }
