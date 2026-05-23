@@ -15,6 +15,12 @@
 #include <glib.h>
 #include <stdio.h>
 
+static inline void
+printand_free(TPrint *tp)
+{
+    tprint_print(tp);
+    tprint_free(tp);
+}
 
 extern size_t numRow, numCol;
 
@@ -294,8 +300,7 @@ pRange(void *mod, GOutputStream *ostr)
     tprint_data_add_double(tp, 2, ABS(cost[i] - ccUpperVal[i]));
     tprint_data_add_double(tp, 3, ABS(cost[i] - ccLowerVal[i]));
   }
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
   pToF(ostr, "\n");
 
   tp = tprint_create (ostr, 0, 1, 0, 5);
@@ -322,8 +327,7 @@ pRange(void *mod, GOutputStream *ostr)
     //tprint_data_add_double(tp, 4, dualRng[i*2]);
     //tprint_data_add_double(tp, 5, dualRng[i*2+1]);
   }
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
   pToF(ostr, "\n");
 
   g_free(dualRng);
@@ -354,8 +358,7 @@ pVal(const void *mod, GOutputStream *ostr)
   tprint_data_add_double(tp, 1, numRow);
   tprint_data_add_str(tp, 0, "Total nonzeros:");
   tprint_data_add_double(tp, 1, num_nz);
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
   pToF(ostr, "\n");
 
   tp = tprint_create (ostr, 0, 1, 0, 5);
@@ -374,8 +377,7 @@ pVal(const void *mod, GOutputStream *ostr)
     tprint_data_add_double(tp, 1, mkPos(col_value[i]));
     tprint_data_add_double(tp, 2, -col_dual[i]);
   }
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
   pToF(ostr, "\n");
 
   /*
@@ -398,8 +400,7 @@ pVal(const void *mod, GOutputStream *ostr)
     tprint_data_add_double(tp, 1, mkPos(getSlack(mod, i, num_nz, row_value)));
     tprint_data_add_double(tp, 2, row_dual[i]);
   }
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
   pToF(ostr, "\n");
 }
 
@@ -435,8 +436,7 @@ printSolToFile(void *mod, GOutputStream* ostr, double time) {
   tprint_data_add_str(tp, 1, bfr);
   tprint_data_add_str(tp, 0, "Time:");
   tprint_data_add_double(tp, 1, time);
-  tprint_print(tp);
-  tprint_free(tp);
+  printand_free(tp);
 
   int64_t status = highsv_getModelStatus(mod);
 
