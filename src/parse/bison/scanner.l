@@ -12,7 +12,7 @@ double highsv_atof(char *c);
 %%
 
 
-!.*\n return HIGHSV_EOL;
+!.*\n {}
 ^(?i:end) return 0;
 (?i:min) return HIGHSV_MIN;
 (?i:max) return HIGHSV_MAX;

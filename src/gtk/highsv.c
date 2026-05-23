@@ -68,9 +68,10 @@ typedef struct {
    GFile **f;
 } Files;
 
-static gboolean
+static void
 open_files(gpointer data)
 {
+    g_usleep(10000);
     Files *f = (Files*) data;
     for (int i = 0; i < f->n_files; i++)
       highsv_app_window_open(f->win, f->f[i]);
@@ -114,9 +115,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   for (int i = 0; i < n_files; i++)
       f->f[i] = g_object_ref(files[i]);
 
-  g_idle_add(open_files, f);
-
-
+  g_idle_add_once(open_files, f);
 }
 
 static void 
