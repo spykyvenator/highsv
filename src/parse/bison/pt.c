@@ -44,18 +44,8 @@ mergeSm(sm* a, sm* b)
     if (b->numNz == 0)
         return a;
     char found = 0;
-    for (size_t i = 0; i < a->numNz; i++) {
-        for (size_t j = 0; j < b->numNz; j++) {
-            if (a->indices[i] == b->indices[j]) {
-                a->vals[i] -= b->vals[j];
-                found = 1;
-                break;
-            }
-        }
-        if (!found) {
-            appendSm(a, b->vals[b->numNz], b->indices[b->numNz]);
-        }
-        found = 0;
+    for (size_t i = 0; i < b->numNz; i++) {
+        appendSm(a, -b->vals[i], b->indices[i]);
     }
     return a;
 }
