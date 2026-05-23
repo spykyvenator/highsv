@@ -93,6 +93,7 @@ highsv_setObjectiveOffset(void *model, const double val)
         die("could not set objective offset");
 }
 
+/*
 static inline void
 highsv_getRowsByRange(const void* highs, const int64_t from_row,
                               const int64_t to_row, int64_t* num_row,
@@ -118,6 +119,7 @@ highsv_getRowsByRange(const void* highs, const int64_t from_row,
         if (matrix_index) matrix_index[i] = (int64_t) mi[i];
     }
 }
+*/
 
 static inline void
 highsv_getColsByRange(const void* highs, const int64_t from_col,
