@@ -118,6 +118,8 @@ getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
           showSaveBtn, 
           saveBtn, NULL);
 
+  g_object_set_data(G_OBJECT(t), "saveBtn", saveBtn);
+
 
   gtk_widget_set_visible(saveBtn, false);
   g_free(basename);

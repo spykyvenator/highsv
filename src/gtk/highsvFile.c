@@ -23,7 +23,6 @@ static void
 handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
 {
   GError *error = NULL;
-  gboolean success = FALSE;
   FileData *fopen = (FileData *)data;
 
   GFile *file = gtk_file_dialog_open_finish(fopen->fd, res, &error);
@@ -100,7 +99,7 @@ saveFile(GFile *file, const char *content)
 
   goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
 
-    if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
+  if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
       g_printerr("Error truncating file: %s\n", error->message);
       g_clear_error(&error);
     }
@@ -172,6 +171,9 @@ saveActive(GtkEntry *entry, HighsvAppWindow *win)
   } else {
       GFile *file = g_file_new_for_path(path);
 
+      gtk_widget_set_visible(
+              GTK_WIDGET(g_object_get_data(G_OBJECT(tab), "saveBtn")), 
+              false);
       saveFile(file, getContentFromTab(tab));
 
       g_object_unref(file);
