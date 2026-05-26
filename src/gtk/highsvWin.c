@@ -22,7 +22,7 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
 {
   gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (class), "/org/highsvapp/window.ui");
 
-  gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class), HighsvAppWindow, stack);
+  gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class), HighsvAppWindow, notebook);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), solveEntry);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNew);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNewEmpty);
@@ -87,12 +87,11 @@ getScrolledWin()
 
   return res;
 }
+
 static inline GtkWidget*
-getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index, GtkTextBuffer *b)
+getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 {
   GtkWidget *box, *label, *closeBtn, *saveBtn;
-  struct closeTab *ct = h_malloc(sizeof(struct closeTab));
-  struct saveTab *st = h_malloc(sizeof(struct saveTab));
   char *basename = g_file_get_basename (file);
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
@@ -106,14 +105,12 @@ getTabLabel(GtkNotebook *n, GtkWidget *t, GFile *file, int index, GtkTextBuffer 
   gtk_button_set_can_shrink(GTK_BUTTON(saveBtn), TRUE);
   gtk_button_set_has_frame(GTK_BUTTON(saveBtn), FALSE);
   gtk_widget_set_tooltip_text(saveBtn, "save tab");
-  ct->n = n;
-  ct->i = index;
-  st->f = g_file_get_path(file);
-  st->t = t;
+
   g_signal_connect(G_OBJECT(closeBtn), "clicked", 
-          G_CALLBACK(close_tab_by_pointer), ct);
+          G_CALLBACK(close_tab_by_pointer), t);
   g_signal_connect(G_OBJECT(saveBtn), "clicked", 
-          G_CALLBACK(save_tab_by_pointer), st);
+          G_CALLBACK(save_tab_by_pointer), t);
+
   gtk_box_append(GTK_BOX(box), label);
   gtk_box_append(GTK_BOX(box), saveBtn);
   gtk_box_append(GTK_BOX(box), closeBtn);
@@ -138,6 +135,8 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 
   scrolled = getScrolledWin();
   view = getSourceView();
+  g_object_set_data_full(G_OBJECT(scrolled), "path", g_file_get_path(file), (GDestroyNotify) g_free);
+  g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
 
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
@@ -146,8 +145,8 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
     GTK_POLICY_AUTOMATIC
     );
   setSourceCompletion(GTK_SOURCE_VIEW(view));
-  int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->stack), scrolled, NULL);
-  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->stack), scrolled, TRUE);
+  int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->notebook), scrolled, NULL);
+  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->notebook), scrolled, TRUE);
 
   if (g_file_load_contents(file, NULL, &contents, &length, NULL, NULL))
   {
@@ -158,9 +157,9 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
       gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
       gtk_text_buffer_set_text(buffer, contents, length);
-      gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->stack), scrolled, getTabLabel(GTK_NOTEBOOK(win->stack), scrolled, file, index, buffer));
+      gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), scrolled, getTabLabel(scrolled, file, buffer));
 
       g_free(contents);
   }
-  gtk_notebook_set_current_page(GTK_NOTEBOOK(win->stack), index);
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(win->notebook), index);
 }

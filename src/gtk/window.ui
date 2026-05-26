@@ -44,7 +44,7 @@
       </object>
     </child>
     <child>
-      <object class="GtkNotebook" id="stack">
+      <object class="GtkNotebook" id="notebook">
 	<property name="tab-pos">GTK_POS_TOP</property>
       </object>
     </child>

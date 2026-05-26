@@ -37,20 +37,21 @@ close_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 void
 close_tab_by_pointer(GtkButton *button, gpointer data)
 {
-  struct closeTab *temp = (struct closeTab*) data;
-  gtk_notebook_remove_page(temp->n, temp->i);
-  g_free(temp);
+  GtkWidget *t = (GtkWidget*) data;
+  GtkNotebook *n = g_object_get_data(G_OBJECT(t), "parent_notebook");
+
+  gtk_notebook_remove_page(n, gtk_notebook_page_num(n, t));
 }
 
 void
 save_tab_by_pointer(GtkButton *button, gpointer data)
 {
-  struct saveTab *temp = (struct saveTab*) data;
+  GtkWidget *temp = (GtkWidget*) data;
+  GFile *f = g_file_new_for_path((const gchar*) g_object_get_data(G_OBJECT(temp), "path"));
 
   gtk_widget_set_visible(GTK_WIDGET(button), false);
-  if (!temp->f) return;// silently ignore if no filename is present
-  GFile *f = g_file_new_for_path (temp->f);
-  saveFile(f, getContentFromTab(temp->t));
+  if (!f) return;// silently ignore if no filename is present
+  saveFile(f, getContentFromTab(temp));
   g_object_unref(f);
 }
 
@@ -95,7 +96,7 @@ void
 zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app)
 {
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
-    GtkWidget *tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+    GtkWidget *tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
     GtkWidget *view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance
     puts("ok");
     puts(gtk_widget_get_css_name(GTK_WIDGET(view)));
@@ -105,7 +106,7 @@ void
 complete(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
-    GtkWidget *tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+    GtkWidget *tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
     GtkWidget *view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance
     GtkSourceCompletion *c = gtk_source_view_get_completion(GTK_SOURCE_VIEW(view));
     gtk_source_completion_show(c);

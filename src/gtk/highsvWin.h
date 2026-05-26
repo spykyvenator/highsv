@@ -7,7 +7,7 @@ struct _HighsvAppWindow
 {
   GtkApplicationWindow parent;
 
-  GtkWidget *stack;
+  GtkNotebook *notebook;
 };
 
 #define HIGHSV_APP_WINDOW_TYPE (highsv_app_window_get_type ())
@@ -22,14 +22,3 @@ getNotebookActive(GtkNotebook *n)
 { 
     return gtk_notebook_get_nth_page(n, gtk_notebook_get_current_page(n));
 }
-
-struct closeTab
-{
-    GtkNotebook *n;
-    int i;
-};
-struct saveTab
-{
-    char *f;
-    GtkWidget *t;
-};

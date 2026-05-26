@@ -16,9 +16,9 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     GError *error = NULL;
     GFileIOStream* stream = NULL;
     
-    tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
+    tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
 
-    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->stack), GTK_WIDGET(tab));// owned by instance
+    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->notebook), GTK_WIDGET(tab));// owned by instance
     label = gtk_widget_get_first_child(box);
     const char *name = gtk_label_get_text(GTK_LABEL(label));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance

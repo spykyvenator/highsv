@@ -6,12 +6,12 @@
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
-    GtkWidget* tab = getNotebookActive(GTK_NOTEBOOK(win->stack));
-    gtk_notebook_prev_page(GTK_NOTEBOOK(win->stack));
+    GtkWidget* tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+    gtk_notebook_prev_page(GTK_NOTEBOOK(win->notebook));
     if (!tab) {
         return;
     }
-    gtk_notebook_detach_tab(GTK_NOTEBOOK(win->stack), tab);
+    gtk_notebook_detach_tab(GTK_NOTEBOOK(win->notebook), tab);
 }
 
 typedef struct {
@@ -36,7 +36,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   highsv_app_window_open(fopen->win, file);
-  // TODO reset button pos -> in stack button possible?
+  // TODO reset button pos -> in notebook button possible?
   g_free(fopen);
 } 
 
@@ -138,7 +138,7 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
   if (!file)
       return;
 
-  tab = getNotebookActive(GTK_NOTEBOOK(fsave->win->stack));
+  tab = getNotebookActive(GTK_NOTEBOOK(fsave->win->notebook));
 
   char *content = getContentFromTab(tab);
 

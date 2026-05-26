@@ -104,7 +104,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   gtk_box_append(GTK_BOX(box), openBtn);
   gtk_box_append(GTK_BOX(box), button);
   gtk_widget_set_halign(GTK_WIDGET(box), GTK_ALIGN_START);
-  gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->stack), box, GTK_PACK_END);
+  gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->notebook), box, GTK_PACK_END);
 
   gtk_window_present(GTK_WINDOW(win));
 
