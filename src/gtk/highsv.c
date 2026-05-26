@@ -106,8 +106,8 @@ typedef struct {
 static void
 open_files(gpointer data)
 {
+    sleep(1);
     Files *f = (Files*) data;
-    while (!gtk_window_get_focus(GTK_WINDOW(f->win))) g_usleep(100);// check if the window is presented
     for (int i = 0; i < f->n_files; i++)
       highsv_app_window_open(f->win, f->f[i]);
     g_free(f->f);
@@ -130,7 +130,7 @@ highsv_app_open(GApplication *app, GFile **files, int n_files, const char *hint)
   highsv_app_add_notebookBtn(win);
   gtk_window_present(GTK_WINDOW(win));
 
-  Files *f = (Files*) malloc(sizeof(Files));
+  Files *f = (Files*) g_malloc(sizeof(Files));
   f->win = win;
   f->n_files = n_files;
   f->f = g_malloc(sizeof(GFile*) *n_files);
