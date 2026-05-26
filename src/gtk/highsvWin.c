@@ -92,7 +92,11 @@ static inline GtkWidget*
 getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 {
   GtkWidget *box, *label, *closeBtn, *saveBtn;
-  char *basename = g_file_get_basename (file);
+  char *basename;
+  if (file)
+      basename = g_file_get_basename (file);
+  else
+      basename = "unsaved";
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
   label = gtk_label_new(basename);
@@ -122,9 +126,40 @@ getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 
 
   gtk_widget_set_visible(saveBtn, false);
-  g_free(basename);
+  if (file)
+      g_free(basename);
 
   return box;
+}
+
+void
+highsv_app_window_open_empty(HighsvAppWindow *win)
+{
+  GtkWidget *scrolled, *view;
+  GtkTextBuffer *buffer = gtk_text_buffer_new(NULL);
+
+  scrolled = getScrolledWin();
+  view = getSourceView();
+  g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
+
+  gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
+  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
+    GTK_SCROLLED_WINDOW(scrolled),
+    GTK_POLICY_AUTOMATIC,
+    GTK_POLICY_AUTOMATIC
+    );
+  setSourceCompletion(GTK_SOURCE_VIEW(view));
+  int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->notebook), scrolled, NULL);
+  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->notebook), scrolled, TRUE);
+
+  GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
+  gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
+  GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
+
+  gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
+  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), scrolled, getTabLabel(scrolled, NULL, buffer));
+
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(win->notebook), index);
 }
 
 void

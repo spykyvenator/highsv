@@ -61,21 +61,7 @@ openNew(GtkEntry *entry, HighsvAppWindow *win)
 void
 openNewEmpty(GtkEntry *entry, HighsvAppWindow *win)
 {
-  GError *error = NULL;
-  GFileIOStream* stream = NULL;
-  GFile *file = g_file_new_tmp("new-XXXXXX.txt", &stream, &error);
-  if (!file) {
-      g_printerr("Error creating temp file: %s\n", error->message);
-      g_clear_error(&error);
-      return;
-  }
-  if (!g_io_stream_close((GIOStream*)stream, NULL, &error)) {
-      g_printerr("Error closing temp file stream: %s\n", error->message);
-      g_clear_error(&error);
-      return;
-  }
-  highsv_app_window_open(win, file);
-  g_object_unref(file);
+  highsv_app_window_open_empty(win);
 }
 
 void

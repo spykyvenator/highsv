@@ -54,12 +54,47 @@ highsv_app_startup(GApplication *app)
 #undef SET_ACCELS
 
 static void
+highsv_app_add_notebookBtn(HighsvAppWindow *win)
+{
+  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  GtkWidget *button = gtk_button_new_with_label("+");
+  GtkWidget *openBtn = gtk_button_new_with_label("O");
+  gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
+  gtk_button_set_has_frame(GTK_BUTTON(openBtn), FALSE);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Create new file");
+  gtk_widget_set_tooltip_text(GTK_WIDGET(openBtn), "Open file");
+  g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(openNewEmpty), win);
+  g_signal_connect(G_OBJECT(openBtn), "clicked", G_CALLBACK(openNew), win);
+  gtk_box_append(GTK_BOX(box), openBtn);
+  gtk_box_append(GTK_BOX(box), button);
+  gtk_widget_set_halign(GTK_WIDGET(box), GTK_ALIGN_START);
+  gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->notebook), box, GTK_PACK_END);
+}
+
+static void
+open_empty(gpointer data)
+{
+    HighsvAppWindow *win = (HighsvAppWindow*) data;
+    while (!gtk_window_get_focus(GTK_WINDOW(win))) g_usleep(100);// check if the window is presented
+    highsv_app_window_open_empty(win);
+}
+
+static void
 highsv_app_activate(GApplication *app)
 {
   HighsvAppWindow *win;
+  GList *windows;
+  int i;
 
-  win = highsv_app_window_new(HIGHSV_APP (app));
+  windows = gtk_application_get_windows(GTK_APPLICATION(app));
+  if (windows)
+    win = HIGHSV_APP_WINDOW(windows->data);
+  else
+    win = highsv_app_window_new(HIGHSV_APP(app));
+  highsv_app_add_notebookBtn(win);
+
   gtk_window_present(GTK_WINDOW(win));
+  g_idle_add_once(open_empty, win);
 }
 
 typedef struct {
@@ -80,7 +115,7 @@ open_files(gpointer data)
 }
 
 static void
-highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint)
+highsv_app_open(GApplication *app, GFile **files, int n_files, const char *hint)
 {
   GList *windows;
   HighsvAppWindow *win;
@@ -92,20 +127,7 @@ highsv_app_open (GApplication *app, GFile **files, int n_files, const char *hint
   else
     win = highsv_app_window_new(HIGHSV_APP(app));
 
-  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  GtkWidget *button = gtk_button_new_with_label("+");
-  GtkWidget *openBtn = gtk_button_new_with_label("O");
-  gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
-  gtk_button_set_has_frame(GTK_BUTTON(openBtn), FALSE);
-  gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Create new file");
-  gtk_widget_set_tooltip_text(GTK_WIDGET(openBtn), "Open file");
-  g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(openNewEmpty), win);
-  g_signal_connect(G_OBJECT(openBtn), "clicked", G_CALLBACK(openNew), win);
-  gtk_box_append(GTK_BOX(box), openBtn);
-  gtk_box_append(GTK_BOX(box), button);
-  gtk_widget_set_halign(GTK_WIDGET(box), GTK_ALIGN_START);
-  gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->notebook), box, GTK_PACK_END);
-
+  highsv_app_add_notebookBtn(win);
   gtk_window_present(GTK_WINDOW(win));
 
   Files *f = (Files*) malloc(sizeof(Files));
