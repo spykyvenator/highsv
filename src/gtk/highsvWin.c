@@ -96,7 +96,7 @@ getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
   label = gtk_label_new(basename);
-  saveBtn = gtk_button_new_with_label("S");// TODO make icon
+  saveBtn = gtk_button_new_with_label("💾");// TODO make icon
   closeBtn = gtk_button_new_with_label("X");
 
   gtk_button_set_can_shrink(GTK_BUTTON(closeBtn), TRUE);
