@@ -98,6 +98,13 @@ saveFile(GFile *file, const char *content)
       g_clear_error(&error);
   }
 
+  goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
+
+    if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
+      g_printerr("Error truncating file: %s\n", error->message);
+      g_clear_error(&error);
+    }
+
   if (!g_output_stream_close(ostream, NULL, &error)) {
       g_printerr("Error closing ostream: %s\n", error->message);
       g_clear_error(&error);
@@ -153,9 +160,20 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 void
 saveActive(GtkEntry *entry, HighsvAppWindow *win)
 {
-  FileData *res = g_malloc(sizeof(FileData));
-  res->fd = gtk_file_dialog_new();
-  res->win = win;
+  GtkWidget *tab = getNotebookActive(win->notebook);
+  gchar *path = g_object_get_data(G_OBJECT(tab), "path");
 
-  gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleSave), res);
+  if (!path) {
+      FileData *res = g_malloc(sizeof(FileData));
+      res->fd = gtk_file_dialog_new();
+      res->win = win;
+
+      gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleSave), res);
+  } else {
+      GFile *file = g_file_new_for_path(path);
+
+      saveFile(file, getContentFromTab(tab));
+
+      g_object_unref(file);
+  }
 }

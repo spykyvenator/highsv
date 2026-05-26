@@ -47,7 +47,8 @@ void
 save_tab_by_pointer(GtkButton *button, gpointer data)
 {
   GtkWidget *temp = (GtkWidget*) data;
-  GFile *f = g_file_new_for_path((const gchar*) g_object_get_data(G_OBJECT(temp), "path"));
+  gchar *path = (gchar*) g_object_get_data(G_OBJECT(temp), "path");
+  GFile *f = g_file_new_for_path(path);
 
   gtk_widget_set_visible(GTK_WIDGET(button), false);
   if (!f) return;// silently ignore if no filename is present
