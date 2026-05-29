@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gtksourceview/gtksource.h>
 
 #include "highsv.h"
 #include "highsvWin.h"
@@ -37,7 +38,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
   highsv_app_window_open(fopen->win, file);
   // TODO reset button pos -> in notebook button possible?
   g_free(fopen);
-} 
+}
 
 void
 openNew(GtkEntry *entry, HighsvAppWindow *win)
@@ -164,4 +165,37 @@ saveActive(GtkEntry *entry, HighsvAppWindow *win)
 
       g_object_unref(file);
   }
+}
+
+static void
+handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)
+{
+    GtkTextBuffer *buffer;
+    gsize length;
+    GtkWidget *view = GTK_WIDGET(data);
+    GFile *file = G_FILE(src);
+    char *contents;
+    GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
+    GError *error = NULL;
+    g_file_load_contents_finish(file, res, &contents, &length, NULL, &error);
+    if (!error) {
+        gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
+        GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
+
+        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+        gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
+        gtk_text_buffer_set_text(buffer, contents, length);
+
+        g_free(contents);
+    } else {
+        g_printerr("Error opening file: %s\n", error->message);
+        g_clear_error(&error);
+        return;
+    }
+} 
+
+void
+setViewContent(GtkWidget *view, GFile *file)
+{
+    g_file_load_contents_async(file, NULL, handleFileLoad, view);
 }

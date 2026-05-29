@@ -106,7 +106,6 @@ typedef struct {
 static void
 open_files(gpointer data)
 {
-    sleep(1);
     Files *f = (Files*) data;
     for (int i = 0; i < f->n_files; i++)
       highsv_app_window_open(f->win, f->f[i]);
