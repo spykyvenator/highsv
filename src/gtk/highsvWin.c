@@ -91,7 +91,7 @@ getScrolledWin()
 /*
  * file is NULLable
  */
-static inline GtkWidget*
+GtkWidget*
 getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 {
   GtkWidget *box, *label, *closeBtn, *saveBtn;
@@ -176,7 +176,7 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
   g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
 
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
-  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
+  gtk_scrolled_window_set_policy(
     GTK_SCROLLED_WINDOW(scrolled),
     GTK_POLICY_AUTOMATIC,
     GTK_POLICY_AUTOMATIC
@@ -187,6 +187,5 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 
   setViewContent(view, file);
 
-  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), scrolled, getTabLabel(scrolled, file, gtk_text_view_get_buffer(GTK_TEXT_VIEW(view))));
   gtk_notebook_set_current_page(GTK_NOTEBOOK(win->notebook), index);
 }

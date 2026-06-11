@@ -173,10 +173,13 @@ handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)
     GtkTextBuffer *buffer;
     gsize length;
     GtkWidget *view = GTK_WIDGET(data);
+    GtkWidget *scrolled = gtk_widget_get_parent(view);
+    GtkWidget *notebook = g_object_get_data(G_OBJECT(scrolled), "parent_notebook");
     GFile *file = G_FILE(src);
     char *contents;
     GtkSourceLanguageManager *manager = gtk_source_language_manager_get_default();
     GError *error = NULL;
+
     g_file_load_contents_finish(file, res, &contents, &length, NULL, &error);
     if (!error) {
         gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
@@ -185,6 +188,8 @@ handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)
         buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
         gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
         gtk_text_buffer_set_text(buffer, contents, length);
+
+        gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), scrolled, getTabLabel(scrolled, file, gtk_text_view_get_buffer(GTK_TEXT_VIEW(view))));
 
         g_free(contents);
     } else {
