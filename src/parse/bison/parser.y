@@ -51,7 +51,7 @@
 %token <double> NUM "number"
 %token <char *> VAR "var"
 %nterm <double> expr
-%nterm <sm*> statement constraint
+%nterm <sm*> statements statement constraint
 
 
 %printer { fprintf (yyo, "%f", $$); } <double>
