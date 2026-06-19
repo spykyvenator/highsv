@@ -5,19 +5,9 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 #include <stdlib.h>
 #include "parser.h"
 #include <ctype.h>
-
-#define LOCATION_STEP()                         \
-  do {                                          \
-    yylloc->first_line = yylloc->last_line;     \
-    yylloc->first_column = yylloc->last_column; \
-  } while (0)
 %}
 
 %%
-
-%{
-LOCATION_STEP();
-%}
 
 !.*\n {}
 ^(?i:end) return 0;
