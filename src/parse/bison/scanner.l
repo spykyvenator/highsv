@@ -5,9 +5,20 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 #include <stdlib.h>
 #include "parser.h"
 #include <ctype.h>
+
+#define YY_USER_ACTION                          \
+  yylloc->last_column += (int) yyleng;
+
+#define LOCATION_STEP()                         \
+    yylloc->first_line = yylloc->last_line;     \
+    yylloc->first_column = yylloc->last_column; 
 %}
 
 %%
+
+%{
+LOCATION_STEP();
+%}
 
 !.*\n {}
 ^(?i:end) return 0;
@@ -30,5 +41,5 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 "<"|"<="|"=<" return HIGHSV_LESS;
 ">"|">="|"=>" return HIGHSV_MORE;
 "="|"==" return HIGHSV_EQUAL;
-"\n" return HIGHSV_EOL;
+"\n" { yylloc->last_line++; yylloc->last_column = 1; return HIGHSV_EOL; }
 <*>. {}

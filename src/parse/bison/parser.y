@@ -72,7 +72,7 @@ input: %empty
 st: trailingEOLS ST trailingEOLS
 
 constraints: constraint
-	   | constraints eol constraint { }// here we have to add the constraint to the model
+	   | constraints EOL constraint { }// here we have to add the constraint to the model
 
 constraint: statement LESS statement {  // <=
 		  $$ = mergeSm($1, $3); 
@@ -156,17 +156,10 @@ expr: NUM { $$ = $1; }
     | SUB expr { $$ = $2*-1; }
     ;
 
-eol: EOL { 
-   h_line++; 
-   #ifdef DEBUG
-   printf("\nline: %d\n", h_line); 
-   #endif
-   }
-   ;
-trailingEOLS: eol
-	    | eol trailingEOLS ;// trailing start, require at least one eol
+trailingEOLS: EOL
+	    | EOL trailingEOLS ;// trailing start, require at least one eol
 trailingEOL: %empty
-	   | eol trailingEOL 
+	   | EOL trailingEOL 
 	   ;
 
 %%
