@@ -40,7 +40,7 @@ resources.c: highsv.gresource.xml window.ui
 	$(GLIB_COMPILE_RESOURCES) highsv.gresource.xml --target=$@ --sourcedir=. --generate-source
 
 ../parse/bison/parser.c ../parse/bison/parser.h: ../parse/bison/parser.y
-	bison -r all --report-file=./report -Wcounterexamples --debug -o ../parse/bison/parser.c -d $<
+	bison --warnings -r all --report-file=./report -Wcounterexamples --debug -o ../parse/bison/parser.c -d $<
 ../parse/bison/scanner.h ../parse/bison/scanner.c: ../parse/bison/scanner.l ../parse/bison/parser.h
 	flex -o ../parse/bison/scanner.c --header-file=$(patsubst %.l,%.h,$<) $<
 

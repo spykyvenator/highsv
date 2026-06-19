@@ -3,12 +3,12 @@
 %define api.pure full
 %define api.value.type union
 %define api.header.include {"parser.h"}
+%define locations
 
 %code requires {
 	#include "pt.h"
 	#include "../../sol.h"
 	#include <math.h>
-	//#include "../../print.h"
         #include "../../util.h"
 	typedef void * yyscan_t;
     }
@@ -26,8 +26,10 @@
 %param {yyscan_t scanner}
 
 %code provides {	
-	int yylex(YYSTYPE * yylval_param , yyscan_t yyscanner);
-	void yyerror(yyscan_t scanner, const char *msg);
+	#define YY_DECL \
+	int yylex(YYSTYPE* yylval_param, YYLTYPE *yylloc, yyscan_t yyscanner)
+	YY_DECL;
+	void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg);
 }
 
 %token 
@@ -54,7 +56,7 @@
 
 
 %printer { fprintf (yyo, "%f", $$); } <double>
-%left NUM PLUS SUB
+%left PLUS SUB
 %left MULT DIV
 %left POW;
 
@@ -169,8 +171,10 @@ trailingEOL: %empty
 
 %%
 
-void
-yyerror(yyscan_t scanner, const char *msg)
+void 
+yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg)
 {
-	die("parser stopped at line: %d because of %s at: ", h_line, msg);
+	fprintf(stderr, "parsing failed at: ");
+	YYLOCATION_PRINT(stderr, yylloc);
+	die(" because of %s", msg);
 }

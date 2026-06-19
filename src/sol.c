@@ -149,6 +149,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
     printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
     fclose(fd);
     highsv_writeModel(model, "/tmp/model.lp");
+
     yylex_destroy(scanner);
     return 0;
 }

@@ -1,4 +1,4 @@
-%option nodefault noinput nounput noyywrap reentrant bison-bridge
+%option nodefault noinput nounput noyywrap reentrant bison-bridge yylineno
 FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 
 %{
@@ -6,10 +6,18 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 #include "parser.h"
 #include <ctype.h>
 
+#define LOCATION_STEP()                         \
+  do {                                          \
+    yylloc->first_line = yylloc->last_line;     \
+    yylloc->first_column = yylloc->last_column; \
+  } while (0)
 %}
 
 %%
 
+%{
+LOCATION_STEP();
+%}
 
 !.*\n {}
 ^(?i:end) return 0;
