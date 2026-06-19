@@ -22,8 +22,8 @@
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
 	extern char* yytext;
-
 }
+
 %code provides {	
 #define YY_DECL                                 \
   yytoken_kind_t yylex(YYSTYPE* yylval)
@@ -51,7 +51,7 @@
 %token <double> NUM "number"
 %token <char *> VAR "var"
 %nterm <double> expr
-%nterm <sm*> statements statement constraint
+%nterm <sm*> statement constraint
 
 
 %printer { fprintf (yyo, "%f", $$); } <double>
@@ -64,28 +64,11 @@
 %start input;
 
 input: %empty
-     | MAX costE st constraints trailingEOL { highsv_setSenseMax(model); }
-     | MIN costE st constraints trailingEOL { highsv_setSenseMin(model); }
+     | MAX statement st constraints trailingEOL { highsv_setSenseMax(model); setObjective(model, $2); }
+     | MIN statement st constraints trailingEOL { highsv_setSenseMin(model); setObjective(model, $2); }
      ;
 
 st: trailingEOLS ST trailingEOLS
-
-costE: cost
-     | cost expr { highsv_setObjectiveOffset(model, $2); }
-cost: %empty
-   | cost expr VAR { 
-   	setCost(model, $3, $2); 
-	//printf("setting cost: %s: %f", $2, $1); 
-	char *name = $3; 
-	free(name);// TODO: don't think this is necessary anymore in left recursive parsing
-   }
-   | cost VAR { 
-   	setCost(model, $2, 1.0); 
-	//printf(" setting cost: %s: %f", $1, 1.0); 
-	char *name = $2; 
-	free(name); 
-   }
-   ;
 
 constraints: constraint
 	   | constraints eol constraint { }// here we have to add the constraint to the model
@@ -130,9 +113,6 @@ constraint: statement LESS statement {  // <=
 
 
 statement: %empty { 
-	 #ifdef DEBUG
-	 printf("init sm\n"); 
-	 #endif
 	 $$ = init_sm(); 
    }
    | expr VAR statement {

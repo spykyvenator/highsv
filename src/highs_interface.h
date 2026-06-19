@@ -354,4 +354,11 @@ highsv_passRowName(void *mod, size_t numRow, const char* rowName)
 {
   Highs_passRowName(mod, numRow, rowName);
 }
+
+static inline void
+highsv_changeColsCostByRange(void *mod, const HighsInt from, const HighsInt to, const double *vals) 
+{
+    if (Highs_changeColsCostByRange(mod, from, to, vals))
+        die("failed to set objective");
+}
 #endif

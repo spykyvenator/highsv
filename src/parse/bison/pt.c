@@ -12,7 +12,7 @@ appendSm(sm* a, double val, int index)
           return a;
       }
   }
-  if (index >= a->rL) {
+  if (index >= (int) a->rL) {
     double *tmpVal = (double*) h_malloc(sizeof(double)*a->rL*2);
     int *tmpIndex = (int*) h_malloc(sizeof(int)*a->rL*2);
     memcpy(tmpVal, a->vals, sizeof(double)*a->rL);
@@ -27,7 +27,7 @@ appendSm(sm* a, double val, int index)
     }
     a->rL*=2;
   }
-  a->vals[a->rI] += val;
+  a->vals[a->rI] = val;
   a->indices[a->rI] = index;
   a->numNz++; // right now should still check if index is already present
   a->rI++;
@@ -43,16 +43,10 @@ mergeSm(sm* a, sm* b)
     a->offset = b->offset - a->offset;
     if (b->numNz == 0)
         return a;
-    char found = 0;
     for (size_t i = 0; i < b->numNz; i++) {
         appendSm(a, -b->vals[i], b->indices[i]);
     }
     return a;
-}
-
-void
-apply_sm(sm *a, void *model)
-{
 }
 
 void
@@ -133,4 +127,11 @@ setVal(void *mod, sm *a, const char *var, const double val)
 	const size_t index = findIndex(mod, var);
         appendSm(a, val, index);
         return a;
+}
+
+void
+setObjective(void *mod, sm *a)
+{
+    highsv_setObjectiveOffset(mod, a->offset);
+    highsv_changeColsCostByRange(mod, 0, a->rI, a->vals);
 }

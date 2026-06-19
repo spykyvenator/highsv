@@ -23,4 +23,5 @@ sm* mergeSm(sm *a, sm *b);
 void apply_sm(sm *a, void *model);
 void destroy_sm(sm *a);
 void print_sm(sm *a);
+void setObjective(void *mod, sm *a);
 #endif
