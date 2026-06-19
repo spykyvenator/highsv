@@ -14,6 +14,7 @@
 #include "./tprint/tprint.h"
 #include <glib.h>
 #include <stdio.h>
+#include "./pOstream.h"
 
 static inline void
 printand_free(TPrint *tp)

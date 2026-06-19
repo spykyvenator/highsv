@@ -1,4 +1,4 @@
-%option nodefault noinput nounput noyywrap
+%option nodefault noinput nounput noyywrap reentrant bison-bridge
 FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 
 %{
@@ -6,7 +6,6 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 #include "parser.h"
 #include <ctype.h>
 
-double highsv_atof(char *c);
 %}
 
 %%
@@ -35,34 +34,3 @@ double highsv_atof(char *c);
 "="|"==" return HIGHSV_EQUAL;
 "\n" return HIGHSV_EOL;
 <*>. {}
-
-%%
-
-double
-highsv_atof(char *c) 
-{
-	double res = 0;
-	char sign = 1;
-	while (isspace(*c)) c++;
-	while (*c != '\0') { switch (*c) {
-			case '+': sign = 1; break;
-			case '-': sign = -1; break;
-			case '\t':
-			case '\v':
-			case '\f':
-			case '\n':
-			case '\r':
-			case ' ':
-				break;
-			default:
-				if (*c >= '0' && *c <= '9'){
-					res *= 10;
-					res += *c - '0';
-				} else {
-					return res*sign;
-				}
-			} 
-			c++;
-		}
-	return res*sign;
-}

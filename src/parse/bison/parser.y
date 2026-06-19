@@ -1,4 +1,3 @@
-%define parse.trace
 %define parse.error detailed
 %define api.token.prefix {HIGHSV_}
 %define api.pure full
@@ -11,6 +10,7 @@
 	#include <math.h>
 	//#include "../../print.h"
         #include "../../util.h"
+	typedef void * yyscan_t;
     }
 
 %code top {
@@ -21,14 +21,13 @@
 	int *rowIndex = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
-	extern char* yytext;
 }
 
+%param {yyscan_t scanner}
+
 %code provides {	
-#define YY_DECL                                 \
-  yytoken_kind_t yylex(YYSTYPE* yylval)
-  YY_DECL;
-  void yyerror(const char *msg);
+	int yylex(YYSTYPE * yylval_param , yyscan_t yyscanner);
+	void yyerror(yyscan_t scanner, const char *msg);
 }
 
 %token 
@@ -111,37 +110,36 @@ constraint: statement LESS statement {  // <=
 	   }
 	   ;
 
-
 statement: %empty { 
-	 $$ = init_sm(); 
-   }
-   | expr VAR statement {
-	   $$ = setVal(model, $3, $2, $1); 
-	   char *name = $2;
-	   free(name);
-	   #ifdef DEBUG
-	   printf("%s: %f\n", $2, $1); 
-	   #endif
-   }
-   | VAR statement {
-	   $$ = setVal(model, $2, $1, 1.0); 
-	   char *name = $1;
-	   free(name);
-	   #ifdef DEBUG
-	   printf("%s: %f\n", $1, 1.0); 
-	   #endif
-   }
-   | expr {
-	   #ifdef DEBUG
-	   printf("init sm\n"); 
-	   #endif
-	   $$ = init_sm();
-   	   $$->offset+=$1; 
-	   #ifdef DEBUG
-	   printf("%f\n", $1); 
-	   #endif
-   }
-   ;
+		$$ = init_sm(); 
+	}
+	| expr VAR statement {
+		$$ = setVal(model, $3, $2, $1);
+		char *name = $2;
+		free(name);
+		#ifdef DEBUG
+		printf("%s: %f\n", $2, $1);
+		#endif
+	}
+	| VAR statement {
+		$$ = setVal(model, $2, $1, 1.0);
+		char *name = $1;
+		free(name);
+		#ifdef DEBUG
+		printf("%s: %f\n", $1, 1.0);
+		#endif
+	}
+	| expr {
+		#ifdef DEBUG
+		printf("init sm\n");
+		#endif
+		$$ = init_sm();
+		$$->offset+=$1;
+		#ifdef DEBUG
+		printf("%f\n", $1);
+		#endif
+	}
+  ;
 
 expr: NUM { $$ = $1; }
     | expr PLUS expr { $$ = $1 + $3; }
@@ -172,23 +170,7 @@ trailingEOL: %empty
 %%
 
 void
-yyerror(const char *msg)
+yyerror(yyscan_t scanner, const char *msg)
 {
-	die("parser stopped at line: %d because of %s at: %s", h_line, msg, yytext);
+	die("parser stopped at line: %d because of %s at: ", h_line, msg);
 }
-
-/*
-int 
-main(int argc, const char *argv[])
-{
-  model = highsv_create();
-  initModel();
-  yyparse();
-  highsv_presolve(model);
-  #ifdef DEBUG
-  printModel(model);
-  highsv_writeModel(model, "/tmp/model.lp");
-  #endif
-  return 0;
-}
-*/

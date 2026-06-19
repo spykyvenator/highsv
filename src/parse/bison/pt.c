@@ -29,7 +29,7 @@ appendSm(sm* a, double val, int index)
   }
   a->vals[a->rI] = val;
   a->indices[a->rI] = index;
-  a->numNz++; // right now should still check if index is already present
+  a->numNz++;
   a->rI++;
 #ifdef DEBUG
   printf("appended: %lf at index: %d\n", val, index);
@@ -89,7 +89,7 @@ init_sm(void)
   return the column index of a variable name.
   add it if it is not present
 */
-size_t
+static size_t
 findIndex(void *mod, const char *text)
 {
   int64_t index;

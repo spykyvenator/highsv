@@ -98,48 +98,57 @@ setMip(char mip, void *model)
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 {
-  cleanModel(model);
-  preModel();
-  YY_BUFFER_STATE buffer = yy_scan_string(s);
+    yyscan_t scanner;
+
+    cleanModel(model);
+    preModel();
+    yylex_init(&scanner);
+    YY_BUFFER_STATE buffer = yy_scan_string(s, scanner);
 #ifdef DEBUG
   yydebug=1;
 #endif
-  yyparse();
+    yyparse(scanner);
 #ifdef DEBUG
-  printModel(model);
+    printModel(model);
 #endif
-  setPositive((char) pos, model);
-  setMip((char) mip, model);
-  highsv_presolve(model);
-  clock_t before = clock();
-  highsv_run(model);
-  clock_t diff = clock() - before;
-  printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
-  yy_delete_buffer(buffer);
-  return 0;
+    setPositive((char) pos, model);
+    setMip((char) mip, model);
+    highsv_presolve(model);
+    clock_t before = clock();
+    highsv_run(model);
+    clock_t diff = clock() - before;
+    printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
+
+    yy_delete_buffer(buffer, scanner);
+    yylex_destroy(scanner);
+    return 0;
 }
 
 int
 parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
 {
-  cleanModel(model);
-  preModel();
-  yyset_in(fd);// add yyscanner here for reentrant
+    yyscan_t scanner;
+
+    cleanModel(model);
+    preModel();
+    yylex_init(&scanner);
+    yyset_in(fd, scanner);
 #ifdef DEBUG
-  yydebug=1;
+    yydebug=1;
 #endif
-  yyparse();
+    yyparse(scanner);
 #ifdef DEBUG
-  printModel(model);
+    printModel(model);
 #endif
-  setPositive((char) pos, model);
-  setMip(mip, model);
-  highsv_presolve(model);
-  clock_t before = clock();
-  highsv_run(model);
-  clock_t diff = clock() - before;
-  printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
-  fclose(fd);
-  highsv_writeModel(model, "/tmp/model.lp");
-  return 0;
+    setPositive((char) pos, model);
+    setMip(mip, model);
+    highsv_presolve(model);
+    clock_t before = clock();
+    highsv_run(model);
+    clock_t diff = clock() - before;
+    printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
+    fclose(fd);
+    highsv_writeModel(model, "/tmp/model.lp");
+    yylex_destroy(scanner);
+    return 0;
 }
