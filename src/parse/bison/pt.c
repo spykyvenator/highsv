@@ -60,7 +60,7 @@ destroy_sm(sm *a)
 void
 print_sm(sm *a)
 {
-    printf("printing sm: size: %ld, rL:  %ld\n", a->numNz, a->rL);
+    printf("printing sm: size: %ld, rL:  %ld, offset: %lf\n", a->numNz, a->rL, a->offset);
     for (size_t i = 0; i < a->numNz; i++) {
             printf("index: %d is %f\n", a->indices[i], a->vals[i]);
     }
@@ -105,6 +105,7 @@ findIndex(void *mod, const char *text)
   return (size_t) index;
 }
 
+/*
 void
 setCost(void *mod, const char *var, const double val)
 {
@@ -120,6 +121,7 @@ setCost(void *mod, const char *var, const double val)
                               mi, mv);
 	highsv_changeColCost(mod, index, cost+val);
 }
+*/
 
 sm*
 setVal(void *mod, sm *a, const char *var, const double val)
@@ -133,5 +135,5 @@ void
 setObjective(void *mod, sm *a)
 {
     highsv_setObjectiveOffset(mod, a->offset);
-    highsv_changeColsCostByRange(mod, 0, a->rI, a->vals);
+    highsv_changeColsCostByRange(mod, 0, a->numNz-1, a->vals);
 }

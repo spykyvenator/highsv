@@ -352,13 +352,17 @@ highsv_writeModel(void *highs, const char *filename)
 static inline void
 highsv_passRowName(void *mod, size_t numRow, const char* rowName)
 {
-  Highs_passRowName(mod, numRow, rowName);
+  if (Highs_passRowName(mod, (HighsInt) numRow, rowName)) {
+      die("could not set row name: %d to %s", numRow, rowName);
+  }
 }
 
 static inline void
-highsv_changeColsCostByRange(void *mod, const HighsInt from, const HighsInt to, const double *vals) 
+highsv_changeColsCostByRange(void *mod, const int from, const int to, const double *vals) 
 {
-    if (Highs_changeColsCostByRange(mod, from, to, vals))
+    HighsInt f = (HighsInt) from;
+    HighsInt t = (HighsInt) to;
+    if (Highs_changeColsCostByRange(mod, f, t, vals))
         die("failed to set objective");
 }
 #endif

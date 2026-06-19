@@ -65,8 +65,8 @@
 %start input;
 
 input: %empty
-     | MAX statement st constraints trailingEOL { highsv_setSenseMax(model); setObjective(model, $2); }
-     | MIN statement st constraints trailingEOL { highsv_setSenseMin(model); setObjective(model, $2); }
+     | MAX statement st constraints trailingEOL { highsv_setSenseMax(model); setObjective(model, $2); destroy_sm($2); }
+     | MIN statement st constraints trailingEOL { highsv_setSenseMin(model); setObjective(model, $2); destroy_sm($2); }
      ;
 
 st: trailingEOLS ST trailingEOLS
@@ -109,6 +109,42 @@ constraint: statement LESS statement {  // <=
 		   print_sm($1);
 		   #endif
 		   destroy_sm($1);
+	   }
+	   | statement LESS statement LESS statement {
+		double loffset = $1->offset - $3->offset;
+		double roffset = $5->offset - $3->offset;
+		char rowName[512];
+
+	   	$$ = mergeSm($3, $1);
+		$$ = mergeSm($3, $5);
+		#ifdef DEBUG
+		print_sm($3);
+		#endif
+		snprintf(rowName, 512, "%ld", numRow + 1);
+		highsv_addRow(model, loffset, roffset, $3->numNz, $3->indices, $3->vals);
+		highsv_passRowName(model, numRow++, rowName);
+
+		destroy_sm($1);
+		destroy_sm($3);
+		destroy_sm($5);
+	   }
+	   | statement MORE statement MORE statement {
+		double loffset = $1->offset - $3->offset;
+		double roffset = $5->offset - $3->offset;
+		char rowName[512];
+
+	   	$$ = mergeSm($3, $1);
+		$$ = mergeSm($3, $5);
+		#ifdef DEBUG
+		print_sm($3);
+		#endif
+		snprintf(rowName, 512, "%ld", numRow + 1);
+		highsv_addRow(model, roffset, loffset, $3->numNz, $3->indices, $3->vals);
+		highsv_passRowName(model, numRow++, rowName);
+
+		destroy_sm($1);
+		destroy_sm($3);
+		destroy_sm($5);
 	   }
 	   ;
 
