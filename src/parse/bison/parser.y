@@ -33,20 +33,20 @@
 }
 
 %token 
-	MAX
-	MIN
-	ST
-	EOL
-	MORE
-	LESS
-	EQUAL
-	PLUS
-        SUB
-        MULT
-        DIV
-        POW
-	BO
-	BC
+	MAX "max"
+	MIN "min"
+	ST "st or subject to"
+	EOL "end of line"
+	MORE ">="
+	LESS "<="
+	EQUAL "= or =="
+	PLUS "+"
+        SUB "-"
+        MULT "*"
+        DIV "/"
+        POW "^"
+	BO "("
+	BC ")"
 ;
 
 %token <double> NUM "number"
