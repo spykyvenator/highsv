@@ -9,16 +9,17 @@ void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
     char *content, *newName;
-    GtkWidget *tab, *view, *box, *label;
+    GtkWidget *tab, *view, *box, *label, *overlay;
     GtkTextBuffer *buffer;
     GtkTextIter startI, endI;
     size_t nameLen;
     GError *error = NULL;
     GFileIOStream* stream = NULL;
     
-    tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+    overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+    tab = gtk_overlay_get_child(GTK_OVERLAY(overlay));
 
-    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->notebook), GTK_WIDGET(tab));// owned by instance
+    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->notebook), overlay);// owned by instance
     label = gtk_widget_get_first_child(box);
     const char *name = gtk_label_get_text(GTK_LABEL(label));
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance

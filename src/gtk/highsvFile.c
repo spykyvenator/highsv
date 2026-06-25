@@ -189,7 +189,7 @@ handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)
         gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
         gtk_text_buffer_set_text(buffer, contents, length);
 
-        gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), scrolled, getTabLabel(scrolled, file, gtk_text_view_get_buffer(GTK_TEXT_VIEW(view))));
+        gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), gtk_widget_get_parent(scrolled), getTabLabel(scrolled, file, gtk_text_view_get_buffer(GTK_TEXT_VIEW(view))));
 
         g_free(contents);
     } else {

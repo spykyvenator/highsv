@@ -81,7 +81,7 @@ getSourceView()
 void
 highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
 {
-    GtkWidget *revealer, *box, *label, *button;
+    GtkWidget *revealer, *box, *label, *button, *overlay;
     GtkTextIter start, end;
     GtkTextTag *t;
 
@@ -89,12 +89,12 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     label = gtk_label_new(msg);
     button = gtk_button_new_with_label("✕");
+    overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
     t = gtk_text_buffer_create_tag(bfr, "error", 
             "background", "red",
             "editable", TRUE,
             NULL);
 
-    /*
     gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
     gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
     gtk_widget_set_tooltip_text(button, "close tooltip");
@@ -104,7 +104,8 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
 
     gtk_box_append(GTK_BOX(box), label);
     gtk_box_append(GTK_BOX(box), button);
-    */
+    gtk_box_set_spacing(GTK_BOX(box), 10);
+    gtk_widget_add_css_class(box, "error-box");
 
     gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
@@ -114,10 +115,12 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     printf("making tag from %d,%d to %d,%d\n", x, y, x2, y2);
     gtk_text_buffer_apply_tag(bfr, t, &start, &end);
 
-    /*
+    gtk_widget_set_halign(revealer, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(revealer, GTK_ALIGN_START);
     gtk_revealer_set_child(GTK_REVEALER(revealer), box);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), revealer);
+    gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), revealer, TRUE);
     gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), 1);
-    */
 }
 
 static inline GtkWidget*
@@ -180,13 +183,14 @@ getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b)
 void
 highsv_app_window_open_empty(HighsvAppWindow *win)
 {
-  GtkWidget *scrolled, *view;
+  GtkWidget *scrolled, *view, *overlay;
   GtkTextBuffer *buffer = gtk_text_buffer_new(NULL);
 
   scrolled = getScrolledWin();
   view = getSourceView();
   g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
 
+  gtk_overlay_set_child(GTK_OVERLAY(overlay), scrolled);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
     GTK_SCROLLED_WINDOW(scrolled),
@@ -210,13 +214,15 @@ highsv_app_window_open_empty(HighsvAppWindow *win)
 void
 highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 {
-  GtkWidget *scrolled, *view;
+  GtkWidget *scrolled, *view, *overlay;
 
+  overlay = gtk_overlay_new();
   scrolled = getScrolledWin();
   view = getSourceView();
   g_object_set_data_full(G_OBJECT(scrolled), "path", g_file_get_path(file), (GDestroyNotify) g_free);
   g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
 
+  gtk_overlay_set_child(GTK_OVERLAY(overlay), scrolled);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
   gtk_scrolled_window_set_policy(
     GTK_SCROLLED_WINDOW(scrolled),
@@ -224,8 +230,8 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
     GTK_POLICY_AUTOMATIC
     );
   setSourceCompletion(GTK_SOURCE_VIEW(view));
-  int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->notebook), scrolled, NULL);
-  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->notebook), scrolled, TRUE);
+  int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->notebook), overlay, NULL);
+  gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->notebook), overlay, TRUE);
 
   setViewContent(view, file);
 
