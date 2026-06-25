@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
+#ifndef CLI
+#include "./gtk/highsvWin.h"
+#endif
 
 void
 die(const char *fmt, ...)
@@ -14,14 +17,24 @@ die(const char *fmt, ...)
 	saved_errno = errno;
 
 	va_start(ap, fmt);
+#ifdef GTK
+        const size_t elen = 512;
+        char errmsg[elen];
+        snprintf(errmsg, elen, fmt, ap);
+        fputs(errmsg, stderr);
+        //highsvShowError(errmsg);
+#else
 	vfprintf(stderr, fmt, ap);
+#endif
 	va_end(ap);
 
 	if (fmt[0] && fmt[strlen(fmt)-1] == ':')
 		fprintf(stderr, " %s", strerror(saved_errno));
 	fputc('\n', stderr);
 
+#ifdef CLI
 	exit(1);
+#endif
 }
 
 void*

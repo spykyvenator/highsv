@@ -1,4 +1,6 @@
+#ifdef HIGHS_BACKEND
 #include "highs_interface.h"
+#endif
 
 #ifdef CLI
 #include <stdio.h>
@@ -17,7 +19,6 @@
 #include "print.h"
 #endif
 
-extern int *rowIndex, h_line;
 extern size_t rowLen, numRow, numCol;
 //extern double lastVal, sign, *rowVal;
 extern char state;
@@ -30,13 +31,11 @@ cleanModel (void *model)
   highsv_destroy(model);
   numCol = 0;
   numRow = 0;
-  h_line = 1;
 }
 
 int
 initModel ()
 {
-  //rowIndex = (int*) malloc(sizeof(int)*rowLen);
   model = highsv_create();
   return 0;
 }
@@ -48,10 +47,6 @@ quitModel ()
    // free(rowVal);
     //rowVal = NULL;
   //}
-  if (rowIndex) {
-    free(rowIndex);
-    rowIndex = NULL;
-  }
   return 0;
 }
 
@@ -96,7 +91,7 @@ setMip(char mip, void *model)
 }
 
 int
-parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
+parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, errHandle *err)
 {
     yyscan_t scanner;
 
@@ -107,7 +102,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 #ifdef DEBUG
   yydebug=1;
 #endif
-    yyparse(scanner);
+    yyparse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif
@@ -125,7 +120,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos)
 }
 
 int
-parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
+parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
 {
     yyscan_t scanner;
 
@@ -136,7 +131,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos)
 #ifdef DEBUG
     yydebug=1;
 #endif
-    yyparse(scanner);
+    yyparse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif

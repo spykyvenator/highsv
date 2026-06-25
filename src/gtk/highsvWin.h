@@ -24,3 +24,4 @@ getNotebookActive(GtkNotebook *n)
 { 
     return gtk_notebook_get_nth_page(n, gtk_notebook_get_current_page(n));
 }
+void highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2);

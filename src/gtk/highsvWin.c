@@ -78,6 +78,48 @@ getSourceView()
   return res;
 }
 
+void
+highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
+{
+    GtkWidget *revealer, *box, *label, *button;
+    GtkTextIter start, end;
+    GtkTextTag *t;
+
+    revealer = gtk_revealer_new();
+    box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    label = gtk_label_new(msg);
+    button = gtk_button_new_with_label("✕");
+    t = gtk_text_buffer_create_tag(bfr, "error", 
+            "background", "red",
+            "editable", TRUE,
+            NULL);
+
+    /*
+    gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
+    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
+    gtk_widget_set_tooltip_text(button, "close tooltip");
+
+    gtk_revealer_set_transition_type(GTK_REVEALER(revealer), GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
+    gtk_revealer_set_transition_duration(GTK_REVEALER(revealer), 1);
+
+    gtk_box_append(GTK_BOX(box), label);
+    gtk_box_append(GTK_BOX(box), button);
+    */
+
+    gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
+    gtk_text_buffer_get_iter_at_line(bfr, &end, x);
+    gtk_text_iter_backward_line(&end);
+    gboolean ok = gtk_text_iter_compare(&start, &end) < 0;  // start < end
+    printf("start<end=%d\n", ok);
+    printf("making tag from %d,%d to %d,%d\n", x, y, x2, y2);
+    gtk_text_buffer_apply_tag(bfr, t, &start, &end);
+
+    /*
+    gtk_revealer_set_child(GTK_REVEALER(revealer), box);
+    gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), 1);
+    */
+}
+
 static inline GtkWidget*
 getScrolledWin()
 {

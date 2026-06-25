@@ -1,4 +1,6 @@
+#ifdef HIGHS_BACKEND
 #include "highs_interface.h"
+#endif
 #include <stdarg.h>
 #include "util.h"
 

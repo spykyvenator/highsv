@@ -1,6 +1,6 @@
 CC ?= gcc
 PKGCONFIG ?= $(shell which pkg-config)
-CFLAGS = -DHIGHS_BACKEND -std=c23 -Wpedantic -Wstrict-prototypes -Wmissing-declarations -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
+CFLAGS = -DGTK -DHIGHS_BACKEND -std=c23 -Wpedantic -Wstrict-prototypes -Wmissing-declarations -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
 	 $(shell $(PKGCONFIG) --cflags highs) \
 	 $(shell $(PKGCONFIG) --cflags gtksourceview-5)
 LIBS = $(shell $(PKGCONFIG) --libs gtk4) \
