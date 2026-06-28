@@ -41,7 +41,9 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 
     GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
 
-    parseString(content, ostream, mip, pos, new_errHandle(view, buffer));
+    errHandle *eh = new_errHandle(view, buffer);
+    parseString(content, ostream, mip, pos, eh);
+    eh->free(eh);
 
     if (!g_output_stream_close(ostream, NULL, &error)){
         g_printerr("Error closing out-stream: %s\n", error->message);

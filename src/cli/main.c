@@ -1,5 +1,6 @@
 #include "../sol.h"
 #include <gio/gunixoutputstream.h>
+#include "../parse/bison/errhandle.h"
 
 static void
 pHelp()
@@ -46,7 +47,9 @@ main(int argc, char *argv[])
             perror(argv[index]);
             return (-1);
         }
-        parseFile(fd, ostream, Flags && 0b10, !(Flags && 0b01));
+        errHandle *eh = new_errHandle();
+        parseFile(fd, ostream, Flags && 0b10, !(Flags && 0b01), eh);
+        eh->free(eh);
     }
     g_output_stream_close(ostream, NULL, NULL);
     if (out) fclose(out);
