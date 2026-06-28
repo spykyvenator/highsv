@@ -10,6 +10,7 @@ void close_tab (GSimpleAction *action, GVariant *parameter, gpointer app);
 void save_tab (GSimpleAction *action, GVariant *parameter, gpointer app);
 void save_tab_by_pointer(GtkButton *button, gpointer data);
 void close_tab_by_pointer(GtkButton *button, gpointer notebook);
+void close_errormsg(GtkButton *button, gpointer data);
 void solve_tab (GSimpleAction *action, GVariant *parameter, gpointer app);
 void range_tab (GSimpleAction *action, GVariant *parameter, gpointer app);
 void toggleMip(GtkCheckButton *self, gpointer app);

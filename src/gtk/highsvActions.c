@@ -3,6 +3,7 @@
 #include "highsvWin.h"
 #include "highsvFile.h"
 #include "highsvSol.h"
+#include "../util.h"
 
 extern gboolean mip, pos;
 
@@ -41,6 +42,18 @@ close_tab_by_pointer(GtkButton *button, gpointer data)
   GtkNotebook *n = g_object_get_data(G_OBJECT(t), "parent_notebook");
 
   gtk_notebook_remove_page(n, gtk_notebook_page_num(n, t));
+}
+
+void
+close_errormsg(GtkButton *button, gpointer data)
+{
+    GtkWidget *revealer;
+
+    revealer = (GtkWidget*) data;
+
+    gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), FALSE);
+    if (freeEM(revealer))
+        die("failed to free errormsg");
 }
 
 void

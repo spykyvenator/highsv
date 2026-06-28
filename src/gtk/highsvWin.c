@@ -78,34 +78,63 @@ getSourceView()
   return res;
 }
 
-void
-highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
+static GtkWidget*
+makeErrorMsg(const char *msg)
 {
-    GtkWidget *revealer, *box, *label, *button, *overlay;
-    GtkTextIter start, end;
-    GtkTextTag *t;
+    GtkWidget *revealer, *box, *label, *button;
 
     revealer = gtk_revealer_new();
     box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     label = gtk_label_new(msg);
     button = gtk_button_new_with_label("✕");
+
+    gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
+    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
+    g_signal_connect(G_OBJECT(button), "clicked", 
+        G_CALLBACK(close_errormsg), revealer);
+    gtk_widget_set_tooltip_text(button, "close tooltip");
+
+    gtk_revealer_set_transition_type(GTK_REVEALER(revealer), GTK_REVEALER_TRANSITION_TYPE_SLIDE_DOWN);
+    gtk_revealer_set_transition_duration(GTK_REVEALER(revealer), 500);
+
+    gtk_box_append(GTK_BOX(box), label);
+    gtk_box_append(GTK_BOX(box), button);
+    gtk_box_set_spacing(GTK_BOX(box), 10);
+    gtk_widget_add_css_class(box, "error-box");
+
+    gtk_widget_set_halign(revealer, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(revealer, GTK_ALIGN_START);
+    gtk_revealer_set_child(GTK_REVEALER(revealer), box);
+
+    return revealer;
+}
+
+int
+freeEM(GtkWidget *msg)
+{
+    GtkWidget *overlay = gtk_widget_get_parent(msg);
+
+    gtk_overlay_remove_overlay(GTK_OVERLAY(overlay), msg);
+    g_object_unref(msg);
+
+    return 0;
+}
+
+void
+highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
+{
+    GtkWidget *msgb, *overlay;
+    GtkTextIter start, end;
+    GtkTextTag *t;
+
+    msgb = makeErrorMsg(msg);
+
     overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
     t = gtk_text_buffer_create_tag(bfr, "error", 
             "background", "red",
             "editable", TRUE,
             NULL);
 
-    gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
-    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
-    gtk_widget_set_tooltip_text(button, "close tooltip");
-
-    gtk_revealer_set_transition_type(GTK_REVEALER(revealer), GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
-    gtk_revealer_set_transition_duration(GTK_REVEALER(revealer), 1);
-
-    gtk_box_append(GTK_BOX(box), label);
-    gtk_box_append(GTK_BOX(box), button);
-    gtk_box_set_spacing(GTK_BOX(box), 10);
-    gtk_widget_add_css_class(box, "error-box");
 
     gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
@@ -115,12 +144,9 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     printf("making tag from %d,%d to %d,%d\n", x, y, x2, y2);
     gtk_text_buffer_apply_tag(bfr, t, &start, &end);
 
-    gtk_widget_set_halign(revealer, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(revealer, GTK_ALIGN_START);
-    gtk_revealer_set_child(GTK_REVEALER(revealer), box);
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), revealer);
-    gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), revealer, TRUE);
-    gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), 1);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
+    gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
+    gtk_revealer_set_reveal_child(GTK_REVEALER(msgb), TRUE);
 }
 
 static inline GtkWidget*
