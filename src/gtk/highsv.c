@@ -50,8 +50,19 @@ highsv_app_startup(GApplication *app)
   SET_ACCELS(save);
   SET_ACCELS(solve);
   SET_ACCELS(zoomIn);
-}
 #undef SET_ACCELS
+  GtkCssProvider *provider = gtk_css_provider_new ();
+  gtk_css_provider_load_from_string(provider,
+     "textview { font-family: Monospace; font-size: 12pt; } \
+      .error-box { background-color: #FF4C4CAA; \
+        border: 2px solid #FFA500FF; \
+        border-radius: 10px; padding: 8px; }"
+      );
+  gtk_style_context_add_provider_for_display(gdk_display_get_default(), 
+          GTK_STYLE_PROVIDER(provider),
+          GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  g_object_unref (provider);
+}
 
 static void
 highsv_app_add_notebookBtn(HighsvAppWindow *win)
@@ -75,7 +86,6 @@ static void
 open_empty(gpointer data)
 {
     HighsvAppWindow *win = (HighsvAppWindow*) data;
-    while (!gtk_window_get_focus(GTK_WINDOW(win))) g_usleep(100);// check if the window is presented
     highsv_app_window_open_empty(win);
 }
 
@@ -84,7 +94,6 @@ highsv_app_activate(GApplication *app)
 {
   HighsvAppWindow *win;
   GList *windows;
-  int i;
 
   windows = gtk_application_get_windows(GTK_APPLICATION(app));
   if (windows)
@@ -118,7 +127,6 @@ highsv_app_open(GApplication *app, GFile **files, int n_files, const char *hint)
 {
   GList *windows;
   HighsvAppWindow *win;
-  int i;
 
   windows = gtk_application_get_windows(GTK_APPLICATION(app));
   if (windows)
@@ -143,10 +151,9 @@ static void
 highsv_app_shutdown(GApplication *app)
 {
     quitModel();
-    HighsvApp *highsv = (HighsvApp *) app;
 
   G_APPLICATION_CLASS (highsv_app_parent_class)
-    ->shutdown (app);
+    ->shutdown(app);
 
     GList *windows;
     HighsvAppWindow *win;

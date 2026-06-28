@@ -56,7 +56,6 @@ static inline GtkWidget*
 getSourceView()
 {
   GtkWidget *res = gtk_source_view_new();
-  GtkCssProvider *provider = gtk_css_provider_new ();
   gtk_text_view_set_monospace(GTK_TEXT_VIEW(res), TRUE);
   gtk_text_view_set_editable(GTK_TEXT_VIEW(res), TRUE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(res), TRUE);
@@ -65,15 +64,8 @@ getSourceView()
   gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(res), 10);
   gtk_text_view_set_right_margin(GTK_TEXT_VIEW(res), 10);
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(res), GTK_INPUT_HINT_SPELLCHECK);
-  gtk_css_provider_load_from_string(provider,// this probably needs to be set globally instead
-     "textview { font-family: Monospace; font-size: 12pt; }");
-  gtk_style_context_add_provider(gtk_widget_get_style_context(res),
-      GTK_STYLE_PROVIDER(provider),
-      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
   gtk_source_view_set_highlight_current_line(GTK_SOURCE_VIEW(res), TRUE);
   gtk_source_view_set_show_line_numbers(GTK_SOURCE_VIEW(res), TRUE);
-
-  g_object_unref (provider);
 
   return res;
 }
@@ -89,7 +81,7 @@ makeErrorMsg(const char *msg)
     button = gtk_button_new_with_label("✕");
 
     gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
-    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
+    gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
     g_signal_connect(G_OBJECT(button), "clicked", 
         G_CALLBACK(close_errormsg), revealer);
     gtk_widget_set_tooltip_text(button, "close tooltip");
@@ -139,9 +131,6 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
     gtk_text_iter_backward_line(&end);
-    gboolean ok = gtk_text_iter_compare(&start, &end) < 0;  // start < end
-    printf("start<end=%d\n", ok);
-    printf("making tag from %d,%d to %d,%d\n", x, y, x2, y2);
     gtk_text_buffer_apply_tag(bfr, t, &start, &end);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
@@ -216,9 +205,10 @@ highsv_app_window_open_empty(HighsvAppWindow *win)
   view = getSourceView();
   g_object_set_data(G_OBJECT(scrolled), "parent_notebook", win->notebook);
 
+  overlay = gtk_overlay_new();
   gtk_overlay_set_child(GTK_OVERLAY(overlay), scrolled);
   gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), view);
-  gtk_scrolled_window_set_policy(// TODO: check if this solves scrolling on opening issue -> it does not
+  gtk_scrolled_window_set_policy(
     GTK_SCROLLED_WINDOW(scrolled),
     GTK_POLICY_AUTOMATIC,
     GTK_POLICY_AUTOMATIC
