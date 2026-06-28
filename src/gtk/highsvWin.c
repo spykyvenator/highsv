@@ -81,7 +81,7 @@ makeErrorMsg(const char *msg)
     button = gtk_button_new_with_label("✕");
 
     gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
-    gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
+    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
     g_signal_connect(G_OBJECT(button), "clicked", 
         G_CALLBACK(close_errormsg), revealer);
     gtk_widget_set_tooltip_text(button, "close tooltip");
@@ -92,7 +92,9 @@ makeErrorMsg(const char *msg)
     gtk_box_append(GTK_BOX(box), label);
     gtk_box_append(GTK_BOX(box), button);
     gtk_box_set_spacing(GTK_BOX(box), 10);
+
     gtk_widget_add_css_class(box, "error-box");
+    gtk_widget_add_css_class(button, "error-button");
 
     gtk_widget_set_halign(revealer, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(revealer, GTK_ALIGN_START);

@@ -56,7 +56,8 @@ highsv_app_startup(GApplication *app)
      "textview { font-family: Monospace; font-size: 12pt; } \
       .error-box { background-color: #FF4C4CAA; \
         border: 2px solid #FFA500FF; \
-        border-radius: 10px; padding: 8px; }"
+        border-radius: 10px; padding: 8px; } \
+      .error-button { background-color: #FF4C4C4C; }"
       );
   gtk_style_context_add_provider_for_display(gdk_display_get_default(), 
           GTK_STYLE_PROVIDER(provider),
