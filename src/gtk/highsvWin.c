@@ -28,6 +28,7 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), openNewEmpty);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveActive);
+  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveAsActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), toggleMip);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), togglePos);
 }
@@ -144,6 +145,23 @@ getScrolledWin()
   gtk_widget_set_vexpand(res, TRUE);
 
   return res;
+}
+
+void
+setTabLabel(GtkNotebook *notebook, GtkWidget *overlay, GFile *file)
+{
+  char *basename;
+  if (file)
+      basename = g_file_get_basename (file);
+  else
+      basename = "unsaved";
+
+  GtkWidget *box = gtk_notebook_get_tab_label(notebook, overlay);
+  GtkWidget *label = gtk_widget_get_first_child(box);
+
+  gtk_label_set_label(GTK_LABEL(label), basename);
+
+  if (file) g_free(basename);
 }
 
 /*

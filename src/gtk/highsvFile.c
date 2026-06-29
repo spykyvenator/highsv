@@ -3,16 +3,21 @@
 
 #include "highsv.h"
 #include "highsvWin.h"
+#include "highsvFile.h"
 
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
-    GtkWidget* tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+    GtkWidget *tab;
+
+    tab = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+
+    if (!tab) return;
+
     gtk_notebook_prev_page(GTK_NOTEBOOK(win->notebook));
-    if (!tab) {
-        return;
-    }
-    gtk_notebook_detach_tab(GTK_NOTEBOOK(win->notebook), tab);
+    gtk_notebook_remove_page(GTK_NOTEBOOK(win->notebook), gtk_notebook_page_num(GTK_NOTEBOOK(win->notebook), tab));
+
+    g_object_unref(tab);
 }
 
 typedef struct {
@@ -102,6 +107,9 @@ saveFile(GFile *file, const char *content)
   }
 }
 
+/*
+ * tab is the scrolled widget
+ */
 char*
 getContentFromTab(GtkWidget *tab)
 {
@@ -114,7 +122,7 @@ getContentFromTab(GtkWidget *tab)
   gtk_text_buffer_get_start_iter(buffer, &startI);
   gtk_text_buffer_get_end_iter(buffer, &endI);
 
-  const char *content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
+  char *content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
   return content;
 }
 
@@ -123,7 +131,6 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 {
   GtkWidget *tab;
 
-  gboolean success = FALSE;
   FileData *fsave = (FileData *)data;
 
   GFile *file = gtk_file_dialog_save_finish(fsave->fd, res, NULL);
@@ -132,11 +139,17 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   tab = getNotebookActive(GTK_NOTEBOOK(fsave->win->notebook));
+  tab = gtk_overlay_get_child(GTK_OVERLAY(tab));// scrolled
 
   char *content = getContentFromTab(tab);
+  g_object_set_data_full(G_OBJECT(tab), "path", g_file_get_path(file), (GDestroyNotify) g_free);
 
 
   saveFile(file, content);
+  setTabLabel(fsave->win->notebook, gtk_widget_get_parent(tab), file);
+  gtk_widget_set_visible(
+          GTK_WIDGET(g_object_get_data(G_OBJECT(tab), "saveBtn")), 
+          false);
 
   g_object_unref(file);
   g_free(fsave);
@@ -146,7 +159,8 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 void
 saveActive(GtkEntry *entry, HighsvAppWindow *win)
 {
-  GtkWidget *tab = getNotebookActive(win->notebook);
+  GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+  GtkWidget *tab = gtk_overlay_get_child(GTK_OVERLAY(overlay));
   gchar *path = g_object_get_data(G_OBJECT(tab), "path");
 
   if (!path) {
@@ -165,6 +179,19 @@ saveActive(GtkEntry *entry, HighsvAppWindow *win)
 
       g_object_unref(file);
   }
+}
+
+void
+saveAsActive(GtkEntry *entry, HighsvAppWindow *win)
+{
+  GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+  GtkWidget *tab = gtk_overlay_get_child(GTK_OVERLAY(overlay));
+
+  FileData *res = g_malloc(sizeof(FileData));
+  res->fd = gtk_file_dialog_new();
+  res->win = win;
+
+  gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleSave), res);
 }
 
 static void

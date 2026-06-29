@@ -18,7 +18,7 @@
           <object class="GtkButton" id="SaveButton">
             <property name="label">save As</property>
             <property name="tooltip-text">Save the currently opened window</property>
-            <signal name="clicked" handler="saveActive"/>
+            <signal name="clicked" handler="saveAsActive"/>
           </object>
         </child>
         <child>
@@ -49,6 +49,8 @@
         <child type="action-end">
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
+            <property name="halign">fill</property>
+	    <property name="margin-end">0</property><!-- does this give a crash if set too high and resizing? -> yes -->
             <child>
               <object class="GtkButton">
                 <property name="tooltip-text">Open file</property>

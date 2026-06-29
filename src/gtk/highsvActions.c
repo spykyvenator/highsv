@@ -42,6 +42,7 @@ close_tab_by_pointer(GtkButton *button, gpointer data)
   GtkNotebook *n = g_object_get_data(G_OBJECT(t), "parent_notebook");
 
   gtk_notebook_remove_page(n, gtk_notebook_page_num(n, t));
+  g_object_unref(t);
 }
 
 void
@@ -88,6 +89,13 @@ save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 void
+save_as_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+  saveAsActive(NULL, win);
+}
+
+void
 solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
@@ -107,6 +115,13 @@ void
 togglePos(GtkCheckButton *self, gpointer app)
 {
 	pos = gtk_check_button_get_active(self);
+}
+
+void
+search(GSimpleAction *a, GVariant *parameter, gpointer app)
+{
+    HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+    GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
 }
 
 void

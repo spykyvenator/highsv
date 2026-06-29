@@ -21,8 +21,8 @@ static GActionEntry app_entries[] =
   { "save", save_tab, NULL, NULL, NULL },
   { "solve", solve_tab, NULL, NULL, NULL },
   { "complete", complete, NULL, NULL, NULL },
-  { "zoomi", zoomIn, NULL, NULL, NULL },
-  //{ "search", search, NULL, NULL, NULL },
+  { "zoomin", zoomIn, NULL, NULL, NULL },
+  { "search", search, NULL, NULL, NULL },
 };
 
 static void
