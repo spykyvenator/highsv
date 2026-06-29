@@ -26,6 +26,11 @@ typedef struct {
   HighsvAppWindow *win;
 } FileData;
 
+typedef struct {
+    GFileIOStream *s;
+    char *cnt;
+} streamData;
+
 static void
 handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
 {
@@ -71,41 +76,53 @@ openNewEmpty(GtkEntry *entry, HighsvAppWindow *win)
   highsv_app_window_open_empty(win);
 }
 
+static void
+saveFile_cb(GObject *src, GAsyncResult *res, gpointer data)
+{
+    GError *error = NULL;
+    streamData *passer = (streamData*) data;
+    GFileIOStream *stream = G_FILE_IO_STREAM(passer->s);
+    GOutputStream *ostream = G_OUTPUT_STREAM(src);
+
+    goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
+
+    if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
+        g_printerr("Error truncating file: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_output_stream_close(ostream, NULL, &error)) {
+        g_printerr("Error closing ostream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
+        g_printerr("Error closing stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+    // content needs to be freed here:
+    g_free(passer->cnt);
+    g_free(passer);
+}
+
 void
 saveFile(GFile *file, const char *content)
 {
   GError *error = NULL;
   GFileIOStream *stream;
-  gsize bw;
+  streamData *passer = g_malloc(sizeof(streamData));
 
   if (g_file_query_exists(file, NULL))
     stream = g_file_open_readwrite(file, NULL, &error);
   else
     stream = g_file_create_readwrite(file, G_FILE_CREATE_NONE, NULL, &error);
 
+  passer->s = stream;
+  passer->cnt = content;
+
   GOutputStream *ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));// what??
         
-  if (!g_output_stream_write_all(ostream, content, strlen(content), &bw, NULL, &error)) {
-      g_printerr("Error writing to file: %s\n", error->message);
-      g_clear_error(&error);
-  }
-
-  goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
-
-  if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
-      g_printerr("Error truncating file: %s\n", error->message);
-      g_clear_error(&error);
-    }
-
-  if (!g_output_stream_close(ostream, NULL, &error)) {
-      g_printerr("Error closing ostream: %s\n", error->message);
-      g_clear_error(&error);
-  }
-
-  if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
-      g_printerr("Error closing stream: %s\n", error->message);
-      g_clear_error(&error);
-  }
+  g_output_stream_write_all_async(ostream, content, strlen(content), G_PRIORITY_DEFAULT, NULL, saveFile_cb, passer);
 }
 
 /*
@@ -123,7 +140,7 @@ getContentFromTab(GtkWidget *tab)
   gtk_text_buffer_get_start_iter(buffer, &startI);
   gtk_text_buffer_get_end_iter(buffer, &endI);
 
-  char *content = gtk_text_buffer_get_text(buffer, &startI, &endI, TRUE);
+  char *content = gtk_text_buffer_get_text(buffer, &startI, &endI, FALSE);
   return content;
 }
 
@@ -154,7 +171,6 @@ handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 
   g_object_unref(file);
   g_free(fsave);
-  g_free(content);
 } 
 
 void
@@ -186,7 +202,6 @@ void
 saveAsActive(GtkEntry *entry, HighsvAppWindow *win)
 {
   GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
-  GtkWidget *tab = gtk_overlay_get_child(GTK_OVERLAY(overlay));
 
   FileData *res = g_malloc(sizeof(FileData));
   res->fd = gtk_file_dialog_new();
