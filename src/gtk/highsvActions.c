@@ -127,6 +127,15 @@ search(GSimpleAction *a, GVariant *parameter, gpointer app)
 }
 
 void
+search_changed_cb (GtkSearchEntry *entry, GtkTextBuffer *buffer)
+{
+    const char *text;
+
+    text = gtk_editable_get_text(GTK_EDITABLE(entry));
+    printf("searching for: %s\n", text);
+}
+
+void
 zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app)
 {
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));

@@ -1,5 +1,6 @@
 //TODO: migrate tab functions from win to tab
 #include "highsvTab.h"
+#include "highsvActions.h"
 
 static inline void
 setSourceCompletion(GtkSourceView *v)
@@ -48,6 +49,8 @@ getSearchBar()
     GtkWidget *res = gtk_search_bar_new();
     gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(res), TRUE);
     gtk_search_bar_set_show_close_button(GTK_SEARCH_BAR(res), TRUE);
+    gtk_widget_set_valign(res, GTK_ALIGN_END);
+    gtk_widget_set_halign(res, GTK_ALIGN_END);
 
     return res;
 }
@@ -72,9 +75,20 @@ setTabLabel(GtkNotebook *notebook, GtkWidget *overlay, GFile *file)
 void
 openTabSearchDialog(GtkWidget *tab)
 {
-    GtkWidget *searchBar;
+    GtkWidget *entry, *searchBar, *view;
+    GtkTextBuffer *buffer;
+
+    view = tabToScrolled(tab);
+    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(view));
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
     searchBar = getSearchBar();
-    //gtk_search_bar_set_child(GTK_SEARCH_BAR(searchBar), overlay);
+    entry = gtk_search_entry_new();
+
+    gtk_search_bar_set_child(GTK_SEARCH_BAR(searchBar), entry);
+    gtk_overlay_add_overlay(GTK_OVERLAY(tab), searchBar);
+    g_signal_connect (entry, "search-changed",
+                        G_CALLBACK (search_changed_cb), buffer);
 }
 
 /*
@@ -159,7 +173,7 @@ highsv_app_window_open_empty(HighsvAppWindow *win)
   gtk_source_language_manager_prepend_search_path(manager, "./src/gtk/");
   GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
 
-  //gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
+  gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
   gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), scrolled, getTabLabel(scrolled, NULL, buffer));
 }
 

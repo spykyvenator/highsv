@@ -14,8 +14,7 @@ GtkWidget* getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b);
 static inline GtkWidget*
 tabToScrolled(GtkWidget* tab)
 {
-    GtkWidget *overlay = gtk_search_bar_get_child(GTK_SEARCH_BAR(tab));
-    GtkWidget *scrolled = gtk_overlay_get_child(GTK_OVERLAY(overlay));
+    GtkWidget *scrolled = gtk_overlay_get_child(GTK_OVERLAY(tab));
     return  scrolled;
 }
 #endif
