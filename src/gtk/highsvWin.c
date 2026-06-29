@@ -106,11 +106,7 @@ makeErrorMsg(const char *msg)
 int
 freeEM(GtkWidget *msg)
 {
-    GtkWidget *overlay = gtk_widget_get_parent(msg);
-
-    gtk_overlay_remove_overlay(GTK_OVERLAY(overlay), msg);
     g_object_unref(msg);
-
     return 0;
 }
 

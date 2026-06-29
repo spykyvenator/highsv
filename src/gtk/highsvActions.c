@@ -47,11 +47,14 @@ close_tab_by_pointer(GtkButton *button, gpointer data)
 void
 close_errormsg(GtkButton *button, gpointer data)
 {
-    GtkWidget *revealer;
+    GtkWidget *revealer, *overlay;
 
     revealer = (GtkWidget*) data;
+    overlay = gtk_widget_get_parent(GTK_WIDGET(revealer));
 
     gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), FALSE);
+    gtk_overlay_remove_overlay(GTK_OVERLAY(overlay), revealer);
+
     if (freeEM(revealer))
         die("failed to free errormsg");
 }
