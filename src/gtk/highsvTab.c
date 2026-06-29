@@ -78,6 +78,14 @@ openTabSearchDialog(GtkWidget *tab)
     GtkWidget *entry, *searchBar, *view;
     GtkTextBuffer *buffer;
 
+    searchBar = g_object_get_data(G_OBJECT(tab), "searchBar");
+    if (searchBar) {
+        entry = gtk_search_bar_get_child(GTK_SEARCH_BAR(searchBar));
+        gtk_widget_set_visible(searchBar, TRUE);
+        gtk_widget_grab_focus(entry);
+        return;
+    }
+
     view = tabToScrolled(tab);
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(view));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -87,8 +95,10 @@ openTabSearchDialog(GtkWidget *tab)
 
     gtk_search_bar_set_child(GTK_SEARCH_BAR(searchBar), entry);
     gtk_overlay_add_overlay(GTK_OVERLAY(tab), searchBar);
+    gtk_widget_grab_focus(entry);
+    g_object_set_data(G_OBJECT(tab), "searchBar", searchBar);
     g_signal_connect (entry, "search-changed",
-                        G_CALLBACK (search_changed_cb), buffer);
+                        G_CALLBACK(search_changed_cb), buffer);
 }
 
 /*

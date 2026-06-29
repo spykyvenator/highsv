@@ -127,12 +127,49 @@ search(GSimpleAction *a, GVariant *parameter, gpointer app)
 }
 
 void
-search_changed_cb (GtkSearchEntry *entry, GtkTextBuffer *buffer)
+search_changed_cb(GtkSearchEntry *entry, GtkTextBuffer *buffer)
 {
     const char *text;
+    GtkTextIter start_s, end_s, start_match, end_match;
+    GtkTextTagTable *table;
+    GtkTextTag* tag;
 
     text = gtk_editable_get_text(GTK_EDITABLE(entry));
-    printf("searching for: %s\n", text);
+    gtk_text_buffer_get_start_iter(buffer, &start_s);
+    gtk_text_buffer_get_end_iter(buffer, &end_s);
+
+    if (!strcmp(text, "")) {// early stop if search removed => hide searchbar
+        GtkWidget *cbox = gtk_widget_get_parent(GTK_WIDGET(entry));
+        GtkWidget *revealer = gtk_widget_get_parent(cbox);
+        GtkWidget *searchBar = gtk_widget_get_parent(revealer);
+
+        gtk_text_buffer_remove_tag_by_name(buffer, "search_res", &start_s, &end_s);
+        gtk_widget_set_visible(searchBar, FALSE);
+
+        return;
+    }
+
+    table = gtk_text_buffer_get_tag_table(buffer);
+    tag = gtk_text_tag_table_lookup(table, "search_res");
+
+    
+    if (!tag)// only add tag once
+        gtk_text_buffer_create_tag(buffer, "search_res", 
+          "background", "#38383838", NULL);
+    else
+        gtk_text_buffer_remove_tag_by_name(buffer, "search_res", &start_s, &end_s);
+
+    while (gtk_text_iter_forward_search(&start_s, text, 
+        GTK_TEXT_SEARCH_TEXT_ONLY | 
+        GTK_TEXT_SEARCH_VISIBLE_ONLY, 
+        &start_match, &end_match, NULL)) {
+
+        gtk_text_buffer_apply_tag_by_name(buffer, "search_res", 
+            &start_match, &end_match);
+        gint offset = gtk_text_iter_get_offset(&end_match);
+        gtk_text_buffer_get_iter_at_offset(buffer, 
+            &start_s, offset);
+    }
 }
 
 void

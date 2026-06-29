@@ -3,7 +3,6 @@
 #include <gtk/gtk.h>
 #include <gtksourceview/gtksource.h>
 #include "highsvWin.h"
-#include "highsvActions.h"
 
 void openTabSearchDialog(GtkWidget *tab);
 void highsv_app_window_open(HighsvAppWindow *win, GFile *file);
