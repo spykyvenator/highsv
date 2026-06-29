@@ -4,6 +4,7 @@
 #include "highsv.h"
 #include "highsvWin.h"
 #include "highsvFile.h"
+#include "highsvTab.h"
 
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)

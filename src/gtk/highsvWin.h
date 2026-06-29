@@ -15,11 +15,7 @@ G_DECLARE_FINAL_TYPE (HighsvAppWindow, highsv_app_window, HIGHSV, APP_WINDOW, Gt
 
 
 HighsvAppWindow *highsv_app_window_new(HighsvApp *app);
-void highsv_app_window_open(HighsvAppWindow *win, GFile *file);
-void highsv_app_window_open_empty(HighsvAppWindow *win);
 
-void setTabLabel(GtkNotebook *notebook, GtkWidget *scrolled, GFile *file);
-GtkWidget* getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b);
 inline static GtkWidget* 
 getNotebookActive(GtkNotebook *n) 
 { 

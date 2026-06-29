@@ -4,6 +4,7 @@
 #include "highsvWin.h"
 #include "highsvActions.h"
 #include "../sol.h"
+#include "highsvTab.h"
 
 struct _HighsvApp
 {

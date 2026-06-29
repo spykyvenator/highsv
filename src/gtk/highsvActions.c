@@ -1,9 +1,10 @@
 #include <gtksourceview/gtksource.h>
 
 #include "highsvWin.h"
-#include "highsvFile.h"
 #include "highsvSol.h"
 #include "../util.h"
+#include "highsvTab.h"
+#include "highsvActions.h"
 
 extern gboolean mip, pos;
 
@@ -122,6 +123,7 @@ search(GSimpleAction *a, GVariant *parameter, gpointer app)
 {
     HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
     GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
+    openTabSearchDialog(overlay);
 }
 
 void

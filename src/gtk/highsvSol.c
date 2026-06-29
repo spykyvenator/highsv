@@ -2,6 +2,7 @@
 #include "highsvWin.h"
 #include "highsvFile.h"
 #include "../sol.h"
+#include "highsvTab.h"
 
 extern gboolean mip, pos;
 
