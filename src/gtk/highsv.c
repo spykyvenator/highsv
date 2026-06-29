@@ -22,6 +22,7 @@ static GActionEntry app_entries[] =
   { "solve", solve_tab, NULL, NULL, NULL },
   { "complete", complete, NULL, NULL, NULL },
   { "zoomi", zoomIn, NULL, NULL, NULL },
+  //{ "search", search, NULL, NULL, NULL },
 };
 
 static void
@@ -34,8 +35,9 @@ highsv_app_startup(GApplication *app)
   const char *close_accels[2] = { "<ctrl>w", NULL };
   const char *save_accels[2] = { "<ctrl>s", NULL };
   const char *solve_accels[3] = { "<ctrl>r", "<ctrl>Return", NULL };
-  const char *complete_accels[3] = { "<ctrl>k", NULL };
-  const char *zoomIn_accels[3] = { "<ctrl>p", NULL };
+  const char *complete_accels[2] = { "<ctrl>k", NULL };
+  const char *zoomIn_accels[2] = { "<ctrl>p", NULL };
+  const char *search_accels[2] = { "<ctrl>f", NULL };
 
   G_APPLICATION_CLASS(highsv_app_parent_class)->startup (app);
 
@@ -50,6 +52,7 @@ highsv_app_startup(GApplication *app)
   SET_ACCELS(save);
   SET_ACCELS(solve);
   SET_ACCELS(zoomIn);
+  SET_ACCELS(search);
 #undef SET_ACCELS
   GtkCssProvider *provider = gtk_css_provider_new ();
   gtk_css_provider_load_from_string(provider,
@@ -63,24 +66,6 @@ highsv_app_startup(GApplication *app)
           GTK_STYLE_PROVIDER(provider),
           GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
   g_object_unref (provider);
-}
-
-static void
-highsv_app_add_notebookBtn(HighsvAppWindow *win)
-{
-  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  GtkWidget *button = gtk_button_new_with_label("+");
-  GtkWidget *openBtn = gtk_button_new_with_label("O");
-  gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
-  gtk_button_set_has_frame(GTK_BUTTON(openBtn), FALSE);
-  gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Create new file");
-  gtk_widget_set_tooltip_text(GTK_WIDGET(openBtn), "Open file");
-  g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(openNewEmpty), win);
-  g_signal_connect(G_OBJECT(openBtn), "clicked", G_CALLBACK(openNew), win);
-  gtk_box_append(GTK_BOX(box), openBtn);
-  gtk_box_append(GTK_BOX(box), button);
-  gtk_widget_set_halign(GTK_WIDGET(box), GTK_ALIGN_START);
-  gtk_notebook_set_action_widget(GTK_NOTEBOOK(win->notebook), box, GTK_PACK_END);
 }
 
 static void
@@ -101,7 +86,6 @@ highsv_app_activate(GApplication *app)
     win = HIGHSV_APP_WINDOW(windows->data);
   else
     win = highsv_app_window_new(HIGHSV_APP(app));
-  highsv_app_add_notebookBtn(win);
 
   gtk_window_present(GTK_WINDOW(win));
   g_idle_add_once(open_empty, win);
@@ -135,7 +119,6 @@ highsv_app_open(GApplication *app, GFile **files, int n_files, const char *hint)
   else
     win = highsv_app_window_new(HIGHSV_APP(app));
 
-  highsv_app_add_notebookBtn(win);
   gtk_window_present(GTK_WINDOW(win));
 
   Files *f = (Files*) g_malloc(sizeof(Files));
