@@ -43,10 +43,6 @@ initModel ()
 int
 quitModel ()
 {
-  //if (rowVal) {
-   // free(rowVal);
-    //rowVal = NULL;
-  //}
   return 0;
 }
 
@@ -54,10 +50,6 @@ static void
 preModel () 
 {
   model = highsv_create();
-  //for (size_t i = 0; i < rowLen; i++) {// init to zero
-      //rowVal[i] = 0;
-      //rowIndex[i] = 0;
-  //}
 #ifdef DEBUG
   printf("model: %p\n", model);
 #endif
@@ -68,6 +60,7 @@ preModel ()
 static void
 setPositive(char pos, void *model)
 {
+  if (!numCol) return;
   if (pos) {
     const double inf = highsv_getInfinity(model);
     double infinity[numCol];
@@ -83,6 +76,7 @@ setPositive(char pos, void *model)
 static void
 setMip(char mip, void *model)
 {
+  if (!numCol) return;
   if (mip) {
     int64_t integrality[numCol];
     for (size_t i = 0; i < numCol; i++) integrality[i] = HIGHSV_T_INT;
@@ -143,7 +137,6 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
     clock_t diff = clock() - before;
     printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
     fclose(fd);
-    highsv_writeModel(model, "/tmp/model.lp");
 
     yylex_destroy(scanner);
     return 0;

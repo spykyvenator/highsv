@@ -18,7 +18,6 @@
 	#include <stddef.h>
 
 	void *model = NULL;
-	int h_line = 0;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
 }
@@ -204,6 +203,10 @@ trailingEOL: %empty
 void 
 yyerror(YYLTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg)
 {
+        if (!eh) {
+            die(" because of %s", msg);
+            return;
+        }
         eh->pErr(eh, msg, yylloc->first_line, yylloc->first_column, yylloc->last_line, yylloc->last_column);
 	fprintf(stderr, "parsing failed at: ");
 	YYLOCATION_PRINT(stderr, yylloc);

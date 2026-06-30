@@ -6,6 +6,50 @@
 #include "highsvFile.h"
 #include "highsvTab.h"
 
+typedef struct {
+  GtkFileDialog *fd;
+  HighsvAppWindow *win;
+} FileData;
+
+typedef struct {
+    GFileIOStream *s;
+    char *cnt;
+} streamData;
+
+static void
+saveFile_cb(GObject *src, GAsyncResult *res, gpointer data)
+{
+    GError *error = NULL;
+    streamData *passer = (streamData*) data;
+    GFileIOStream *stream = G_FILE_IO_STREAM(passer->s);
+    GOutputStream *ostream = G_OUTPUT_STREAM(src);
+    gsize bw;
+
+    goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
+    g_output_stream_write_all_finish(ostream, res, &bw, &error);
+
+    if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
+        g_printerr("Error truncating file: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_output_stream_close(ostream, NULL, &error)) {
+        g_printerr("Error closing ostream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+
+    if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
+        g_printerr("Error closing stream: %s\n", error->message);
+        g_clear_error(&error);
+    }
+    // content needs to be freed here:
+    g_free(passer->cnt);
+    g_free(passer);
+}
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 void
 closeActive(GtkEntry *entry , HighsvAppWindow *win)
 {
@@ -20,16 +64,6 @@ closeActive(GtkEntry *entry , HighsvAppWindow *win)
 
     g_object_unref(tab);
 }
-
-typedef struct {
-  GtkFileDialog *fd;
-  HighsvAppWindow *win;
-} FileData;
-
-typedef struct {
-    GFileIOStream *s;
-    char *cnt;
-} streamData;
 
 static void
 handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
@@ -75,38 +109,10 @@ openNewEmpty(GtkEntry *entry, HighsvAppWindow *win)
 {
   highsv_app_window_open_empty(win);
 }
-
-static void
-saveFile_cb(GObject *src, GAsyncResult *res, gpointer data)
-{
-    GError *error = NULL;
-    streamData *passer = (streamData*) data;
-    GFileIOStream *stream = G_FILE_IO_STREAM(passer->s);
-    GOutputStream *ostream = G_OUTPUT_STREAM(src);
-
-    goffset pos = g_seekable_tell(G_SEEKABLE(ostream));
-
-    if (!g_seekable_truncate(G_SEEKABLE(ostream), pos, NULL, &error)) {
-        g_printerr("Error truncating file: %s\n", error->message);
-        g_clear_error(&error);
-    }
-
-    if (!g_output_stream_close(ostream, NULL, &error)) {
-        g_printerr("Error closing ostream: %s\n", error->message);
-        g_clear_error(&error);
-    }
-
-    if (!g_io_stream_close((GIOStream*) stream, NULL, &error)) {
-        g_printerr("Error closing stream: %s\n", error->message);
-        g_clear_error(&error);
-    }
-    // content needs to be freed here:
-    g_free(passer->cnt);
-    g_free(passer);
-}
+#pragma GCC diagnostic pop
 
 void
-saveFile(GFile *file, const char *content)
+saveFile(GFile *file, char *content)
 {
   GError *error = NULL;
   GFileIOStream *stream;
@@ -144,6 +150,8 @@ getContentFromTab(GtkWidget *tab)
   return content;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static void
 handleSave(GObject* source_object, GAsyncResult* res, gpointer data)
 {
@@ -201,14 +209,13 @@ saveActive(GtkEntry *entry, HighsvAppWindow *win)
 void
 saveAsActive(GtkEntry *entry, HighsvAppWindow *win)
 {
-  GtkWidget *overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
-
   FileData *res = g_malloc(sizeof(FileData));
   res->fd = gtk_file_dialog_new();
   res->win = win;
 
   gtk_file_dialog_save(res->fd, GTK_WINDOW(res->win), NULL, (handleSave), res);
 }
+#pragma GCC diagnostic pop
 
 static void
 handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)

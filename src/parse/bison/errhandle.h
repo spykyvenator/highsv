@@ -31,7 +31,7 @@ new_errHandle()
 }
 #elif GTK
 #include <gtk/gtk.h>
-#include "../../gtk/highsvWin.h"
+#include "../../gtk/highsvTab.h"
 
 typedef struct errHandle errHandle;
 struct errHandle {

@@ -43,6 +43,9 @@ getScrolledWin()
   return res;
 }
 
+/*
+ * TODO: replace with ui file
+ */
 static inline GtkWidget*
 getSearchBar()
 {
@@ -90,6 +93,7 @@ openTabSearchDialog(GtkWidget *tab)
     view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(view));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
+    //gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/org/highsvapp/searchBar.ui");
     searchBar = getSearchBar();
     entry = gtk_search_entry_new();
 
@@ -184,7 +188,7 @@ highsv_app_window_open_empty(HighsvAppWindow *win)
   GtkSourceLanguage *lang = gtk_source_language_manager_get_language(manager, "highsv");
 
   gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer), lang);
-  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), scrolled, getTabLabel(scrolled, NULL, buffer));
+  gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), gtk_widget_get_parent(scrolled), getTabLabel(scrolled, NULL, buffer));
 }
 
 void
@@ -196,4 +200,70 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 
   setViewContent(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(scrolled)), file);
 
+}
+
+int
+freeEM(GtkWidget *msg)
+{
+    g_object_unref(msg);
+    return 0;
+}
+
+static GtkWidget*
+makeErrorMsg(const char *msg)
+{
+    GtkWidget *revealer, *box, *label, *button;
+
+    revealer = gtk_revealer_new();
+    box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    label = gtk_label_new(msg);
+    button = gtk_button_new_with_label("✕");
+
+    gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
+    gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
+    g_signal_connect(G_OBJECT(button), "clicked", 
+        G_CALLBACK(close_errormsg), revealer);
+    gtk_widget_set_tooltip_text(button, "close tooltip");
+
+    gtk_revealer_set_transition_type(GTK_REVEALER(revealer), GTK_REVEALER_TRANSITION_TYPE_SLIDE_DOWN);
+    gtk_revealer_set_transition_duration(GTK_REVEALER(revealer), 500);
+
+    gtk_box_append(GTK_BOX(box), label);
+    gtk_box_append(GTK_BOX(box), button);
+    gtk_box_set_spacing(GTK_BOX(box), 10);
+
+    gtk_widget_add_css_class(box, "error-box");
+    gtk_widget_add_css_class(button, "error-button");
+
+    gtk_widget_set_halign(revealer, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(revealer, GTK_ALIGN_START);
+    gtk_revealer_set_child(GTK_REVEALER(revealer), box);
+
+    return revealer;
+}
+
+void
+highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
+{
+    GtkWidget *msgb, *overlay;
+    GtkTextIter start, end;
+    GtkTextTag *t;
+
+    msgb = makeErrorMsg(msg);
+
+    overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
+    t = gtk_text_buffer_create_tag(bfr, "error", 
+            "background", "red",
+            "editable", TRUE,
+            NULL);
+
+
+    gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
+    gtk_text_buffer_get_iter_at_line(bfr, &end, x);
+    gtk_text_iter_backward_line(&end);
+    gtk_text_buffer_apply_tag(bfr, t, &start, &end);
+
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
+    gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
+    gtk_revealer_set_reveal_child(GTK_REVEALER(msgb), TRUE);
 }

@@ -3,4 +3,7 @@
   <gresource prefix="/org/highsvapp">
     <file preprocess="xml-stripblanks">window.ui</file>
   </gresource>
+  <gresource prefix="/org/highsvapp/searchBar">
+      <file preprocess="xml-stripblanks">searchBar.ui</file>
+  </gresource>
 </gresources>

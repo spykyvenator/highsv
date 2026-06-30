@@ -3,6 +3,7 @@
 #include "highsvFile.h"
 #include "../sol.h"
 #include "highsvTab.h"
+#include "highsvSol.h"
 
 extern gboolean mip, pos;
 
@@ -20,11 +21,11 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     overlay = getNotebookActive(GTK_NOTEBOOK(win->notebook));
     tab = gtk_overlay_get_child(GTK_OVERLAY(overlay));
 
-    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->notebook), overlay);// owned by instance
+    box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(win->notebook), overlay);
     label = gtk_widget_get_first_child(box);
     const char *name = gtk_label_get_text(GTK_LABEL(label));
-    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));// owned by instance
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));// owned by instance
+    view = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(tab));
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
     gtk_text_buffer_get_start_iter(buffer, &startI);
     gtk_text_buffer_get_end_iter(buffer, &endI);

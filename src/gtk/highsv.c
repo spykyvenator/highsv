@@ -15,15 +15,15 @@ G_DEFINE_TYPE(HighsvApp, highsv_app, GTK_TYPE_APPLICATION)
 
 static GActionEntry app_entries[] =
 {
-  { "quit", quit_activated, NULL, NULL, NULL },
-  { "open", open_tab, NULL, NULL, NULL },
-  { "openNew", open_new_tab, NULL, NULL, NULL },
-  { "close", close_tab, NULL, NULL, NULL },
-  { "save", save_tab, NULL, NULL, NULL },
-  { "solve", solve_tab, NULL, NULL, NULL },
-  { "complete", complete, NULL, NULL, NULL },
-  { "zoomin", zoomIn, NULL, NULL, NULL },
-  { "search", search, NULL, NULL, NULL },
+  { "quit", quit_activated, NULL, NULL, NULL, {0, 0, 0} },
+  { "open", open_tab, NULL, NULL, NULL, {0, 0, 0} },
+  { "openNew", open_new_tab, NULL, NULL, NULL, {0, 0, 0} },
+  { "close", close_tab, NULL, NULL, NULL, {0, 0, 0} },
+  { "save", save_tab, NULL, NULL, NULL, {0, 0, 0} },
+  { "solve", solve_tab, NULL, NULL, NULL, {0, 0, 0}},
+  { "complete", complete, NULL, NULL, NULL, {0, 0, 0}},
+  { "zoomin", zoomIn, NULL, NULL, NULL, {0, 0, 0}},
+  { "search", search, NULL, NULL, NULL, {0, 0, 0}},
 };
 
 static void
@@ -52,6 +52,7 @@ highsv_app_startup(GApplication *app)
   SET_ACCELS(close);
   SET_ACCELS(save);
   SET_ACCELS(solve);
+  SET_ACCELS(complete);
   SET_ACCELS(zoomIn);
   SET_ACCELS(search);
 #undef SET_ACCELS

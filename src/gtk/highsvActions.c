@@ -9,6 +9,9 @@
 extern gboolean mip, pos;
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 void
 quit_activated(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
@@ -89,12 +92,14 @@ save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
   saveActive(NULL, win);
 }
 
+/* In case We'd like a keybind for saving as
 void
 save_as_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   saveAsActive(NULL, win);
 }
+*/
 
 void
 solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
@@ -191,3 +196,4 @@ complete(GSimpleAction *action, GVariant *parameter, gpointer app)
     GtkSourceCompletion *c = gtk_source_view_get_completion(GTK_SOURCE_VIEW(view));
     gtk_source_completion_show(c);
 }
+#pragma GCC diagnostic pop
