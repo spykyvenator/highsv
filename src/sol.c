@@ -87,6 +87,7 @@ setMip(char mip, void *model)
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, errHandle *err)
 {
+    int res;
     yyscan_t scanner;
 
     cleanModel(model);
@@ -96,7 +97,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, e
 #ifdef DEBUG
   yydebug=1;
 #endif
-    yyparse(scanner, err);
+    res = yyparse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif
@@ -106,16 +107,17 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, e
     clock_t before = clock();
     highsv_run(model);
     clock_t diff = clock() - before;
-    printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
+    printSolToStream(model, ostream, (double) diff/CLOCKS_PER_SEC);
 
     yy_delete_buffer(buffer, scanner);
     yylex_destroy(scanner);
-    return 0;
+    return res;
 }
 
 int
 parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
 {
+    int res;
     yyscan_t scanner;
 
     cleanModel(model);
@@ -125,7 +127,7 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
 #ifdef DEBUG
     yydebug=1;
 #endif
-    yyparse(scanner, err);
+    res = yyparse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif
@@ -135,9 +137,9 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
     clock_t before = clock();
     highsv_run(model);
     clock_t diff = clock() - before;
-    printSolToFile(model, ostream, (double) diff/CLOCKS_PER_SEC);
+    printSolToStream(model, ostream, (double) diff/CLOCKS_PER_SEC);
     fclose(fd);
 
     yylex_destroy(scanner);
-    return 0;
+    return res;
 }

@@ -30,6 +30,8 @@ getSourceView()
   gtk_source_view_set_highlight_current_line(GTK_SOURCE_VIEW(res), TRUE);
   gtk_source_view_set_show_line_numbers(GTK_SOURCE_VIEW(res), TRUE);
 
+  gtk_source_view_set_background_pattern(GTK_SOURCE_VIEW(res), GTK_SOURCE_BACKGROUND_PATTERN_TYPE_ZEBRA);
+
   return res;
 }
 

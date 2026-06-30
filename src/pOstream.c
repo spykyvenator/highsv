@@ -427,7 +427,7 @@ pOpt(void *mod, GOutputStream *ostr){
 }
 
 void
-printSolToFile(void *mod, GOutputStream* ostr, double time) {
+printSolToStream(void *mod, GOutputStream* ostr, double time) {
   TPrint *tp;
   tp = tprint_create (ostr, 0, 0, 0, 5);
   tprint_column_add(tp, "", TPAlign_left, TPAlign_left);
