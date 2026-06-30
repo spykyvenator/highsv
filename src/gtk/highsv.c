@@ -30,6 +30,7 @@ static void
 highsv_app_startup(GApplication *app)
 {
   initModel();
+
   const char *quit_accels[2] = { "<ctrl>q", NULL };
   const char *open_accels[2] = { "<ctrl>o", NULL };
   const char *open_new_accels[2] = { "<ctrl>n", NULL };

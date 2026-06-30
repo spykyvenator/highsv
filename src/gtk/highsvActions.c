@@ -196,4 +196,21 @@ complete(GSimpleAction *action, GVariant *parameter, gpointer app)
     GtkSourceCompletion *c = gtk_source_view_get_completion(GTK_SOURCE_VIEW(view));
     gtk_source_completion_show(c);
 }
+
+gboolean
+on_key_pressed(GtkEventControllerKey *controller,
+               guint                  keyval,
+               guint                  keycode,
+               GdkModifierType        state,
+               gpointer               user_data)
+{
+    HighsvAppWindow *win = user_data;
+    if (state & GDK_ALT_MASK) {
+        gunichar c = gdk_keyval_to_unicode(keyval);
+        if (c >= '1' && c <= '9')
+            gtk_notebook_set_current_page(win->notebook, c - '1');
+    }
+
+    return FALSE;
+}
 #pragma GCC diagnostic pop

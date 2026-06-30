@@ -101,7 +101,7 @@ openTabSearchDialog(GtkWidget *tab)
     gtk_overlay_add_overlay(GTK_OVERLAY(tab), searchBar);
     gtk_widget_grab_focus(entry);
     g_object_set_data(G_OBJECT(tab), "searchBar", searchBar);
-    g_signal_connect (entry, "search-changed",
+    g_signal_connect(entry, "search-changed",
                         G_CALLBACK(search_changed_cb), buffer);
 }
 
@@ -191,7 +191,7 @@ highsv_app_window_open_empty(HighsvAppWindow *win)
   gtk_notebook_set_tab_label(GTK_NOTEBOOK(win->notebook), gtk_widget_get_parent(scrolled), getTabLabel(scrolled, NULL, buffer));
 }
 
-void
+GtkWidget*
 highsv_app_window_open(HighsvAppWindow *win, GFile *file)
 {
   GtkWidget *scrolled = makeTab(win);
@@ -199,7 +199,7 @@ highsv_app_window_open(HighsvAppWindow *win, GFile *file)
   g_object_set_data_full(G_OBJECT(scrolled), "path", g_file_get_path(file), (GDestroyNotify) g_free);
 
   setViewContent(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(scrolled)), file);
-
+  return scrolled;
 }
 
 int
@@ -266,4 +266,26 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
     gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
     gtk_revealer_set_reveal_child(GTK_REVEALER(msgb), TRUE);
+}
+
+void
+tabIsSol(GtkScrolledWindow *scrl)
+{
+    GtkWidget *view = gtk_scrolled_window_get_child(scrl);
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+    int cnt = gtk_text_buffer_get_line_count(buffer);
+    gtk_text_buffer_create_tag(buffer, 
+            "line-coloring", 
+            "background", "#10101010", 
+            NULL);
+
+    for (int i = 0; i < cnt; i+=2) {
+        GtkTextIter line, lineE;
+        gtk_text_buffer_get_iter_at_line(buffer, &line, i);
+        gtk_text_buffer_get_iter_at_line(buffer, &lineE, i);
+        gtk_text_iter_forward_line(&lineE);
+
+        gtk_text_buffer_apply_tag_by_name(buffer, "line-coloring",
+                &line, &lineE);
+    }
 }

@@ -20,4 +20,5 @@ void search(GSimpleAction *a, GVariant *parameter, gpointer app);
 void search_changed_cb(GtkSearchEntry *entry, GtkTextBuffer *buffer);
 void zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app);
 void showSaveBtn(GtkTextBuffer* buffer, GtkTextBufferNotifyFlags flags, guint position, guint length, gpointer user_data);
+gboolean on_key_pressed(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer user_data); 
 #endif

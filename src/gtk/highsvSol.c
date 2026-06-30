@@ -56,9 +56,8 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
         g_clear_error(&error);
     }
 
-    highsv_app_window_open(win, new);
+    GtkWidget *scrolled = highsv_app_window_open(win, new);
 
-    //printf("content: %s\n", content);
     if (!g_output_stream_close(ostream, NULL, &error)) {
         g_printerr("Error closing ostream: %s\n", error->message);
         g_clear_error(&error);

@@ -5,7 +5,7 @@
 #include "highsvWin.h"
 
 void openTabSearchDialog(GtkWidget *tab);
-void highsv_app_window_open(HighsvAppWindow *win, GFile *file);
+GtkWidget* highsv_app_window_open(HighsvAppWindow *win, GFile *file);
 void highsv_app_window_open_empty(HighsvAppWindow *win);
 void setTabLabel(GtkNotebook *notebook, GtkWidget *scrolled, GFile *file);
 GtkWidget* getTabLabel(GtkWidget *t, GFile *file, GtkTextBuffer *b);
@@ -24,4 +24,5 @@ getNotebookActive(GtkNotebook *n)
 { 
     return gtk_notebook_get_nth_page(n, gtk_notebook_get_current_page(n));
 }
+void tabIsSol(GtkScrolledWindow *scrl);
 #endif

@@ -37,5 +37,13 @@ HighsvAppWindow *
 highsv_app_window_new(HighsvApp *app)
 {
   HighsvAppWindow *win = g_object_new(HIGHSV_APP_WINDOW_TYPE, "application", app, NULL);
+
+  GtkEventController *controller;
+  controller = gtk_event_controller_key_new();
+  g_signal_connect(controller,
+                 "key-pressed",
+                 G_CALLBACK(on_key_pressed),
+                 win);
+  gtk_widget_add_controller(GTK_WIDGET(win), controller);
   return win;
 }

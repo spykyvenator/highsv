@@ -247,6 +247,7 @@ handleFileLoad(GObject *src, GAsyncResult *res, gpointer data)
         g_clear_error(&error);
         return;
     }
+    //tabIsSol(GTK_SCROLLED_WINDOW(scrolled));
 } 
 
 void
