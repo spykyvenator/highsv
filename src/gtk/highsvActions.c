@@ -132,24 +132,57 @@ search(GSimpleAction *a, GVariant *parameter, gpointer app)
 }
 
 void
+search_entry_up(GtkButton *BtnUp, GObject *entry)
+{
+    int sel = (int) g_object_get_data(G_OBJECT(entry), "selection");// should return 0 if not found
+    g_object_set_data(G_OBJECT(entry), "selection", (void*) ++sel);// should return 0 if not found
+
+    g_signal_emit_by_name(entry, "search-changed");
+}
+
+void
+search_entry_dwn(GtkButton *BtnUp, GObject *entry)
+{
+    int sel = (int) g_object_get_data(G_OBJECT(entry), "selection");// should return 0 if not found
+    sel = MAX(sel-1, 0);
+    g_object_set_data(G_OBJECT(entry), "selection", (void*) sel);// should return 0 if not found
+
+    g_signal_emit_by_name(entry, "search-changed");
+}
+
+void
+search_disabled(GtkWidget *sb, GtkTextBuffer *buffer)
+{
+    puts("here");
+    GtkTextIter start_s, end_s;
+    gtk_text_buffer_get_start_iter(buffer, &start_s);
+    gtk_text_buffer_get_end_iter(buffer, &end_s);
+    gtk_text_buffer_remove_tag_by_name(buffer, "search_res", &start_s, &end_s);
+    gtk_text_buffer_remove_tag_by_name(buffer, "search_sel", &start_s, &end_s);
+}
+
+void
 search_changed_cb(GtkSearchEntry *entry, GtkTextBuffer *buffer)
 {
     const char *text;
     GtkTextIter start_s, end_s, start_match, end_match;
     GtkTextTagTable *table;
     GtkTextTag* tag;
+    int nbResults = 0, sel;
+
+    sel = (int) g_object_get_data(G_OBJECT(entry), "selection");// should return 0 if not found
 
     text = gtk_editable_get_text(GTK_EDITABLE(entry));
     gtk_text_buffer_get_start_iter(buffer, &start_s);
     gtk_text_buffer_get_end_iter(buffer, &end_s);
 
     if (!strcmp(text, "")) {// early stop if search removed => hide searchbar
-        GtkWidget *cbox = gtk_widget_get_parent(GTK_WIDGET(entry));
-        GtkWidget *revealer = gtk_widget_get_parent(cbox);
-        GtkWidget *searchBar = gtk_widget_get_parent(revealer);
+        GtkWidget *searchBar = getEntrySearchBar(GTK_WIDGET(entry));
 
         gtk_text_buffer_remove_tag_by_name(buffer, "search_res", &start_s, &end_s);
-        gtk_widget_set_visible(searchBar, FALSE);
+        gtk_text_buffer_remove_tag_by_name(buffer, "search_sel", &start_s, &end_s);
+        gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(searchBar), 
+                FALSE);
 
         return;
     }
@@ -159,22 +192,68 @@ search_changed_cb(GtkSearchEntry *entry, GtkTextBuffer *buffer)
 
     
     if (!tag)// only add tag once
+    {
         gtk_text_buffer_create_tag(buffer, "search_res", 
           "background", "#38383838", NULL);
-    else
+        gtk_text_buffer_create_tag(buffer, "search_sel", 
+          "background", "#38383880", NULL);
+    } else {
+        gtk_text_buffer_remove_tag_by_name(buffer, "search_sel", &start_s, &end_s);
         gtk_text_buffer_remove_tag_by_name(buffer, "search_res", &start_s, &end_s);
+    }
 
     while (gtk_text_iter_forward_search(&start_s, text, 
         GTK_TEXT_SEARCH_TEXT_ONLY | 
         GTK_TEXT_SEARCH_VISIBLE_ONLY, 
         &start_match, &end_match, NULL)) {
-
-        gtk_text_buffer_apply_tag_by_name(buffer, "search_res", 
-            &start_match, &end_match);
+        if (nbResults == sel) 
+        {
+            gtk_text_buffer_apply_tag_by_name(buffer, 
+                "search_sel", &start_match, &end_match);
+            GtkWidget *view = GTK_WIDGET(g_object_get_data(
+                        G_OBJECT(entry), "view"));
+            gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(view),
+              &start_match,
+              0.4,
+              TRUE,
+              0.0,
+              0.0
+            );
+        }
+        else
+        {
+            gtk_text_buffer_apply_tag_by_name(buffer, 
+                "search_res", &start_match, &end_match);
+        }
         gint offset = gtk_text_iter_get_offset(&end_match);
         gtk_text_buffer_get_iter_at_offset(buffer, 
             &start_s, offset);
+        nbResults++;
     }
+    GtkWidget *label = GTK_WIDGET(g_object_get_data(G_OBJECT(entry),
+                            "label"));
+    if (sel == nbResults)// TODO: clean this up
+    {
+        sel = nbResults-1;
+        nbResults = 0;
+        g_object_set_data(G_OBJECT(entry), "selection", (void*) sel);// should return 0 if not found
+        gtk_text_buffer_get_start_iter(buffer, &start_s);
+        while (gtk_text_iter_forward_search(&start_s, text, 
+            GTK_TEXT_SEARCH_TEXT_ONLY | 
+            GTK_TEXT_SEARCH_VISIBLE_ONLY, 
+            &start_match, &end_match, NULL)) {
+            gtk_text_buffer_apply_tag_by_name(buffer, 
+                nbResults == sel ? "search_sel" : "search_res", 
+                &start_match, &end_match);
+            gint offset = gtk_text_iter_get_offset(&end_match);
+            gtk_text_buffer_get_iter_at_offset(buffer, 
+                &start_s, offset);
+            nbResults++;
+        }
+    }
+    char lbls[512];
+    snprintf(lbls, 512, "%d/%d", sel+1, nbResults);
+    gtk_label_set_label(GTK_LABEL(label), lbls);
 }
 
 void

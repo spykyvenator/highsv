@@ -24,5 +24,25 @@ getNotebookActive(GtkNotebook *n)
 { 
     return gtk_notebook_get_nth_page(n, gtk_notebook_get_current_page(n));
 }
+
+static inline GtkWidget*
+getSearchBarEntry(GtkSearchBar *sb)
+{
+    GtkWidget *box = gtk_search_bar_get_child(sb);
+    GtkWidget *se = gtk_widget_get_first_child(box);
+    return se;
+}
+
+static inline GtkWidget*
+getEntrySearchBar(GtkWidget *se)
+{
+    GtkWidget *box = gtk_widget_get_parent(se);
+    GtkWidget *cbox = gtk_widget_get_parent(box);
+    GtkWidget *revealer = gtk_widget_get_parent(cbox);
+    GtkWidget *searchBar = gtk_widget_get_parent(revealer);
+
+    return searchBar;
+}
+
 void tabIsSol(GtkScrolledWindow *scrl);
 #endif

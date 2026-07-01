@@ -49,13 +49,37 @@ getScrolledWin()
  * TODO: replace with ui file
  */
 static inline GtkWidget*
-getSearchBar()
+getSearchBar(GtkTextBuffer *buffer)
 {
     GtkWidget *res = gtk_search_bar_new();
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
+    GtkWidget *entry = gtk_search_entry_new();
+    GtkWidget *upB = gtk_button_new_with_label("↑");
+    GtkWidget *dwnB = gtk_button_new_with_label("↓");
+    GtkWidget *lbl = gtk_label_new("0/0");
+
+
+    gtk_search_bar_set_child(GTK_SEARCH_BAR(res), box);
+
+    gtk_box_append(GTK_BOX(box), entry);
+    gtk_box_append(GTK_BOX(box), upB);
+    gtk_box_append(GTK_BOX(box), dwnB);
+    gtk_box_append(GTK_BOX(box), lbl);
+
     gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(res), TRUE);
     gtk_search_bar_set_show_close_button(GTK_SEARCH_BAR(res), TRUE);
     gtk_widget_set_valign(res, GTK_ALIGN_END);
     gtk_widget_set_halign(res, GTK_ALIGN_END);
+
+    g_object_set_data(G_OBJECT(entry), "label", lbl);
+    g_signal_connect(G_OBJECT(upB), "clicked",
+                        G_CALLBACK(search_entry_dwn), entry);
+    g_signal_connect(G_OBJECT(dwnB), "clicked",
+                        G_CALLBACK(search_entry_up), entry);
+    g_signal_connect(G_OBJECT(entry), "search-changed",
+                        G_CALLBACK(search_changed_cb), buffer);
+    g_signal_connect(G_OBJECT(res), "hide",
+                        G_CALLBACK(search_disabled), buffer);
 
     return res;
 }
@@ -85,8 +109,8 @@ openTabSearchDialog(GtkWidget *tab)
 
     searchBar = g_object_get_data(G_OBJECT(tab), "searchBar");
     if (searchBar) {
-        entry = gtk_search_bar_get_child(GTK_SEARCH_BAR(searchBar));
-        gtk_widget_set_visible(searchBar, TRUE);
+        entry = getSearchBarEntry(GTK_SEARCH_BAR(searchBar));
+        gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(searchBar), TRUE);
         gtk_widget_grab_focus(entry);
         return;
     }
@@ -96,15 +120,13 @@ openTabSearchDialog(GtkWidget *tab)
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
 
     //gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/org/highsvapp/searchBar.ui");
-    searchBar = getSearchBar();
-    entry = gtk_search_entry_new();
+    searchBar = getSearchBar(buffer);
+    entry = getSearchBarEntry(GTK_SEARCH_BAR(searchBar));
+    g_object_set_data(G_OBJECT(entry), "view", view);
 
-    gtk_search_bar_set_child(GTK_SEARCH_BAR(searchBar), entry);
     gtk_overlay_add_overlay(GTK_OVERLAY(tab), searchBar);
     gtk_widget_grab_focus(entry);
     g_object_set_data(G_OBJECT(tab), "searchBar", searchBar);
-    g_signal_connect(entry, "search-changed",
-                        G_CALLBACK(search_changed_cb), buffer);
 }
 
 /*
