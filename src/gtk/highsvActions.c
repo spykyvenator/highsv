@@ -153,7 +153,6 @@ search_entry_dwn(GtkButton *BtnUp, GObject *entry)
 void
 search_disabled(GtkWidget *sb, GtkTextBuffer *buffer)
 {
-    puts("here");
     GtkTextIter start_s, end_s;
     gtk_text_buffer_get_start_iter(buffer, &start_s);
     gtk_text_buffer_get_end_iter(buffer, &end_s);

@@ -78,7 +78,7 @@ getSearchBar(GtkTextBuffer *buffer)
                         G_CALLBACK(search_entry_up), entry);
     g_signal_connect(G_OBJECT(entry), "search-changed",
                         G_CALLBACK(search_changed_cb), buffer);
-    g_signal_connect(G_OBJECT(res), "hide",
+    g_signal_connect(G_OBJECT(res), "hide",// why won't this connect?
                         G_CALLBACK(search_disabled), buffer);
 
     return res;
