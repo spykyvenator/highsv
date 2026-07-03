@@ -17,6 +17,7 @@
 %code top {
 	#include <stddef.h>
 
+	char mip = 0, pos = 0;
 	void *model = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
@@ -47,6 +48,10 @@
         POW "^"
 	BO "("
 	BC ")"
+	OPT_INT "int"
+	OPT_FLOAT "float"
+	OPT_POS "pos"
+	OPT "%option"
 ;
 
 %token <double> NUM "number"
@@ -65,8 +70,9 @@
 %start input;
 
 input: %empty
-     | MAX statement st constraints trailingEOL { highsv_setSenseMax(model); setObjective(model, $2); destroy_sm($2); }
-     | MIN statement st constraints trailingEOL { highsv_setSenseMin(model); setObjective(model, $2); destroy_sm($2); }
+     | option EOL input
+     | MAX statement st constraints trailingEOL { highsv_setSenseMax(model); setObjective(model, $2); destroy_sm($2); setGlobalTypes(model, mip, pos); }
+     | MIN statement st constraints trailingEOL { highsv_setSenseMin(model); setObjective(model, $2); destroy_sm($2); setGlobalTypes(model, mip, pos); }
      ;
 
 st: trailingEOLS ST trailingEOLS
@@ -197,6 +203,11 @@ trailingEOLS: EOL
 trailingEOL: %empty
 	   | EOL trailingEOL 
 	   ;
+
+option: OPT OPT_FLOAT { mip = 0; }
+      | OPT OPT_INT { mip = 1; }
+      | OPT OPT_POS { pos = 1; }
+      ;
 
 %%
 

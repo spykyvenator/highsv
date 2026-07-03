@@ -137,3 +137,37 @@ setObjective(void *mod, sm *a)
     highsv_setObjectiveOffset(mod, a->offset);
     highsv_changeColsCostByRange(mod, 0, a->numNz-1, a->vals);
 }
+	
+static void
+setPositive(char pos, void *model)
+{
+  if (!numCol) return;
+  if (pos) {
+    const double inf = highsv_getInfinity(model);
+    double infinity[numCol];
+    double zero[numCol];
+    for (size_t i = 0; i < numCol; i++) {
+      infinity[i] = inf;
+      zero[i] = 0;
+    }
+    highsv_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
+  }
+}
+
+static void
+setMip(char mip, void *model)
+{
+  if (!numCol) return;
+  if (mip) {
+    int64_t integrality[numCol];
+    for (size_t i = 0; i < numCol; i++) integrality[i] = HIGHSV_T_INT;
+    highsv_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
+  }
+}
+
+void
+setGlobalTypes(void *model, char mip, char pos)
+{
+        setPositive(pos, model);
+        setMip(mip, model);
+}

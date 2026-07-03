@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="HighsvTabSearchBar" parent="GtkOverlay">
+        <object class="GtkSearchBar">
+            <child>
+                <object class="GtkEntry">
+                </object>
+            </child>
+            <property name="search_mode">TRUE</property>
+            <property name="show_close_button">TRUE</property>
+            <property name="valign">ALIGN_END</property>
+            <property name="halign">ALIGN_END</property>
+        </object>
+    </template>
+</interface>

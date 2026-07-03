@@ -23,4 +23,5 @@ void apply_sm(sm *a, void *model);
 void destroy_sm(sm *a);
 void print_sm(sm *a);
 void setObjective(void *mod, sm *a);
+void setGlobalTypes(void *model, char mip, char pos);
 #endif

@@ -131,8 +131,8 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
 #ifdef DEBUG
     printModel(model);
 #endif
-    setPositive((char) pos, model);
-    setMip(mip, model);
+    //setPositive((char) pos, model);
+    //setMip(mip, model);
     highsv_presolve(model);
     clock_t before = clock();
     highsv_run(model);
