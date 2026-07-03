@@ -17,7 +17,7 @@
 %code top {
 	#include <stddef.h>
 
-	char mip = 0, pos = 0;
+	char mip = 0, pos = 1;
 	void *model = NULL;
 	size_t rowLen = 2, numRow = 0, numCol = 0;
 	double *rowVal = NULL;
@@ -51,6 +51,7 @@
 	OPT_INT "int"
 	OPT_FLOAT "float"
 	OPT_POS "pos"
+	OPT_NEG "neg"
 	OPT "%option"
 ;
 
@@ -206,6 +207,7 @@ trailingEOL: %empty
 
 option: OPT OPT_FLOAT { mip = 0; }
       | OPT OPT_INT { mip = 1; }
+      | OPT OPT_NEG { pos = 0; }
       | OPT OPT_POS { pos = 1; }
       ;
 

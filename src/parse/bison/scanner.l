@@ -25,6 +25,7 @@ LOCATION_STEP();
 (?i:float)|(?i:floating) return HIGHSV_OPT_FLOAT;
 (?i:int)|(?i:integer) return HIGHSV_OPT_INT;
 (?i:pos)|(?i:nonneg)|(?i:nonnegative) return HIGHSV_OPT_POS;
+(?i:neg)|(?i:negative)|(?i:allownegative) return HIGHSV_OPT_NEG;
 ^(?i:end) return 0;
 (?i:min) return HIGHSV_MIN;
 (?i:max) return HIGHSV_MAX;

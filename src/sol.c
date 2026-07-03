@@ -57,33 +57,6 @@ preModel ()
   highsv_setBoolOptionValue(model, "output_flag", 0);
 }
 
-static void
-setPositive(char pos, void *model)
-{
-  if (!numCol) return;
-  if (pos) {
-    const double inf = highsv_getInfinity(model);
-    double infinity[numCol];
-    double zero[numCol];
-    for (size_t i = 0; i < numCol; i++) {
-      infinity[i] = inf;
-      zero[i] = 0;
-    }
-    highsv_changeColsBoundsByRange(model, 0, numCol-1, zero, infinity);
-  }
-}
-
-static void
-setMip(char mip, void *model)
-{
-  if (!numCol) return;
-  if (mip) {
-    int64_t integrality[numCol];
-    for (size_t i = 0; i < numCol; i++) integrality[i] = HIGHSV_T_INT;
-    highsv_changeColsIntegralityByRange(model, 0, numCol-1, integrality);
-  }
-}
-
 int
 parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, errHandle *err)
 {
@@ -101,8 +74,6 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, e
 #ifdef DEBUG
     printModel(model);
 #endif
-    setPositive((char) pos, model);
-    setMip((char) mip, model);
     highsv_presolve(model);
     clock_t before = clock();
     highsv_run(model);
@@ -131,8 +102,6 @@ parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
 #ifdef DEBUG
     printModel(model);
 #endif
-    //setPositive((char) pos, model);
-    //setMip(mip, model);
     highsv_presolve(model);
     clock_t before = clock();
     highsv_run(model);
