@@ -272,6 +272,7 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     GtkWidget *msgb, *overlay;
     GtkTextIter start, end;
     GtkTextTag *t;
+    gfloat xr, yr;
 
     msgb = makeErrorMsg(msg);
 
@@ -286,6 +287,17 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
     gtk_text_iter_backward_line(&end);
     gtk_text_buffer_apply_tag(bfr, t, &start, &end);
+
+    gtk_source_buffer_create_source_mark(bfr, NULL, "err", start);
+    GtkSourceGutter* g = gtk_source_view_get_gutter(
+            GTK_SOURCE_VIEW(view), 
+            GTK_TEXT_WINDOW_LEFT);
+    GtkSourceGutterRenderer* rend = gtk_source_gutter_renderer_text_new();
+    gtk_source_gutter_renderer_text_set_text(
+            GTK_SOURCE_GUTTER_RENDERER_TEXT(rend), "H", 2);
+    gtk_source_gutter_renderer_marks_set_category(rend, "err");
+    gtk_source_gutter_renderer_align_cell(rend, y, 1.0, 1.0, &xr, &yr);
+    gtk_source_gutter_insert(g, GTK_SOURCE_GUTTER_RENDERER(rend), y);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
     gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
