@@ -29,8 +29,6 @@ highsv_app_window_class_init(HighsvAppWindowClass *class)
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), closeActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveActive);
   gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), saveAsActive);
-  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), toggleMip);
-  gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class), togglePos);
 }
 
 HighsvAppWindow *

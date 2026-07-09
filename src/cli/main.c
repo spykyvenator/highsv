@@ -5,13 +5,12 @@
 static void
 pHelp()
 {
-    puts("opts: h: help, o: outfile, i = integer, n = negative too");
+    puts("opts: h: help, o: outfile");
 }
 
 int
 main(int argc, char *argv[])
 {
-    char Flags = 0;
     int c;
     FILE *out = NULL;
     GOutputStream *ostream;
@@ -19,12 +18,6 @@ main(int argc, char *argv[])
     if (argc == 1) pHelp();
     while ((c = getopt(argc, argv, "nio:h")) != -1) {
         switch (c) {
-            case 'n':// also allow negative results
-                Flags += 0b1;
-                break;
-            case 'i':// only allow integer results
-                Flags += 0b10;
-                break;
             case 'o':
                 out = fopen(optarg, "w+");
                 break;
@@ -48,7 +41,7 @@ main(int argc, char *argv[])
             return (-1);
         }
         errHandle *eh = new_errHandle();
-        parseFile(fd, ostream, Flags && 0b10, !(Flags && 0b01), eh);
+        parseFile(fd, ostream, eh);
         eh->free(eh);
     }
     g_output_stream_close(ostream, NULL, NULL);

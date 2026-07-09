@@ -6,8 +6,6 @@
 #include "highsvTab.h"
 #include "highsvActions.h"
 
-extern gboolean mip, pos;
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -106,21 +104,6 @@ solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   solveEntry(NULL, win);
-}
-
-/*
- * could I set the sol button action here instead?
- */
-void
-toggleMip(GtkCheckButton *self, gpointer app)
-{
-	mip = gtk_check_button_get_active(self);
-}
-
-void
-togglePos(GtkCheckButton *self, gpointer app)
-{
-	pos = gtk_check_button_get_active(self);
 }
 
 void

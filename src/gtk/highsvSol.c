@@ -5,8 +5,6 @@
 #include "highsvTab.h"
 #include "highsvSol.h"
 
-extern gboolean mip, pos;
-
 void
 solveEntry(GtkEntry *entry, HighsvAppWindow *win)
 {
@@ -44,7 +42,7 @@ solveEntry(GtkEntry *entry, HighsvAppWindow *win)
     GOutputStream* ostream = g_io_stream_get_output_stream(G_IO_STREAM(stream));
 
     errHandle *eh = new_errHandle(view, buffer);
-    int result = parseString(content, ostream, mip, pos, eh);
+    int result = parseString(content, ostream, eh);
     eh->free(eh);
 
     if (!g_output_stream_close(ostream, NULL, &error)){

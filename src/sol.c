@@ -58,7 +58,7 @@ preModel ()
 }
 
 int
-parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, errHandle *err)
+parseString(const char *s, GOutputStream* ostream, errHandle *err)
 {
     int res;
     yyscan_t scanner;
@@ -86,7 +86,7 @@ parseString(const char *s, GOutputStream* ostream, gboolean mip, gboolean pos, e
 }
 
 int
-parseFile(FILE *fd, GOutputStream* ostream, char mip, char pos, errHandle *err)
+parseFile(FILE *fd, GOutputStream* ostream, errHandle *err)
 {
     int res;
     yyscan_t scanner;
