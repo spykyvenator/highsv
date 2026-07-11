@@ -1,6 +1,7 @@
 //TODO: migrate tab functions from win to tab
 #include "highsvTab.h"
 #include "highsvActions.h"
+#include "../util.h"
 
 static inline void
 setSourceCompletion(GtkSourceView *v)
@@ -235,9 +236,12 @@ freeEM(GtkWidget *msg)
 }
 
 static GtkWidget*
-makeErrorMsg(const char *msg)
+makeErrorMsg(const char *msg, GtkTextBuffer *b)
 {
     GtkWidget *revealer, *box, *label, *button;
+    struct errMsgComb *em;
+
+    em = (struct errMsgComb*) h_malloc(sizeof(struct errMsgComb));
 
     revealer = gtk_revealer_new();
     box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -246,8 +250,11 @@ makeErrorMsg(const char *msg)
 
     gtk_button_set_can_shrink(GTK_BUTTON(button), TRUE);
     gtk_button_set_has_frame(GTK_BUTTON(button), TRUE);
+
+    em->rev = revealer;
+    em->b = b;
     g_signal_connect(G_OBJECT(button), "clicked", 
-        G_CALLBACK(close_errormsg), revealer);
+        G_CALLBACK(close_errormsg), em);
     gtk_widget_set_tooltip_text(button, "close tooltip");
 
     gtk_revealer_set_transition_type(GTK_REVEALER(revealer), GTK_REVEALER_TRANSITION_TYPE_SLIDE_DOWN);
@@ -271,16 +278,14 @@ void
 highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
 {
     GtkWidget *msgb, *overlay;
-    GtkTextIter start, end;
+    GtkTextIter end;
     GtkSourceMarkAttributes *attrs;
     GtkSourceMark *mark;
 
-    msgb = makeErrorMsg(msg);
 
     attrs = gtk_source_mark_attributes_new();
     overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
 
-    gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
     gtk_text_iter_backward_line(&end);
 
@@ -297,9 +302,12 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     mark = gtk_source_buffer_create_source_mark(GTK_SOURCE_BUFFER(bfr), 
             NULL, "gtr-err", &end);
 
+    msgb = makeErrorMsg(msg, bfr);
+
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
     gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
     gtk_revealer_set_reveal_child(GTK_REVEALER(msgb), TRUE);
+
     g_object_unref(attrs);
 }
 

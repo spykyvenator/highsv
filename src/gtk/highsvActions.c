@@ -51,8 +51,18 @@ void
 close_errormsg(GtkButton *button, gpointer data)
 {
     GtkWidget *revealer, *overlay;
+    GtkTextBuffer *bfr;
+    GtkTextIter end, start;
 
-    revealer = (GtkWidget*) data;
+    struct errMsgComb *em = (struct errMsgComb*) data;
+
+    revealer = em->rev;
+    bfr = em->b;
+
+    gtk_text_buffer_get_start_iter(bfr, &start);
+    gtk_text_buffer_get_end_iter(bfr, &end);
+
+    gtk_source_buffer_remove_source_marks(GTK_SOURCE_BUFFER(bfr), &start, &end, "gtr-err");
     overlay = gtk_widget_get_parent(GTK_WIDGET(revealer));
 
     gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), FALSE);
@@ -60,6 +70,7 @@ close_errormsg(GtkButton *button, gpointer data)
 
     if (freeEM(revealer))
         die("failed to free errormsg");
+    free(em);
 }
 
 void

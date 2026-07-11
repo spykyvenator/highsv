@@ -2,6 +2,7 @@
 #define HIGHSVACTIONS_H
 
 #include "highsvFile.h"
+#include <gtksourceview/gtksource.h>
 
 void quit_activated(GSimpleAction *action, GVariant *parameter, gpointer app);
 void open_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
@@ -24,4 +25,10 @@ void search_changed_cb(GtkSearchEntry *entry, GtkTextBuffer *buffer);
 void zoomIn(GSimpleAction *a, GVariant *parameter, gpointer app);
 void showSaveBtn(GtkTextBuffer* buffer, GtkTextBufferNotifyFlags flags, guint position, guint length, gpointer user_data);
 gboolean on_key_pressed(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer user_data); 
+
+struct errMsgComb {
+    GtkTextBuffer *b;
+    GtkWidget *rev;
+};
+
 #endif
