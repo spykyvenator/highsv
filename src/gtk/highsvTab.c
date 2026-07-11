@@ -29,6 +29,7 @@ getSourceView()
   gtk_text_view_set_input_hints(GTK_TEXT_VIEW(res), GTK_INPUT_HINT_SPELLCHECK);
   gtk_source_view_set_highlight_current_line(GTK_SOURCE_VIEW(res), TRUE);
   gtk_source_view_set_show_line_numbers(GTK_SOURCE_VIEW(res), TRUE);
+  gtk_source_view_set_show_line_marks(GTK_SOURCE_VIEW(res), TRUE);
 
   gtk_source_view_set_background_pattern(GTK_SOURCE_VIEW(res), GTK_SOURCE_BACKGROUND_PATTERN_TYPE_ZEBRA);
 
@@ -271,28 +272,21 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
 {
     GtkWidget *msgb, *overlay;
     GtkTextIter start, end;
-    GtkTextTag *t;
-    gfloat xr, yr;
+    GtkSourceMarkAttributes *attrs;
+    GtkSourceMark *mark;
 
     msgb = makeErrorMsg(msg);
 
+    attrs = gtk_source_mark_attributes_new();
     overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
-    t = gtk_text_buffer_create_tag(bfr, "error", 
-            "background", "red",
-            "editable", TRUE,
-            NULL);
-
 
     gtk_text_buffer_get_iter_at_line_index(bfr, &start, x, 0);
     gtk_text_buffer_get_iter_at_line(bfr, &end, x);
     gtk_text_iter_backward_line(&end);
-    gtk_text_buffer_apply_tag(bfr, t, &start, &end);
-
-    GtkSourceMarkAttributes *attrs = gtk_source_mark_attributes_new();
 
     gtk_source_mark_attributes_set_icon_name(
         attrs,
-        "pkt");
+        "process-stop");
 
     gtk_source_view_set_mark_attributes(
         GTK_SOURCE_VIEW(view),
@@ -300,24 +294,13 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
         attrs,
         0);
 
-    g_object_unref(attrs);
-    gtk_source_buffer_create_source_mark(GTK_SOURCE_BUFFER(bfr), 
-            NULL, "gtr-err", &start);
-
-    //gtk_source_buffer_create_source_mark(bfr, NULL, "err", start);
-    //GtkSourceGutter* g = gtk_source_view_get_gutter(
-    //        GTK_SOURCE_VIEW(view), 
-    //        GTK_TEXT_WINDOW_LEFT);
-    //GtkSourceGutterRenderer* rend = gtk_source_gutter_renderer_text_new();
-    //gtk_source_gutter_renderer_text_set_text(
-    //        GTK_SOURCE_GUTTER_RENDERER_TEXT(rend), "H", 2);
-    //gtk_source_gutter_renderer_marks_set_category(rend, "err");
-    //gtk_source_gutter_renderer_align_cell(rend, y, 1.0, 1.0, &xr, &yr);
-    //gtk_source_gutter_insert(g, GTK_SOURCE_GUTTER_RENDERER(rend), y);
+    mark = gtk_source_buffer_create_source_mark(GTK_SOURCE_BUFFER(bfr), 
+            NULL, "gtr-err", &end);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), msgb);
     gtk_overlay_set_clip_overlay(GTK_OVERLAY(overlay), msgb, TRUE);
     gtk_revealer_set_reveal_child(GTK_REVEALER(msgb), TRUE);
+    g_object_unref(attrs);
 }
 
 void
