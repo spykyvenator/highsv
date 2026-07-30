@@ -1,4 +1,3 @@
-//TODO: migrate tab functions from win to tab
 #include "highsvTab.h"
 #include "highsvActions.h"
 #include "../util.h"
@@ -53,25 +52,12 @@ getScrolledWin()
 static inline GtkWidget*
 getSearchBar(GtkTextBuffer *buffer)
 {
-    GtkWidget *res = gtk_search_bar_new();
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
-    GtkWidget *entry = gtk_search_entry_new();
-    GtkWidget *upB = gtk_button_new_with_label("↑");
-    GtkWidget *dwnB = gtk_button_new_with_label("↓");
-    GtkWidget *lbl = gtk_label_new("0/0");
-
-
-    gtk_search_bar_set_child(GTK_SEARCH_BAR(res), box);
-
-    gtk_box_append(GTK_BOX(box), entry);
-    gtk_box_append(GTK_BOX(box), upB);
-    gtk_box_append(GTK_BOX(box), dwnB);
-    gtk_box_append(GTK_BOX(box), lbl);
-
-    gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(res), TRUE);
-    gtk_search_bar_set_show_close_button(GTK_SEARCH_BAR(res), TRUE);
-    gtk_widget_set_valign(res, GTK_ALIGN_END);
-    gtk_widget_set_halign(res, GTK_ALIGN_END);
+    GtkBuilder *b = gtk_builder_new_from_resource("/org/highsvapp/searchBar/searchBar.ui");
+    GtkWidget *res = GTK_WIDGET(gtk_builder_get_object(b, "searchBar"));
+    GtkWidget *entry = GTK_WIDGET(gtk_builder_get_object(b, "entry")); 
+    GtkWidget *lbl = GTK_WIDGET(gtk_builder_get_object(b, "lbl")); 
+    GtkWidget *upB = GTK_WIDGET(gtk_builder_get_object(b, "upB")); 
+    GtkWidget *dwnB = GTK_WIDGET(gtk_builder_get_object(b, "dwnB")); 
 
     g_object_set_data(G_OBJECT(entry), "label", lbl);
     g_signal_connect(G_OBJECT(upB), "clicked",
@@ -80,9 +66,11 @@ getSearchBar(GtkTextBuffer *buffer)
                         G_CALLBACK(search_entry_up), entry);
     g_signal_connect(G_OBJECT(entry), "search-changed",
                         G_CALLBACK(search_changed_cb), buffer);
-    g_signal_connect(G_OBJECT(res), "hide",// why won't this connect?
+    g_signal_connect(G_OBJECT(res), "hide",
                         G_CALLBACK(search_disabled), buffer);
 
+    g_object_ref(res);
+    g_object_unref(b);
     return res;
 }
 

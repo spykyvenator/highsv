@@ -36,7 +36,7 @@ options:
 	@echo "LDFLAGS = $(LDFLAGS)"
 	@echo "CC = $(CC)"
 
-resources.c: highsv.gresource.xml window.ui
+resources.c: highsv.gresource.xml window.ui searchBar.ui
 	$(GLIB_COMPILE_RESOURCES) highsv.gresource.xml --target=$@ --sourcedir=. --generate-source
 
 ../parse/bison/parser.c ../parse/bison/parser.h: ../parse/bison/parser.y
