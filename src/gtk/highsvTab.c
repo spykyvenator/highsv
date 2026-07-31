@@ -53,6 +53,7 @@ static inline GtkWidget*
 getSearchBar(GtkTextBuffer *buffer)
 {
     GtkBuilder *b = gtk_builder_new_from_resource("/org/highsvapp/searchBar/searchBar.ui");
+
     GtkWidget *res = GTK_WIDGET(gtk_builder_get_object(b, "searchBar"));
     GtkWidget *entry = GTK_WIDGET(gtk_builder_get_object(b, "entry")); 
     GtkWidget *lbl = GTK_WIDGET(gtk_builder_get_object(b, "lbl")); 
@@ -185,9 +186,12 @@ makeTab(HighsvAppWindow *win)
     GTK_POLICY_AUTOMATIC
     );
     setSourceCompletion(GTK_SOURCE_VIEW(view));
+
     int index = gtk_notebook_append_page(GTK_NOTEBOOK(win->notebook), overlay, NULL);
+
     gtk_notebook_set_current_page(GTK_NOTEBOOK(win->notebook), index);
     gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(win->notebook), overlay, TRUE);
+
     return scrolled;
 }
 
