@@ -51,7 +51,7 @@ void
 close_errormsg(GtkButton *button, gpointer data)
 {
     GtkWidget *revealer, *overlay;
-    GtkTextBuffer *bfr;
+    GtkTextBuffer *bfr;// can be NULL
     GtkTextIter end, start;
 
     struct errMsgComb *em = (struct errMsgComb*) data;
@@ -59,10 +59,14 @@ close_errormsg(GtkButton *button, gpointer data)
     revealer = em->rev;
     bfr = em->b;
 
-    gtk_text_buffer_get_start_iter(bfr, &start);
-    gtk_text_buffer_get_end_iter(bfr, &end);
+    if (bfr)
+    {
+        gtk_text_buffer_get_start_iter(bfr, &start);
+        gtk_text_buffer_get_end_iter(bfr, &end);
 
-    gtk_source_buffer_remove_source_marks(GTK_SOURCE_BUFFER(bfr), &start, &end, "gtr-err");
+        gtk_source_buffer_remove_source_marks(GTK_SOURCE_BUFFER(bfr), &start, &end, "gtr-err");
+    }
+
     overlay = gtk_widget_get_parent(GTK_WIDGET(revealer));
 
     gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), FALSE);
@@ -102,13 +106,13 @@ save_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 /* In case We'd like a keybind for saving as
+*/
 void
 save_as_tab(GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   HighsvAppWindow *win = HIGHSV_APP_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
   saveAsActive(NULL, win);
 }
-*/
 
 void
 solve_tab(GSimpleAction *action, GVariant *parameter, gpointer app)

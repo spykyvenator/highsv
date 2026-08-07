@@ -73,6 +73,7 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
 
   GFile *file = gtk_file_dialog_open_finish(fopen->fd, res, &error);
   if (error) {
+      //highsvShowError("Error opening file", , NULL, 0, 0, 0, 0);
       g_printerr("Error opening file: %s\n", error->message);
       g_clear_error(&error);
   }
@@ -81,7 +82,6 @@ handleOpen(GObject* source_object, GAsyncResult* res, gpointer data)
       return;
 
   highsv_app_window_open(fopen->win, file);
-  // TODO reset button pos -> in notebook button possible?
   g_free(fopen);
 }
 

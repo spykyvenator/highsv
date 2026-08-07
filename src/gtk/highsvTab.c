@@ -227,6 +227,9 @@ freeEM(GtkWidget *msg)
     return 0;
 }
 
+/*
+ * b is NULLABLE, will be handled in close_errormsg
+ */
 static GtkWidget*
 makeErrorMsg(const char *msg, GtkTextBuffer *b)
 {
@@ -267,10 +270,18 @@ makeErrorMsg(const char *msg, GtkTextBuffer *b)
 }
 
 void
+highsvShowGlblError(const char *msg)
+{
+
+}
+
+/*
+ * bfr is NULLABLE
+ */
+void
 highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int y, int x2, int y2)
 {
     GtkWidget *msgb, *overlay;
-    GtkTextIter end;
     GtkSourceMarkAttributes *attrs;
     GtkSourceMark *mark;
 
@@ -278,8 +289,17 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
     attrs = gtk_source_mark_attributes_new();
     overlay = gtk_widget_get_parent(gtk_widget_get_parent(view));
 
-    gtk_text_buffer_get_iter_at_line(bfr, &end, x);
-    gtk_text_iter_backward_line(&end);
+    if (bfr) 
+    {
+        GtkTextIter end;
+    
+        gtk_text_buffer_get_iter_at_line(bfr, &end, x);
+        gtk_text_iter_backward_line(&end);
+
+        mark = gtk_source_buffer_create_source_mark(GTK_SOURCE_BUFFER(bfr), 
+                NULL, "gtr-err", &end);
+    }
+
 
     gtk_source_mark_attributes_set_icon_name(
         attrs,
@@ -291,8 +311,6 @@ highsvShowError(const char *msg, GtkWidget *view, GtkTextBuffer *bfr, int x, int
         attrs,
         0);
 
-    mark = gtk_source_buffer_create_source_mark(GTK_SOURCE_BUFFER(bfr), 
-            NULL, "gtr-err", &end);
 
     msgb = makeErrorMsg(msg, bfr);
 

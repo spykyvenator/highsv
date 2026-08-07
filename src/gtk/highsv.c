@@ -20,6 +20,7 @@ static GActionEntry app_entries[] =
   { "openNew", open_new_tab, NULL, NULL, NULL, {0, 0, 0} },
   { "close", close_tab, NULL, NULL, NULL, {0, 0, 0} },
   { "save", save_tab, NULL, NULL, NULL, {0, 0, 0} },
+  { "save_as", save_as_tab, NULL, NULL, NULL, {0, 0, 0} },
   { "solve", solve_tab, NULL, NULL, NULL, {0, 0, 0}},
   { "complete", complete, NULL, NULL, NULL, {0, 0, 0}},
   { "zoomin", zoomIn, NULL, NULL, NULL, {0, 0, 0}},
@@ -36,6 +37,7 @@ highsv_app_startup(GApplication *app)
   const char *open_new_accels[2] = { "<ctrl>n", NULL };
   const char *close_accels[2] = { "<ctrl>w", NULL };
   const char *save_accels[2] = { "<ctrl>s", NULL };
+  const char *save_as_accels[2] = { "<ctrl><Alt>s", NULL };
   const char *solve_accels[3] = { "<ctrl>r", "<ctrl>Return", NULL };
   const char *complete_accels[2] = { "<ctrl>k", NULL };
   const char *zoomIn_accels[2] = { "<ctrl>p", NULL };
@@ -52,6 +54,7 @@ highsv_app_startup(GApplication *app)
   SET_ACCELS(open_new);
   SET_ACCELS(close);
   SET_ACCELS(save);
+  SET_ACCELS(save_as);
   SET_ACCELS(solve);
   SET_ACCELS(complete);
   SET_ACCELS(zoomIn);

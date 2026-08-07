@@ -9,6 +9,7 @@ void open_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
 void open_new_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
 void close_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
 void save_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
+void save_as_tab(GSimpleAction *action, GVariant *parameter, gpointer app);
 void save_tab_by_pointer(GtkButton *button, gpointer data);
 void close_tab_by_pointer(GtkButton *button, gpointer notebook);
 void close_errormsg(GtkButton *button, gpointer data);
