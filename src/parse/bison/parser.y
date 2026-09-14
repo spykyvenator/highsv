@@ -215,7 +215,7 @@ option: OPT OPT_FLOAT { mip = 0; }
 %%
 
 void 
-yyerror(YYLTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg)
+yyerror(HIGHSV_LTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg)
 {
         if (!eh) {
             die(" because of %s", msg);
@@ -223,6 +223,6 @@ yyerror(YYLTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg)
         }
         eh->pErr(eh, msg, yylloc->first_line, yylloc->first_column, yylloc->last_line, yylloc->last_column);
 	fprintf(stderr, "parsing failed at: ");
-	YYLOCATION_PRINT(stderr, yylloc);
+	YY_LOCATION_PRINT(stderr, *yylloc);
 	die(" because of %s", msg);
 }

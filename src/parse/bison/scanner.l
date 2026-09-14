@@ -26,7 +26,7 @@ FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
 LOCATION_STEP();
 %}
 
-!.*\n {}
+!.*\n { return HIGHSV_EOL; }
 (?i:%option) return HIGHSV_OPT;
 (?i:float)|(?i:floating) return HIGHSV_OPT_FLOAT;
 (?i:int)|(?i:integer) return HIGHSV_OPT_INT;
