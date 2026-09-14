@@ -1,12 +1,18 @@
-%option nodefault noinput nounput noyywrap reentrant bison-bridge yylineno
+%option nodefault noinput nounput noyywrap reentrant bison-bridge yylineno prefix="HIGHSV_"
+
 FLOAT (?x:[\ ]?([0-9]*[\.])?[0-9]+)
+
+%top {
+#define YYSTYPE HIGHSV_STYPE
+#define YYSTATE HIGHSV_STATE
+}
 
 %{
 #include <stdlib.h>
 #include "parser.h"
 #include <ctype.h>
 
-#define YY_USER_ACTION                          \
+#define HIGHSV_USER_ACTION                          \
   yylloc->last_column += (int) yyleng;
 
 #define LOCATION_STEP()                         \

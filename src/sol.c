@@ -65,12 +65,12 @@ parseString(const char *s, GOutputStream* ostream, errHandle *err)
 
     cleanModel(model);
     preModel();
-    yylex_init(&scanner);
-    YY_BUFFER_STATE buffer = yy_scan_string(s, scanner);
+    HIGHSV_lex_init(&scanner);
+    YY_BUFFER_STATE buffer = HIGHSV__scan_string(s, scanner);
 #ifdef DEBUG
   yydebug=1;
 #endif
-    res = yyparse(scanner, err);
+    res = HIGHSV_parse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif
@@ -80,8 +80,8 @@ parseString(const char *s, GOutputStream* ostream, errHandle *err)
     clock_t diff = clock() - before;
     printSolToStream(model, ostream, (double) diff/CLOCKS_PER_SEC);
 
-    yy_delete_buffer(buffer, scanner);
-    yylex_destroy(scanner);
+    HIGHSV__delete_buffer(buffer, scanner);
+    HIGHSV_lex_destroy(scanner);
     return res;
 }
 
@@ -93,12 +93,12 @@ parseFile(FILE *fd, GOutputStream* ostream, errHandle *err)
 
     cleanModel(model);
     preModel();
-    yylex_init(&scanner);
-    yyset_in(fd, scanner);
+    HIGHSV_lex_init(&scanner);
+    HIGHSV_set_in(fd, scanner);
 #ifdef DEBUG
     yydebug=1;
 #endif
-    res = yyparse(scanner, err);
+    res = HIGHSV_parse(scanner, err);
 #ifdef DEBUG
     printModel(model);
 #endif
@@ -109,6 +109,6 @@ parseFile(FILE *fd, GOutputStream* ostream, errHandle *err)
     printSolToStream(model, ostream, (double) diff/CLOCKS_PER_SEC);
     fclose(fd);
 
-    yylex_destroy(scanner);
+    HIGHSV_lex_destroy(scanner);
     return res;
 }

@@ -1,4 +1,5 @@
 %define parse.error detailed
+%define api.prefix {HIGHSV_}
 %define api.token.prefix {HIGHSV_}
 %define api.pure full
 %define api.value.type union
@@ -28,9 +29,9 @@
 
 %code provides {	
 	#define YY_DECL \
-	int yylex(YYSTYPE* yylval_param, YYLTYPE *yylloc, yyscan_t yyscanner, errHandle *eh)
+	int HIGHSV_lex(HIGHSV_STYPE* yylval_param, HIGHSV_LTYPE *yylloc, yyscan_t yyscanner, errHandle *eh)
 	YY_DECL;
-	void yyerror(YYLTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg);
+	void yyerror(HIGHSV_LTYPE *yylloc, yyscan_t scanner, errHandle *eh, const char *msg);
 }
 
 %token 
