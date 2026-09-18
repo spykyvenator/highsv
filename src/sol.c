@@ -9,6 +9,7 @@
 #else
 #include <gtk/gtk.h>
 #endif
+
 #include <time.h>
 
 #include "./parse/bison/parser.h"
@@ -17,6 +18,12 @@
 #include "sol.h"
 #ifdef DEBUG
 #include "print.h"
+#endif
+
+#ifdef PREPROCESS
+#include "../tp/vbpp/common.h"
+#include "../tp/vbpp/yacc_stuff.h"
+#include "../tp/vbpp/vpp_yacc.h"
 #endif
 
 extern size_t rowLen, numRow, numCol;
