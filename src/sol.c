@@ -21,9 +21,7 @@
 #endif
 
 #ifdef PREPROCESS
-#include "../tp/vbpp/common.h"
-#include "../tp/vbpp/yacc_stuff.h"
-#include "../tp/vbpp/vpp_yacc.h"
+#include "./preprocess.h"
 #endif
 
 extern size_t rowLen, numRow, numCol;

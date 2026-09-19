@@ -1,6 +1,6 @@
 CC ?= gcc
 PKGCONFIG ?= $(shell which pkg-config)
-CFLAGS = -DGTK -DHIGHS_BACKEND -std=c23 -Wpedantic -Wstrict-prototypes -Wmissing-declarations -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
+CFLAGS = -DGTK -DPREPROCESS -DHIGHS_BACKEND -std=c23 -Wpedantic -Wstrict-prototypes -Wmissing-declarations -Wall -Wextra $(shell $(PKGCONFIG) --cflags gtk4) \
 	 $(shell $(PKGCONFIG) --cflags highs) \
 	 $(shell $(PKGCONFIG) --cflags gtksourceview-5)
 	 #-I ../../tp/vbpp/
@@ -11,7 +11,7 @@ LIBS = $(shell $(PKGCONFIG) --libs gtk4) \
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 LDFLAGS = -Wl,--allow-multiple-definition
 
-SRC = highsv.c highsvWin.c main.c ../parse/bison/pt.c ../parse/bison/scanner.c ../parse/bison/parser.c highsvFile.c highsvSol.c highsvActions.c ../sol.c ../pOstream.c ../tprint/tprint.c ../util.c highsvTab.c ../../tp/vbpp/vpp_bison.c ../../tp/vbpp/vpp_lex.c ../../tp/vbpp/create.c
+SRC = highsv.c highsvWin.c main.c ../parse/bison/pt.c ../parse/bison/scanner.c ../parse/bison/parser.c highsvFile.c highsvSol.c highsvActions.c ../sol.c ../pOstream.c ../tprint/tprint.c ../util.c highsvTab.c ../../tp/vbpp/vpp_bison.c ../../tp/vbpp/vpp_lex.c ../../tp/vbpp/create.c ../preprocess.c
 BUILT_SRC = resources.c
 
 OBJS = $(BUILT_SRC:.c=.o) $(SRC:.c=.o)
