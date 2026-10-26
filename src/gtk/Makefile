@@ -47,7 +47,7 @@ resources.c: highsv.gresource.xml window.ui searchBar.ui
 ../parse/bison/scanner.h ../parse/bison/scanner.c: ../parse/bison/scanner.l ../parse/bison/parser.h
 	flex -o ../parse/bison/scanner.c --header-file=$(patsubst %.l,%.h,$<) $<
 ../../tp/vbpp/vpp_lex.h ../../tp/vbpp/vpp_lex.c: ../../tp/vbpp/vpp.l ../../tp/vbpp/vpp_bison.h
-	flex -o ../../tp/vbpp/vpp_lex.c --header-file=$(patsubst %.l,%.h,$<) $<
+	flex -o ../../tp/vbpp/vpp_lex.c --header-file=../../tp/vbpp_lex.h ../../tp/vbpp/vpp.l
 
 clean:
 	rm -f $(BUILT_SRC)
