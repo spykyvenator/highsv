@@ -2,6 +2,7 @@
 #include "../tp/vbpp/common.h"
 #include "../tp/vbpp/yacc_stuff.h"
 #include "../tp/vbpp/vpp_yacc.h"
+#include "../tp/vbpp/vpp_lex.h"
 
 FILE*
 preProcessString(const char *s)

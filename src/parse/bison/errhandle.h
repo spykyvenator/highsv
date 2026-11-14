@@ -64,8 +64,9 @@ new_errHandle(GtkWidget *view, GtkTextBuffer *bfr)
     return res;
 }
 #else
-typedef struct errHandle {
+typedef struct errHandle errHandle;
+struct errHandle {
     void (*pErr)(errHandle *self, const char *msg);
-} errHandle;
+};
 #endif
 #endif
